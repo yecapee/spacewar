@@ -146,6 +146,14 @@
     render('PLAYER_MOVE');
   }, false);
 
+  window.addEventListener('deviceorientation', function(event) {
+    var alpha = event.alpha;
+    var beta = event.beta;
+    var gamma = event.gamma;
+
+    document.getElementById('debug').innerHTML = 'alpha:'+alpha+' ,beta:'+beta+' ,gamma:'+gamma;
+  }, false);
+
   setInterval(function () { render('OBJ_MOVE') }, renderTime);
   setInterval(function () { render('BULLET_MOVE') }, bulletTime);
   // setInterval(bulletRender, bulletTime);
