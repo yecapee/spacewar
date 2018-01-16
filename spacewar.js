@@ -147,12 +147,12 @@
   }, false);
 
   window.addEventListener('deviceorientation', function(event) {
-    var triggerDeg = 10;
+    var triggerDeg = 3;
     var alpha = event.alpha;
     var beta = event.beta;
     var gamma = event.gamma;
     var ps = randerData.position;
-    document.getElementById('debug').innerHTML = 'v0.0.2 alpha:'+alpha+' ,beta:'+beta+' ,gamma:'+gamma;
+    document.getElementById('debug').innerHTML = 'v0.0.3 alpha:'+alpha+' ,beta:'+beta+' ,gamma:'+gamma;
 
     if(beta < -triggerDeg){
       randerData.position = (ps - w > -1) ? ps - w : ps;
