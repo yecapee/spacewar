@@ -173,6 +173,7 @@
         }
       }
     }
+    render('PLAYER_MOVE');
   }, false);
 
   setInterval(function () { render('OBJ_MOVE') }, renderTime);
