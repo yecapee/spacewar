@@ -151,7 +151,7 @@
     var alpha = event.alpha;
     var beta = event.beta;
     var gamma = event.gamma;
-    document.getElementById('debug').innerHTML = 'alpha:'+alpha+' ,beta:'+beta+' ,gamma:'+gamma;
+    document.getElementById('debug').innerHTML = 'v0.0.0 alpha:'+alpha+' ,beta:'+beta+' ,gamma:'+gamma;
 
     if(beta < -triggerDeg){
       randerData.position = (ps - w > -1) ? ps - w : ps;
