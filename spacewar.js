@@ -156,24 +156,17 @@
 
     if(beta < -triggerDeg){
       randerData.position = (ps - w > -1) ? ps - w : ps;
-    }
+    };
+    
     if(beta > triggerDeg){
       randerData.position = (ps + w <= w * h - 1) ? ps + w : ps;
-    }
-    if(gamma < -triggerDeg){
-      if (ps - 1 > -1) {
-        if (ps % w !== 0) {
-          randerData.position = ps - 1;
-        }
-      }   
-    }
-    if(gamma > triggerDeg){
-      if (ps + 1 <= w * h - 1) {
-        if ((ps + 1) % w !== 0) {
-          randerData.position = ps + 1;
-        }
+    };
+
+    if(ps + gamma > -1 && ps + gamma <= w * h - 1){
+      if(ps % w !== 0 && (ps + 1) % w !== 0){
+        randerData.position = ps + gamma;
       }
-    }
+    };
     render('PLAYER_MOVE');
   }, false);
 
