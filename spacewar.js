@@ -147,10 +147,32 @@
   }, false);
 
   window.addEventListener('deviceorientation', function(event) {
+    var triggerDeg = 30;
     var alpha = event.alpha;
     var beta = event.beta;
     var gamma = event.gamma;
     document.getElementById('debug').innerHTML = 'alpha:'+alpha+' ,beta:'+beta+' ,gamma:'+gamma;
+
+    if(beta < -triggerDeg){
+      randerData.position = (ps - w > -1) ? ps - w : ps;
+    }
+    if(beta > triggerDeg){
+      randerData.position = (ps + w <= w * h - 1) ? ps + w : ps;
+    }
+    if(gamma < -triggerDeg){
+      if (ps - 1 > -1) {
+        if (ps % w !== 0) {
+          randerData.position = ps - 1;
+        }
+      }   
+    }
+    if(gamma > triggerDeg){
+      if (ps + 1 <= w * h - 1) {
+        if ((ps + 1) % w !== 0) {
+          randerData.position = ps + 1;
+        }
+      }
+    }
   }, false);
 
   setInterval(function () { render('OBJ_MOVE') }, renderTime);
