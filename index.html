@@ -1,0 +1,46 @@
+<html>
+  <style>
+   #view{
+     display: block;
+     width: 100%;
+     height: 100%;
+     word-wrap: break-word; word-break: normal; 
+   }
+
+   #score{
+     display: block;
+     position: fixed;
+     top:0;
+     left: 0;
+   }
+
+   .pixel{
+     display: inline-block;
+   }
+
+   .pixel.point{
+     background-color: black;
+   }
+
+   .pixel.obj{
+     background-color: red;
+   }
+
+   .pixel.bullet{
+    background-color: rgb(255, 230, 0);
+   }
+
+   .pixel.bullet.obj{
+     background-color: rgb(243, 243, 243);
+   }
+   
+   .pixel.point.obj{
+     background-color: rgb(4, 0, 255);
+   }
+  </style>
+<body>
+  <div id="score"></div>
+  <div id="view"></div>
+</body>
+<script type="text/javascript" src="spacewar.js"></script>
+</html>
