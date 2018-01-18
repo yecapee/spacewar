@@ -140,33 +140,59 @@
     document.getElementById('view').innerHTML = template;
   }
 
+  function getScope(nowPosition) {
+    var ps = randerData.position;
+    return {
+      left: nowPosition - (ps % nowPosition),
+      right: nowPosition - (ps % nowPosition)+(w-1)
+    }
+  }
+
   document.addEventListener('keydown', function (e) {
     //console.log(e.keyCode);
     keyCodeMap(e.keyCode)();
     render('PLAYER_MOVE');
   }, false);
 
-  window.addEventListener('deviceorientation', function(event) {
-    var triggerDeg = 3;
+  window.addEventListener('deviceorientation', function (event) {
+    var triggerDeg = 0;
     var alpha = event.alpha;
     var beta = event.beta;
-    var gamma = event.gamma;
+    var gamma = Math.floor(event.gamma / 3);
     var ps = randerData.position;
-    document.getElementById('debug').innerHTML = 'v0.0.4 alpha:'+alpha+' ,beta:'+beta+' ,gamma:'+gamma;
+    document.getElementById('debug').innerHTML = 'v0.0.5 alpha:' + alpha + ' ,beta:' + beta + ' ,gamma:' + gamma;
 
-    if(beta < -triggerDeg){
-      randerData.position = (ps - w > -1) ? ps - w : ps;
-    };
+    // if (beta < -triggerDeg) {
+    //   randerData.position = (ps - w > -1) ? ps - w : ps;
+    // };
 
-    if(beta > triggerDeg){
-      randerData.position = (ps + w <= w * h - 1) ? ps + w : ps;
-    };
+    // if (beta > triggerDeg) {
+    //   randerData.position = (ps + w <= w * h - 1) ? ps + w : ps;
+    // };
 
-    if(ps + gamma > -1 && ps + gamma <= w * h - 1){
-      if(ps % w !== 0 && (ps + 1) % w !== 0){
-        randerData.position = ps + gamma;
+    //randerData.position = ps + gamma;
+    if (gamma < -triggerDeg) {
+      if (ps - 1 > -1) {
+        if (ps % w !== 0) {
+          randerData.position = ps - 1;
+          setTimeout(function(){
+            render('PLAYER_MOVE');
+          },50/math.abs(gamma));
+        }
       }
     };
+
+    if (gamma > triggerDeg) {
+      if (ps + 1 <= w * h - 1) {
+        if ((ps + 1) % w !== 0) {
+          randerData.position = ps + 1;
+          setTimeout(function(){
+            render('PLAYER_MOVE');
+          },50/math.abs(gamma));
+        }
+      }
+    };
+
     render('PLAYER_MOVE');
   }, false);
 
