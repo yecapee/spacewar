@@ -5,8 +5,8 @@
   var objPolling = [1, 4];
   var renCount = 0;
   var renderTime = 500;
-  var bulletTime = (window.innerWidth < 500) ? 120 : 200;
-  var moveTime = (window.innerWidth < 500) ? 120 : 80;
+  var bulletTime = 200;
+  var moveTime = (window.innerWidth < 500) ? 10 : 80;
   var nextPoling = 1;
   var killCount = 0;
 
@@ -243,7 +243,7 @@
   var shotBtn = document.getElementById('shotBtn');
   shotBtn.addEventListener("mouseover", function(event){
     console.log(1231);
-    touchShot = setInterval(shot, bulletTime);
+    touchShot = setInterval(shot, 300);
   }, false);
 
   shotBtn.addEventListener("mouseout", function(event){
