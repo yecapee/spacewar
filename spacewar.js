@@ -9,17 +9,6 @@
   var moveTime = (window.innerWidth < 500) ? 100 : 80;
   var nextPoling = 1;
   var killCount = 0;
-  // var synth = new Tone.Synth({
-  //   "oscillator" : {
-  //     "type" : "square"
-  //   },
-  //   "envelope" : {
-  //     "attack" : 0.01,
-  //     "decay" : 0.2,
-  //     "sustain" : 0.2,
-  //     "release" : 0.2,
-  //   }
-  // }).toMaster();
   var synth = new Tone.AMSynth().toMaster()
 
   var randerData = {
