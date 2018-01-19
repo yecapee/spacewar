@@ -219,8 +219,8 @@
     };
 
     if (beta > triggerDeg) {
-      keyType.UP = true;
-      keyType.DOWN = false;
+      keyType.DOWN = true;
+      keyType.UP = false;
     };
 
     if (gamma < -triggerDeg) {
