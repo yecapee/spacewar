@@ -239,7 +239,7 @@
     };
   }, false);
 
-  window.addEventListener("touchstart", function(event){
+  window.addEventListener("touchmove", function(event){
     shot();
   }, false);
 
