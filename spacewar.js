@@ -9,6 +9,18 @@
   var moveTime = (window.innerWidth < 500) ? 100 : 80;
   var nextPoling = 1;
   var killCount = 0;
+  // var synth = new Tone.Synth({
+  //   "oscillator" : {
+  //     "type" : "square"
+  //   },
+  //   "envelope" : {
+  //     "attack" : 0.01,
+  //     "decay" : 0.2,
+  //     "sustain" : 0.2,
+  //     "release" : 0.2,
+  //   }
+  // }).toMaster();
+  var synth = new Tone.AMSynth().toMaster()
 
   var randerData = {
     position: null,
@@ -111,6 +123,8 @@
   function shot() {
     var bulletArr = randerData.bullet;
     bulletArr.push(randerData.position - w);
+    synth.triggerAttackRelease('C4', 0.5, 0)
+
   }
 
   function bulletPosition() {
