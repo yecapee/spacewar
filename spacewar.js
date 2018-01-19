@@ -248,17 +248,11 @@
     };
   }, false);
 
-  var touchShot;
   var view = document.getElementById('view');
   view.addEventListener("touchstart", function(event){
-    burst(3);
+    // burst(3);
+    shot();
   }, false);
-
-  view.addEventListener("touchend", function(event){
-    clearInterval(touchShot);
-  }, false);
-
-  
 
   setInterval(function () { render('OBJ_MOVE') }, renderTime);
   setInterval(function () { render('BULLET_MOVE') }, bulletTime);
