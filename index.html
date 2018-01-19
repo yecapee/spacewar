@@ -1,6 +1,10 @@
 <html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    html{
+      background-color: black;
+    }
+
    #view{
      display: block;
      width: 100%;
@@ -13,6 +17,7 @@
     position: fixed;
     top:0;
     left: 0;
+    color: white;
    }
 
    #debug{
@@ -36,15 +41,38 @@
    }
 
    .pixel.point{
-     background-color: black;
+     background-color: white;
+     position: relative;
+   }
+
+   .pixel.point::before{
+     content: '';
+     width: 100%;
+     height: 100%;
+     display: block;
+     position: absolute;
+     top: 100%;
+     left: -100%;
+     background-color: white;
+   }
+
+   .pixel.point::after{
+     content: '';
+     width: 100%;
+     height: 100%;
+     display: block;
+     position: absolute;
+     top: 100%;
+     right: -100%;
+     background-color: white;
    }
 
    .pixel.obj{
-     background-color: red;
+     background-color: white;
    }
 
    .pixel.bullet{
-    background-color: rgb(255, 230, 0);
+    background-color: yellow;
    }
 
    .pixel.bullet.obj{
@@ -52,7 +80,7 @@
    }
 
    .pixel.point.bullet{
-     background-color: black;
+     background-color: white;
    }
 
    .pixel.point.obj{
