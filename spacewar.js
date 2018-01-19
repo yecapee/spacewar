@@ -251,8 +251,8 @@
   var view = document.getElementById('view');
   view.addEventListener("touchstart", function(event){
     document.getElementById('debug').innerHTML += '-1';
-    // burst(3);
-    shot();
+    burst(3);
+    // shot();
   }, false);
 
   setInterval(function () { render('OBJ_MOVE') }, renderTime);
