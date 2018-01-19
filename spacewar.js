@@ -240,14 +240,15 @@
   }, false);
 
   var touchShot;
-  window.addEventListener("touchstart", function(event){
+  var view = document.getElementById('view');
+  view.addEventListener("touchstart", function(event){
     document.getElementById('debug').innerHTML = 'v0.0.7 shot';
     //touchShot = setInterval(shot, bulletTime);
   }, false);
 
-  window.addEventListener("touchend", function(event){
+  view.addEventListener("touchend", function(event){
     document.getElementById('debug').innerHTML = 'v0.0.7 end';
-    clearInterval(touchShot);
+    // clearInterval(touchShot);
   }, false);
 
   
