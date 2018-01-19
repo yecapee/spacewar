@@ -84,9 +84,8 @@
     };
     for (var key in keyType) {
       if (keyType[key] == true) action[key]();
-      render('PLAYER_MOVE');
     }
-    
+    render('PLAYER_MOVE');
   }
 
   function objPosition(isSet) {
@@ -201,7 +200,7 @@
   }, false);
 
   window.addEventListener('deviceorientation', function (event) {
-    var triggerDeg = 10;
+    var triggerDeg = 5;
     var alpha = event.alpha;
     var beta = Math.floor(event.beta);
     var gamma = Math.floor(event.gamma);
