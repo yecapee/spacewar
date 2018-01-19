@@ -6,7 +6,7 @@
   var renCount = 0;
   var renderTime = 500;
   var bulletTime = 200;
-  var moveTime = 80;
+  var moveTime = 3000/w;
   var nextPoling = 1;
   var killCount = 0;
 
