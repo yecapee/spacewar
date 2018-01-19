@@ -240,14 +240,12 @@
   }, false);
 
   var touchShot;
-  var shotBtn = document.getElementById('shotBtn');
-  shotBtn.addEventListener("mouseover", function(event){
-    console.log(1231);
+  var view = document.getElementById('view');
+  view.addEventListener("touchstart", function(event){
     touchShot = setInterval(shot, 300);
   }, false);
 
-  shotBtn.addEventListener("mouseout", function(event){
-    console.log(1231);
+  view.addEventListener("touchend", function(event){
     clearInterval(touchShot);
   }, false);
 
