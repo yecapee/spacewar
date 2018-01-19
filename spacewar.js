@@ -5,7 +5,7 @@
   var objPolling = [1, 4];
   var renCount = 0;
   var renderTime = 500;
-  var bulletTime = 200;
+  var bulletTime = (window.innerWidth < 500) ? 120 : 200;
   var moveTime = (window.innerWidth < 500) ? 120 : 80;
   var nextPoling = 1;
   var killCount = 0;
