@@ -213,7 +213,7 @@
     // };
 
     //randerData.position = ps + gamma;
-    if (beta < -triggerDeg) {
+    if (beta < triggerDeg) {
       keyType.UP = true;
       keyType.DOWN = false;
     };
@@ -223,7 +223,7 @@
       keyType.UP = false;
     };
 
-    if (gamma < -triggerDeg) {
+    if (gamma < triggerDeg) {
       keyType.LEFT = true;
       keyType.RIGHT = false;
     };
