@@ -242,12 +242,12 @@
   var touchShot;
   document.addEventListener("touchstart", function(event){
     document.getElementById('debug').innerHTML = 'v0.0.7 shot';
-    touchShot = setInterval(shot, bulletTime);
+    //touchShot = setInterval(shot, bulletTime);
   }, false);
 
   document.addEventListener("touchend", function(event){
     document.getElementById('debug').innerHTML = 'v0.0.7 end';
-    clearInterval(touchShot);
+    //clearInterval(touchShot);
   }, false);
 
   
