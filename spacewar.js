@@ -1,7 +1,7 @@
 (function () {
   var w = Math.floor(window.innerWidth/30);
   var h = Math.floor(window.innerHeight/30);
-  var objQuantity = 5;
+  var objQuantity = 1;
   var objPolling = [1, 4];
   var renCount = 0;
   var renderTime = 500;
