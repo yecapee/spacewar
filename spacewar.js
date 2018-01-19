@@ -240,15 +240,15 @@
   }, false);
 
   var touchShot;
-  var view = document.getElementById('view');
-  view.addEventListener("touchstart", function(event){
-    document.getElementById('debug').innerHTML = 'v0.0.7 shot';
-    //touchShot = setInterval(shot, bulletTime);
+  var shotBtn = document.getElementById('shotBtn');
+  shotBtn.addEventListener("mouseover", function(event){
+    console.log(1231);
+    touchShot = setInterval(shot, bulletTime);
   }, false);
 
-  view.addEventListener("touchend", function(event){
-    document.getElementById('debug').innerHTML = 'v0.0.7 end';
-    // clearInterval(touchShot);
+  shotBtn.addEventListener("mouseout", function(event){
+    console.log(1231);
+    clearInterval(touchShot);
   }, false);
 
   
