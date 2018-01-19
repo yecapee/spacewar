@@ -6,6 +6,7 @@
   var renCount = 0;
   var renderTime = 500;
   var bulletTime = 200;
+  var moveTime = 100;
   var nextPoling = 1;
   var killCount = 0;
 
@@ -15,34 +16,73 @@
     bullet: [],
   };
 
-  function keyCodeMap(keycode) {
-    var ps = randerData.position;
+  var keyType = {
+    UP: false,
+    RIGHT: false,
+    DOWN: false,
+    LEFT: false,
+    SPACE: false
+  };
+
+  function keyCodeMap(keycode, type) {
     var map = {
       38: function () {
-        randerData.position = (ps - w > -1) ? ps - w : ps;
+        if (type == 'keydown') keyType.UP = true;
+        if (type == 'keyup') keyType.UP = false;
       },
       39: function () {
+        if (type == 'keydown') keyType.RIGHT = true;
+        if (type == 'keyup') keyType.RIGHT = false;
+      },
+      40: function () {
+        if (type == 'keydown') keyType.DOWN = true;
+        if (type == 'keyup') keyType.DOWN = false;
+      },
+      37: function () {
+        if (type == 'keydown') keyType.LEFT = true;
+        if (type == 'keyup') keyType.LEFT = false;
+      },
+      32: function () {
+        if (type == 'keydown') keyType.SPACE = true;
+        if (type == 'keyup') keyType.SPACE = false;
+      }
+    };
+
+    if (map[keycode]) map[keycode]();
+    // return map[keycode] || function () { };
+  }
+
+  function actionMove() {
+    var ps = randerData.position;
+    var action = {
+      UP: function () {
+        randerData.position = (ps - w > -1) ? ps - w : ps;
+      },
+      RIGHT: function () {
         if (ps + 1 <= w * h - 1) {
           if ((ps + 1) % w !== 0) {
             randerData.position = ps + 1;
           }
         }
       },
-      40: function () {
+      DOWN: function () {
         randerData.position = (ps + w <= w * h - 1) ? ps + w : ps;
       },
-      37: function () {
+      LEFT: function () {
         if (ps - 1 > -1) {
           if (ps % w !== 0) {
             randerData.position = ps - 1;
           }
         }
       },
-      32: function () {
+      SPACE: function () {
         shot(true);
       }
     };
-    return map[keycode] || function () { };
+    for (var key in keyType) {
+      if (keyType[key] == true) action[key]();
+    }
+    render('PLAYER_MOVE');
   }
 
   function objPosition(isSet) {
@@ -144,14 +184,19 @@
     var ps = randerData.position;
     return {
       left: nowPosition - (ps % nowPosition),
-      right: nowPosition - (ps % nowPosition)+(w-1)
+      right: nowPosition - (ps % nowPosition) + (w - 1)
     }
   }
 
   document.addEventListener('keydown', function (e) {
     //console.log(e.keyCode);
-    keyCodeMap(e.keyCode)();
-    render('PLAYER_MOVE');
+    keyCodeMap(e.keyCode, 'keydown');
+    //render('PLAYER_MOVE');
+  }, false);
+
+  document.addEventListener('keyup', function (e) {
+    //console.log(e.keyCode);
+    keyCodeMap(e.keyCode, 'keyup');
   }, false);
 
   window.addEventListener('deviceorientation', function (event) {
@@ -175,9 +220,9 @@
       if (ps - 1 > -1) {
         if (ps % w !== 0) {
           randerData.position = ps - 1;
-          setTimeout(function(){
+          setTimeout(function () {
             render('PLAYER_MOVE');
-          },50/math.abs(gamma));
+          }, 50 / math.abs(gamma));
         }
       }
     };
@@ -186,9 +231,9 @@
       if (ps + 1 <= w * h - 1) {
         if ((ps + 1) % w !== 0) {
           randerData.position = ps + 1;
-          setTimeout(function(){
+          setTimeout(function () {
             render('PLAYER_MOVE');
-          },50/math.abs(gamma));
+          }, 50 / math.abs(gamma));
         }
       }
     };
@@ -198,5 +243,7 @@
 
   setInterval(function () { render('OBJ_MOVE') }, renderTime);
   setInterval(function () { render('BULLET_MOVE') }, bulletTime);
+  setInterval(function () { actionMove() }, moveTime);
+
   // setInterval(bulletRender, bulletTime);
 })();
