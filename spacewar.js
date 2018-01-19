@@ -197,7 +197,7 @@
     if( time > 0){
       setTimeout(function(){
         burst(time - 1);
-      }, 120);
+      }, 80);
     }
   }
 
@@ -250,9 +250,7 @@
 
   var view = document.getElementById('view');
   view.addEventListener("touchstart", function(event){
-    document.getElementById('debug').innerHTML += '-1';
-    burst(3);
-    // shot();
+    burst(5);
   }, false);
 
   setInterval(function () { render('OBJ_MOVE') }, renderTime);
