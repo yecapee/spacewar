@@ -206,7 +206,7 @@
     var beta = Math.floor(event.beta);
     var gamma = Math.floor(event.gamma);
     var ps = randerData.position;
-    document.getElementById('debug').innerHTML = 'v0.0.6 alpha:' + alpha + ' ,beta:' + beta + ' ,gamma:' + gamma;
+    //document.getElementById('debug').innerHTML = 'v0.0.6 alpha:' + alpha + ' ,beta:' + beta + ' ,gamma:' + gamma;
 
     if (beta < -triggerDeg) {
       keyType.UP = true;
@@ -241,10 +241,12 @@
 
   var touchShot;
   window.addEventListener("touchstart", function(event){
+    document.getElementById('debug').innerHTML = 'v0.0.7 shot';
     touchShot = setInterval(shot, bulletTime);
   }, false);
 
   window.addEventListener("touchend", function(event){
+    document.getElementById('debug').innerHTML = 'v0.0.7 end';
     clearInterval(touchShot);
   }, false);
 
