@@ -6,7 +6,7 @@
   var renCount = 0;
   var renderTime = 500;
   var bulletTime = 200;
-  var moveTime = 100;
+  var moveTime = 80;
   var nextPoling = 1;
   var killCount = 0;
 
@@ -48,8 +48,9 @@
       }
     };
 
-    if (map[keycode]) map[keycode]();
-    // return map[keycode] || function () { };
+    if (map[keycode]){
+      map[keycode]();
+    }
   }
 
   function actionMove() {
@@ -205,7 +206,7 @@
     var beta = Math.floor(event.beta);
     var gamma = Math.floor(event.gamma);
     var ps = randerData.position;
-    document.getElementById('debug').innerHTML = 'v0.0.5 alpha:' + alpha + ' ,beta:' + beta + ' ,gamma:' + gamma;
+    document.getElementById('debug').innerHTML = 'v0.0.6 alpha:' + alpha + ' ,beta:' + beta + ' ,gamma:' + gamma;
 
     if (beta < -triggerDeg) {
       keyType.UP = true;
