@@ -250,8 +250,8 @@
 
   var view = document.getElementById('view');
   view.addEventListener("touchend", function(event){
-    // burst(3);
-    shot();
+    burst(3);
+    // shot();
   }, false);
 
   setInterval(function () { render('OBJ_MOVE') }, renderTime);
