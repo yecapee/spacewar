@@ -189,13 +189,10 @@
   }
 
   document.addEventListener('keydown', function (e) {
-    //console.log(e.keyCode);
     keyCodeMap(e.keyCode, 'keydown');
-    //render('PLAYER_MOVE');
   }, false);
 
   document.addEventListener('keyup', function (e) {
-    //console.log(e.keyCode);
     keyCodeMap(e.keyCode, 'keyup');
   }, false);
 
@@ -217,25 +214,13 @@
 
     //randerData.position = ps + gamma;
     if (gamma < -triggerDeg) {
-      if (ps - 1 > -1) {
-        if (ps % w !== 0) {
-          randerData.position = ps - 1;
-          setTimeout(function () {
-            render('PLAYER_MOVE');
-          }, 50 / math.abs(gamma));
-        }
-      }
+      keyType.LEFT = true;
+      keyType.RIGHT = false;
     };
 
     if (gamma > triggerDeg) {
-      if (ps + 1 <= w * h - 1) {
-        if ((ps + 1) % w !== 0) {
-          randerData.position = ps + 1;
-          setTimeout(function () {
-            render('PLAYER_MOVE');
-          }, 50 / math.abs(gamma));
-        }
-      }
+      keyType.RIGHT = true;
+      keyType.LEFT = false;
     };
 
     render('PLAYER_MOVE');
