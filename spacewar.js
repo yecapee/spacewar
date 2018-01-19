@@ -53,12 +53,13 @@
   }
 
   function actionMove() {
-    var ps = randerData.position;
     var action = {
       UP: function () {
+        var ps = randerData.position;
         randerData.position = (ps - w > -1) ? ps - w : ps;
       },
       RIGHT: function () {
+        var ps = randerData.position;
         if (ps + 1 <= w * h - 1) {
           if ((ps + 1) % w !== 0) {
             randerData.position = ps + 1;
@@ -66,9 +67,11 @@
         }
       },
       DOWN: function () {
+        var ps = randerData.position;
         randerData.position = (ps + w <= w * h - 1) ? ps + w : ps;
       },
       LEFT: function () {
+        var ps = randerData.position;
         if (ps - 1 > -1) {
           if (ps % w !== 0) {
             randerData.position = ps - 1;
@@ -76,13 +79,14 @@
         }
       },
       SPACE: function () {
-        shot(true);
+        shot();
       }
     };
     for (var key in keyType) {
       if (keyType[key] == true) action[key]();
+      render('PLAYER_MOVE');
     }
-    render('PLAYER_MOVE');
+    
   }
 
   function objPosition(isSet) {
@@ -204,15 +208,6 @@
     var ps = randerData.position;
     document.getElementById('debug').innerHTML = 'v0.0.5 alpha:' + alpha + ' ,beta:' + beta + ' ,gamma:' + gamma;
 
-    // if (beta < -triggerDeg) {
-    //   randerData.position = (ps - w > -1) ? ps - w : ps;
-    // };
-
-    // if (beta > triggerDeg) {
-    //   randerData.position = (ps + w <= w * h - 1) ? ps + w : ps;
-    // };
-
-    //randerData.position = ps + gamma;
     if (beta < -triggerDeg) {
       keyType.UP = true;
       keyType.DOWN = false;
@@ -250,3 +245,4 @@
 
   // setInterval(bulletRender, bulletTime);
 })();
+
