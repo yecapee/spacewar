@@ -197,7 +197,7 @@
   }, false);
 
   window.addEventListener('deviceorientation', function (event) {
-    var triggerDeg = 0;
+    var triggerDeg = 10;
     var alpha = event.alpha;
     var beta = Math.floor(event.beta);
     var gamma = Math.floor(event.gamma);
@@ -213,7 +213,7 @@
     // };
 
     //randerData.position = ps + gamma;
-    if (beta < triggerDeg) {
+    if (beta < -triggerDeg) {
       keyType.UP = true;
       keyType.DOWN = false;
     };
@@ -223,7 +223,7 @@
       keyType.UP = false;
     };
 
-    if (gamma < triggerDeg) {
+    if (gamma < -triggerDeg) {
       keyType.LEFT = true;
       keyType.RIGHT = false;
     };
