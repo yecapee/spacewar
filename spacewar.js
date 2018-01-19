@@ -199,8 +199,8 @@
   window.addEventListener('deviceorientation', function (event) {
     var triggerDeg = 0;
     var alpha = event.alpha;
-    var beta = event.beta;
-    var gamma = Math.floor(event.gamma / 3);
+    var beta = Math.floor(event.beta);
+    var gamma = Math.floor(event.gamma);
     var ps = randerData.position;
     document.getElementById('debug').innerHTML = 'v0.0.5 alpha:' + alpha + ' ,beta:' + beta + ' ,gamma:' + gamma;
 
@@ -213,6 +213,16 @@
     // };
 
     //randerData.position = ps + gamma;
+    if (beta < -triggerDeg) {
+      keyType.UP = true;
+      keyType.DOWN = false;
+    };
+
+    if (beta > triggerDeg) {
+      keyType.UP = true;
+      keyType.DOWN = false;
+    };
+
     if (gamma < -triggerDeg) {
       keyType.LEFT = true;
       keyType.RIGHT = false;
@@ -223,7 +233,6 @@
       keyType.LEFT = false;
     };
 
-    render('PLAYER_MOVE');
   }, false);
 
   setInterval(function () { render('OBJ_MOVE') }, renderTime);
