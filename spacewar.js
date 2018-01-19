@@ -200,7 +200,7 @@
     keyCodeMap(e.keyCode, 'keyup');
   }, false);
 
-  window.addEventListener('deviceorientation', function (event) {
+  document.addEventListener('deviceorientation', function (event) {
     var triggerDeg = 2;
     var alpha = event.alpha;
     var beta = Math.floor(event.beta);
@@ -240,12 +240,12 @@
   }, false);
 
   var touchShot;
-  window.addEventListener("touchstart", function(event){
+  document.addEventListener("touchstart", function(event){
     document.getElementById('debug').innerHTML = 'v0.0.7 shot';
     touchShot = setInterval(shot, bulletTime);
   }, false);
 
-  window.addEventListener("touchend", function(event){
+  document.addEventListener("touchend", function(event){
     document.getElementById('debug').innerHTML = 'v0.0.7 end';
     clearInterval(touchShot);
   }, false);
