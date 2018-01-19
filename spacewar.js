@@ -195,7 +195,7 @@
   function burst(time){
     shot();
     if( time > 0){
-      setInterval(function(){
+      setTimeout(function(){
         burst(time - 1);
       }, 120);
     }
