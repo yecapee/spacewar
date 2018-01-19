@@ -185,14 +185,6 @@
     document.getElementById('view').innerHTML = template;
   }
 
-  function getScope(nowPosition) {
-    var ps = randerData.position;
-    return {
-      left: nowPosition - (ps % nowPosition),
-      right: nowPosition - (ps % nowPosition) + (w - 1)
-    }
-  }
-
   function burst(time) {
     shot();
     if (time > 0) {
