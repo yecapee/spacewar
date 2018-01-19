@@ -1,6 +1,6 @@
 (function () {
-  var w = Math.floor(window.innerWidth/30);
-  var h = Math.floor(window.innerHeight/30);
+  var w = Math.floor(window.innerWidth / 30);
+  var h = Math.floor(window.innerHeight / 30);
   var objQuantity = 1;
   var objPolling = [1, 4];
   var renCount = 0;
@@ -48,7 +48,7 @@
       }
     };
 
-    if (map[keycode]){
+    if (map[keycode]) {
       map[keycode]();
     }
   }
@@ -172,6 +172,7 @@
 
         document.getElementById('score').innerHTML = 'Score: ' + killCount;
         var point = (pointCount == randerData.position) ? 'point' : '';
+        if (point !== '' && obj !== '') killCount = 0;
         rsPixel += '<div class="pixel ' + point + obj + bullet + '" style=\'width:' + ww + ';height:' + hh + '\'></div>';
         pointCount += 1;
       }
@@ -192,10 +193,10 @@
     }
   }
 
-  function burst(time){
+  function burst(time) {
     shot();
-    if( time > 0){
-      setTimeout(function(){
+    if (time > 0) {
+      setTimeout(function () {
         burst(time - 1);
       }, 80);
     }
@@ -249,7 +250,7 @@
   }, false);
 
   var view = document.getElementById('view');
-  view.addEventListener("touchstart", function(event){
+  view.addEventListener("touchstart", function (event) {
     burst(5);
   }, false);
 
