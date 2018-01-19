@@ -223,6 +223,11 @@
       keyType.UP = false;
     };
 
+    if (beta > -triggerDeg && beta < triggerDeg) {
+      keyType.DOWN = false;
+      keyType.UP = false;
+    };
+
     if (gamma < -triggerDeg) {
       keyType.LEFT = true;
       keyType.RIGHT = false;
@@ -233,6 +238,10 @@
       keyType.LEFT = false;
     };
 
+    if (gamma > -triggerDeg && gamma < triggerDeg) {
+      keyType.RIGHT = false;
+      keyType.LEFT = false;
+    };
   }, false);
 
   setInterval(function () { render('OBJ_MOVE') }, renderTime);
