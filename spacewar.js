@@ -201,12 +201,12 @@
   }, false);
 
   window.addEventListener('deviceorientation', function (event) {
-    var triggerDeg = 5;
+    var triggerDeg = 2;
     var alpha = event.alpha;
     var beta = Math.floor(event.beta);
     var gamma = Math.floor(event.gamma);
     var ps = randerData.position;
-    document.getElementById('debug').innerHTML = 'v0.0.6 alpha:' + alpha + ' ,beta:' + beta + ' ,gamma:' + gamma;
+    // document.getElementById('debug').innerHTML = 'v0.0.6 alpha:' + alpha + ' ,beta:' + beta + ' ,gamma:' + gamma;
 
     if (beta < -triggerDeg) {
       keyType.UP = true;
@@ -237,6 +237,11 @@
       keyType.RIGHT = false;
       keyType.LEFT = false;
     };
+  }, false);
+
+  window.addEventListener("touchstart", function(event){
+
+    document.getElementById('debug').innerHTML = JSON.stringify(event,null,2); 
   }, false);
 
   setInterval(function () { render('OBJ_MOVE') }, renderTime);
