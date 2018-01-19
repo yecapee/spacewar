@@ -1,7 +1,7 @@
 (function () {
-  var w = 25;
-  var h = 25;
-  var objQuantity = 1;
+  var w = Math.floor(window.innerWidth/30);
+  var h = Math.floor(window.innerHeight/30);
+  var objQuantity = 5;
   var objPolling = [1, 4];
   var renCount = 0;
   var renderTime = 500;
@@ -134,7 +134,7 @@
   function gaphic(TYPE) {
     var _w = w;
     var _h = h;
-    var ww = Math.floor(100 / _w).toString() + '%';
+    var ww = 100 / _w.toString() + '%';
     var hh = Math.floor(100 / _h).toString() + '%';
     var rsPixel = '';
 
