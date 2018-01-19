@@ -249,7 +249,7 @@
   }, false);
 
   var view = document.getElementById('view');
-  view.addEventListener("touchstart", function(event){
+  view.addEventListener("touchend", function(event){
     // burst(3);
     shot();
   }, false);
