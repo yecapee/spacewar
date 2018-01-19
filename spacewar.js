@@ -6,7 +6,7 @@
   var renCount = 0;
   var renderTime = 500;
   var bulletTime = 200;
-  var moveTime = (window.innerWidth < 500) ? 120 : 80;
+  var moveTime = (window.innerWidth < 500) ? 100 : 80;
   var nextPoling = 1;
   var killCount = 0;
 
@@ -192,6 +192,15 @@
     }
   }
 
+  function burst(time){
+    shot();
+    if( time > 0){
+      setInterval(function(){
+        burst(time - 1);
+      }, 120);
+    }
+  }
+
   document.addEventListener('keydown', function (e) {
     keyCodeMap(e.keyCode, 'keydown');
   }, false);
@@ -242,7 +251,7 @@
   var touchShot;
   var view = document.getElementById('view');
   view.addEventListener("touchstart", function(event){
-    touchShot = setInterval(shot, 300);
+    burst(3);
   }, false);
 
   view.addEventListener("touchend", function(event){
