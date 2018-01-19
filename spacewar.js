@@ -239,9 +239,16 @@
     };
   }, false);
 
-  window.addEventListener("touchmove", function(event){
-    shot();
+  var touchShot;
+  window.addEventListener("touchstart", function(event){
+    touchShot = setInterval(shot, bulletTime);
   }, false);
+
+  window.addEventListener("touchend", function(event){
+    clearInterval(touchShot);
+  }, false);
+
+  
 
   setInterval(function () { render('OBJ_MOVE') }, renderTime);
   setInterval(function () { render('BULLET_MOVE') }, bulletTime);
