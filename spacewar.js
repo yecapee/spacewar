@@ -7,7 +7,7 @@
   var renderTime = 500;
   var bulletTime = 200;
   var moveTime = (window.innerWidth < 500) ? 100 : 80;
-  var nextPoling = 1;
+  var nextPolling = 1;
   var killCount = 0;
   var synth = new Tone.AMSynth().toMaster();
   var atc = {
@@ -19,8 +19,9 @@
     }
   };
 
-  var randerData = {
+  var renderData = {
     position: null,
+    renderTemp: {},
     object: [],
     bullet: [],
   };
@@ -33,18 +34,41 @@
     SPACE: false
   };
 
-  var bossMap = {
-    WALL: function () {
-      var objArr = randerData.object;
-      for (var position = 0; position < w; position++) {
-        objArr.push(position);
+  var bossList = {
+    WALL: function (renCount) {
+      renderData.renderTemp[renCount] = function () {
+        var objArr = renderData.object;
+        for (var position = 0; position < w; position++) {
+          objArr.push(position);
+        }
       }
-    }
+    },
+    LASER: function (renCount) {
+      nextPolling = renCount+30;
+      for (var x = 0; x < 30; x++) {
+        renderData.renderTemp[renCount + x] = (function (x) {
+          return function () {
+            var objArr = renderData.object;
+            var xMargin = (Math.floor(x / 10) * 3) % 6;
+            if (x % 10 < 6) {
+              for (var position = 0; position < w; position++) {
+                if (position % 6 == xMargin) {
+                  objArr.push(position);
+                }
+              }
+            }
+          }
+        })(x);
+      }
+    },
   };
 
-  function isBossCome(killCount) {
-    if (killCount % 20 == 0 && killCount != 0) {
-      bossMap['WALL']();
+  function isBossCome(killCount, renCount) {
+    if (killCount % 30 == 0 && killCount != 0) {
+      bossList['WALL'](renCount);
+    }
+    if (killCount % 120 == 0 && killCount != 0) {
+      bossList['LASER'](renCount);
     }
   }
 
@@ -81,26 +105,26 @@
   function actionMove() {
     var action = {
       UP: function () {
-        var ps = randerData.position;
-        randerData.position = (ps - w > -1) ? ps - w : ps;
+        var ps = renderData.position;
+        renderData.position = (ps - w > -1) ? ps - w : ps;
       },
       RIGHT: function () {
-        var ps = randerData.position;
+        var ps = renderData.position;
         if (ps + 1 <= w * h - 1) {
           if ((ps + 1) % w !== 0) {
-            randerData.position = ps + 1;
+            renderData.position = ps + 1;
           }
         }
       },
       DOWN: function () {
-        var ps = randerData.position;
-        randerData.position = (ps + w <= w * h - 1) ? ps + w : ps;
+        var ps = renderData.position;
+        renderData.position = (ps + w <= w * h - 1) ? ps + w : ps;
       },
       LEFT: function () {
-        var ps = randerData.position;
+        var ps = renderData.position;
         if (ps - 1 > -1) {
           if (ps % w !== 0) {
-            randerData.position = ps - 1;
+            renderData.position = ps - 1;
           }
         }
       },
@@ -114,12 +138,11 @@
     render('PLAYER_MOVE');
   }
 
-  function objPosition(isSet, boss) {
-    var objArr = randerData.object;
+  function objPosition(isSet) {
+    var objArr = renderData.object;
     var quantity = objQuantity;
 
-    if (boss) boss();
-    else if (isSet) {
+    if (isSet) {
       for (var x = 0; x < quantity; x++) {
         objArr.push(Math.floor(Math.random() * w));
       }
@@ -131,19 +154,17 @@
         objArr.splice(key, 1);
       };
     }
-
-    // console.log(randerData.object);
   }
 
   function shot() {
-    var bulletArr = randerData.bullet;
-    bulletArr.push(randerData.position - w);
+    var bulletArr = renderData.bullet;
+    bulletArr.push(renderData.position - w);
     // if (!atc.isMobile()) synth.triggerAttackRelease('C4',0.1,0);
     // synth.triggerAttackRelease('C4', 0.2, 0);
   }
 
   function bulletPosition() {
-    var bulletArr = randerData.bullet;
+    var bulletArr = renderData.bullet;
     for (var key in bulletArr) {
       bulletArr[key] = bulletArr[key] - w;
       if (bulletArr[key] < 0) {
@@ -167,15 +188,18 @@
     var hh = Math.floor(100 / _h).toString() + '%';
     var rsPixel = '';
 
-    if (!randerData.position) {
-      randerData.position = w * Math.floor(h / 2) - Math.floor(w / 2);
+    if (!renderData.position) {
+      renderData.position = w * Math.floor(h / 2) - Math.floor(w / 2);
     }
 
     if (TYPE === 'OBJ_MOVE') {
-      if (renCount % nextPoling == 0) {
-        nextPoling = Math.floor(Math.random() * objPolling[1] + objPolling[0])
+      var createObj = false;
+      if (renCount == nextPolling) {
+        createObj = true;
+        nextPolling = renCount + Math.floor(Math.random() * objPolling[1] + objPolling[0])
       }
-      objPosition(renCount % nextPoling == 0);
+      // document.getElementById('debug').innerHTML = nextPolling + ', ' + renCount;
+      objPosition(createObj);
       renCount++;
     }
 
@@ -186,41 +210,44 @@
     var pointCount = 0;
     for (var x = 0; x < w; x++) {
       for (var y = 0; y < h; y++) {
-        var bullet = (randerData.bullet.includes(pointCount)) ? ' bullet' : '';
-        var obj = (randerData.object.includes(pointCount)) ? ' obj' : '';
+        var bullet = (renderData.bullet.includes(pointCount)) ? ' bullet' : '';
+        var obj = (renderData.object.includes(pointCount)) ? ' obj' : '';
 
-        if (randerData.bullet.includes(pointCount) && randerData.object.includes(pointCount)) {
-          delArr(randerData.bullet, pointCount);
-          delArr(randerData.object, pointCount);
+        if (renderData.bullet.includes(pointCount) && renderData.object.includes(pointCount)) {
+          delArr(renderData.bullet, pointCount);
+          delArr(renderData.object, pointCount);
           // synth.triggerAttackRelease('C4', 0.1, 0);
           killCount++;
-          isBossCome(killCount);
-        } else if (randerData.bullet.includes(pointCount) && randerData.object.includes(pointCount + w)) {
-          delArr(randerData.bullet, pointCount);
-          delArr(randerData.object, pointCount + w);
+          isBossCome(killCount, renCount);
+        } else if (renderData.bullet.includes(pointCount) && renderData.object.includes(pointCount + w)) {
+          delArr(renderData.bullet, pointCount);
+          delArr(renderData.object, pointCount + w);
           // synth.triggerAttackRelease('C4', 0.1, 0);
           killCount++;
-          isBossCome(killCount);
+          isBossCome(killCount, renCount);
         }
-
         document.getElementById('score').innerHTML = 'Score: ' + killCount;
-        var point = (pointCount == randerData.position) ? 'point' : '';
+        var point = (pointCount == renderData.position) ? 'point' : '';
         var dead = '';
-        if ( isDead(randerData.position) ){
+        if (isDead(renderData.position)) {
           killCount = 0;
           dead = ' dead';
         }
-        rsPixel += '<div class="pixel ' + point + obj + bullet + dead +'" style=\'width:' + ww + ';height:' + hh + '\'></div>';
+        rsPixel += '<div class="pixel ' + point + obj + bullet + dead + '" style=\'width:' + ww + ';height:' + hh + '\'></div>';
         pointCount += 1;
       }
+    }
+    if (renderData.renderTemp[renCount]) {
+      renderData.renderTemp[renCount]();
+      delete renderData.renderTemp[renCount];
     }
     return rsPixel;
   }
 
   function isDead(point) {
-    if (randerData.object.includes(point)) return true;
-    if (randerData.object.includes(point + w + 1)) return true;
-    if (randerData.object.includes(point + w - 1)) return true;
+    if (renderData.object.includes(point)) return true;
+    if (renderData.object.includes(point + w + 1)) return true;
+    if (renderData.object.includes(point + w - 1)) return true;
     return false;
   }
 
@@ -251,7 +278,7 @@
     var alpha = event.alpha;
     var beta = Math.floor(event.beta);
     var gamma = Math.floor(event.gamma);
-    var ps = randerData.position;
+    var ps = renderData.position;
     //document.getElementById('debug').innerHTML = 'v0.0.6 alpha:' + alpha + ' ,beta:' + beta + ' ,gamma:' + gamma;
 
     if (beta < -triggerDeg) {

@@ -1,102 +1,118 @@
 <html>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/0.12.54/Tone.min.js"></script>
-  <style>
-    html{
-      background-color: black;
-      overflow: hidden;
-    }
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/0.12.54/Tone.min.js"></script>
+<!-- Google Tag Manager -->
+<script>(function (w, d, s, l, i) {
+  w[l] = w[l] || []; w[l].push({
+    'gtm.start':
+      new Date().getTime(), event: 'gtm.js'
+  }); var f = d.getElementsByTagName(s)[0],
+    j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+      'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+  })(window, document, 'script', 'dataLayer', 'GTM-5NN74MQ');</script>
+<!-- End Google Tag Manager -->
+<style>
+  html {
+    background-color: black;
+    overflow: hidden;
+  }
 
-   #view{
-     display: block;
-     width: 100%;
-     height: 100%;
-     word-wrap: break-word; word-break: normal; 
-   }
+  #view {
+    display: block;
+    width: 100%;
+    height: 100%;
+    word-wrap: break-word;
+    word-break: normal;
+  }
 
-   #score{
+  #score {
     display: block;
     position: fixed;
-    top:0;
+    top: 0;
     left: 0;
     color: white;
-   }
+  }
 
-   #debug{
+  #debug {
     display: block;
     position: fixed;
-    top:0;
+    top: 0;
     right: 0;
-   }
+    color: white;
+  }
 
-   #shotBtn{
+  #shotBtn {
     display: block;
     width: 50%;
     height: 20%;
     right: 0px;
     bottom: 0px;
-    position: fixed;  
-   }
+    position: fixed;
+  }
 
-   .pixel{
-     display: inline-block;
-   }
+  .pixel {
+    display: inline-block;
+  }
 
-   .pixel.point{
-     background-color: white;
-     position: relative;
-   }
+  .pixel.point {
+    background-color: white;
+    position: relative;
+  }
 
-   .pixel.point::before{
-     content: '';
-     width: 200%;
-     height: 100%;
-     display: block;
-     position: absolute;
-     top: 100%;
-     left: -100%;
-     background-color: white;
-   }
+  .pixel.point::before {
+    content: '';
+    width: 200%;
+    height: 100%;
+    display: block;
+    position: absolute;
+    top: 100%;
+    left: -100%;
+    background-color: white;
+  }
 
-   .pixel.point::after{
-     content: '';
-     width: 100%;
-     height: 100%;
-     display: block;
-     position: absolute;
-     top: 100%;
-     right: -100%;
-     background-color: white;
-   }
+  .pixel.point::after {
+    content: '';
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: absolute;
+    top: 100%;
+    right: -100%;
+    background-color: white;
+  }
 
-   .pixel.obj{
-     background-color: white;
-   }
+  .pixel.obj {
+    background-color: white;
+  }
 
-   .pixel.bullet{
+  .pixel.bullet {
     background-color: yellow;
-   }
+  }
 
-   .pixel.bullet.obj{
-     background-color: rgb(243, 243, 243);
-   }
+  .pixel.bullet.obj {
+    background-color: rgb(243, 243, 243);
+  }
 
-   .pixel.point.bullet{
-     background-color: white;
-   }
+  .pixel.point.bullet {
+    background-color: white;
+  }
 
-   .pixel.point.dead{
-      animation-name: deadani;
-      animation-duration: .34s;
-      animation-iteration-count: infinite;
-   }
+  .pixel.point.dead {
+    animation-name: deadani;
+    animation-duration: .34s;
+    animation-iteration-count: infinite;
+  }
 
-   @keyframes deadani {
-      from {opacity: 0}
-      to {opacity: 1}
+  @keyframes deadani {
+    from {
+      opacity: 0
     }
+    to {
+      opacity: 1
+    }
+  }
+</style>
 
-  </style>
 <body>
   <div id="debug"></div>
   <div id="score"></div>
@@ -104,4 +120,5 @@
   <div id="shotBtn"></div>
 </body>
 <script type="text/javascript" src="spacewar.js"></script>
+
 </html>
