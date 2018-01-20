@@ -69,6 +69,7 @@
       32: function () {
         if (type == 'keydown') keyType.SPACE = true;
         if (type == 'keyup') keyType.SPACE = false;
+        actionMove();
       }
     };
 
@@ -222,6 +223,7 @@
     if (randerData.object.includes(point + w - 1)) return true;
     return false;
   }
+
   function render(TYPE) {
     var template = gaphic(TYPE);
     document.getElementById('view').innerHTML = template;
