@@ -112,7 +112,7 @@
   function shot() {
     var bulletArr = randerData.bullet;
     bulletArr.push(randerData.position - w);
-    // synth.triggerAttackRelease('C4', 0.3, 0)
+    synth.triggerAttackRelease('C4', 0.1, 0)
   }
 
   function bulletPosition() {
@@ -194,7 +194,7 @@
     if (time > 0) {
       setTimeout(function () {
         burst(time - 1);
-      }, 80);
+      }, 100);
     }
   }
 
