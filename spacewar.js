@@ -204,16 +204,23 @@
 
         document.getElementById('score').innerHTML = 'Score: ' + killCount;
         var point = (pointCount == randerData.position) ? 'point' : '';
-        if (point !== '' && obj !== '') killCount = 0;
-        rsPixel += '<div class="pixel ' + point + obj + bullet + '" style=\'width:' + ww + ';height:' + hh + '\'></div>';
+        var dead = '';
+        if ( isDead(randerData.position) ){
+          killCount = 0;
+          dead = ' dead';
+        }
+        rsPixel += '<div class="pixel ' + point + obj + bullet + dead +'" style=\'width:' + ww + ';height:' + hh + '\'></div>';
         pointCount += 1;
       }
     }
     return rsPixel;
   }
 
-  function dead(){
-    return true;
+  function isDead(point) {
+    if (randerData.object.includes(point)) return true;
+    if (randerData.object.includes(point + w + 1)) return true;
+    if (randerData.object.includes(point + w - 1)) return true;
+    return false;
   }
   function render(TYPE) {
     var template = gaphic(TYPE);
