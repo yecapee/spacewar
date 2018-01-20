@@ -112,8 +112,7 @@
   function shot() {
     var bulletArr = randerData.bullet;
     bulletArr.push(randerData.position - w);
-    synth.triggerAttackRelease('C4', 0.3, 0)
-
+    // synth.triggerAttackRelease('C4', 0.3, 0)
   }
 
   function bulletPosition() {
@@ -166,12 +165,12 @@
         if (randerData.bullet.includes(pointCount) && randerData.object.includes(pointCount)) {
           delArr(randerData.bullet, pointCount);
           delArr(randerData.object, pointCount);
-          synth.triggerAttackRelease('B3', 0.2, 0)
+          synth.triggerAttackRelease('C4', 0.3, 0);
           killCount++;
         } else if (randerData.bullet.includes(pointCount) && randerData.object.includes(pointCount + w)) {
           delArr(randerData.bullet, pointCount);
           delArr(randerData.object, pointCount + w);
-          synth.triggerAttackRelease('B3', 0.2, 0)
+          synth.triggerAttackRelease('C4', 0.3, 0);
           killCount++;
         }
 
