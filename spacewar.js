@@ -9,8 +9,7 @@
   var moveTime = (window.innerWidth < 500) ? 100 : 80;
   var nextPoling = 1;
   var killCount = 0;
-  var synth = new Tone.AMSynth().toMaster()
-
+  var synth = new Tone.AMSynth().toMaster();
   var atc = {
     isMobile: function () {
       var e = !1;
@@ -33,6 +32,21 @@
     LEFT: false,
     SPACE: false
   };
+
+  var bossMap = {
+    WALL: function () {
+      var objArr = randerData.object;
+      for (var position = 0; position < w; position++) {
+        objArr.push(position);
+      }
+    }
+  };
+
+  function isBossCome(killCount) {
+    if (killCount % 20 == 0 && killCount != 0) {
+      bossMap['WALL']();
+    }
+  }
 
   function keyCodeMap(keycode, type) {
     var map = {
@@ -99,10 +113,12 @@
     render('PLAYER_MOVE');
   }
 
-  function objPosition(isSet) {
+  function objPosition(isSet, boss) {
     var objArr = randerData.object;
     var quantity = objQuantity;
-    if (isSet) {
+
+    if (boss) boss();
+    else if (isSet) {
       for (var x = 0; x < quantity; x++) {
         objArr.push(Math.floor(Math.random() * w));
       }
@@ -121,7 +137,8 @@
   function shot() {
     var bulletArr = randerData.bullet;
     bulletArr.push(randerData.position - w);
-    if (!atc.isMobile()) synth.triggerAttackRelease('C4',0.1,0);
+    // if (!atc.isMobile()) synth.triggerAttackRelease('C4',0.1,0);
+    // synth.triggerAttackRelease('C4', 0.2, 0);
   }
 
   function bulletPosition() {
@@ -174,13 +191,15 @@
         if (randerData.bullet.includes(pointCount) && randerData.object.includes(pointCount)) {
           delArr(randerData.bullet, pointCount);
           delArr(randerData.object, pointCount);
-          synth.triggerAttackRelease('C4', 0.3, 0);
+          // synth.triggerAttackRelease('C4', 0.1, 0);
           killCount++;
+          isBossCome(killCount);
         } else if (randerData.bullet.includes(pointCount) && randerData.object.includes(pointCount + w)) {
           delArr(randerData.bullet, pointCount);
           delArr(randerData.object, pointCount + w);
-          synth.triggerAttackRelease('C4', 0.3, 0);
+          // synth.triggerAttackRelease('C4', 0.1, 0);
           killCount++;
+          isBossCome(killCount);
         }
 
         document.getElementById('score').innerHTML = 'Score: ' + killCount;
@@ -193,6 +212,9 @@
     return rsPixel;
   }
 
+  function dead(){
+    return true;
+  }
   function render(TYPE) {
     var template = gaphic(TYPE);
     document.getElementById('view').innerHTML = template;
