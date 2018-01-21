@@ -76,14 +76,14 @@
     },
   };
 
-  function isBossCome(killCount, renCount) {
-    if (killCount % 80 == 0 && killCount != 0) {
+  function isBossCome() {
+    if (renCount % 40 == 0 && renCount != 0) {
       bossList['WALL'](renCount);
     }
-    if (killCount % 120 == 0 && killCount != 0) {
+    if (renCount % 120 == 0 && renCount != 0) {
       bossList['LASER'](renCount);
     }
-    if (killCount % 300 == 0 && killCount != 0) {
+    if (renCount % 300 == 0 && renCount != 0) {
       bossList['POWERSHOT'](renCount);
     }
   }
@@ -164,11 +164,16 @@
     }
 
     for (var key in objArr) {
+      var val = objArr[key];
       objArr[key] = objArr[key] + w;
+    }
+
+    for (var key in objArr) {
       if (objArr[key] > w * h - 1) {
         objArr.splice(key, 1);
       };
     }
+
   }
 
   function shot() {
@@ -227,21 +232,25 @@
       for (var y = 0; y < h; y++) {
         var bullet = (renderData.bullet.includes(pointCount)) ? ' bullet' : '';
         var obj = (renderData.object.includes(pointCount)) ? ' obj' : '';
+        var bestScore = localStorage.getItem('bestScore') || 0;
 
         if (renderData.bullet.includes(pointCount) && renderData.object.includes(pointCount)) {
           delArr(renderData.bullet, pointCount);
           delArr(renderData.object, pointCount);
           // synth.triggerAttackRelease('C4', 0.1, 0);
           killCount++;
-          isBossCome(killCount, renCount);
+          if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
+          //isBossCome(killCount, renCount);
         } else if (renderData.bullet.includes(pointCount) && renderData.object.includes(pointCount + w)) {
           delArr(renderData.bullet, pointCount);
           delArr(renderData.object, pointCount + w);
           // synth.triggerAttackRelease('C4', 0.1, 0);
           killCount++;
-          isBossCome(killCount, renCount);
+          if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
+          //isBossCome(killCount, renCount);
         }
-        document.getElementById('score').innerHTML = 'Score: ' + killCount;
+        isBossCome();
+        document.getElementById('score').innerHTML = 'Score: ' + killCount + '<br/>Best score: ' + (localStorage.getItem('bestScore') || 0) + '<br/> Mileage: ' + renCount;
         var point = (pointCount == renderData.position) ? 'point' : '';
         var dead = '';
         if (isDead(renderData.position)) {
@@ -260,9 +269,24 @@
   }
 
   function isDead(point) {
-    if (renderData.object.includes(point)) return true;
-    if (renderData.object.includes(point + w + 1)) return true;
-    if (renderData.object.includes(point + w - 1)) return true;
+    if (renderData.object.includes(point)) {
+      renCount = 0;
+      nextPolling = 1;
+      renderData.renderTemp = {};
+      return true;
+    }
+    if (renderData.object.includes(point + w + 1)) {
+      renCount = 0;
+      nextPolling = 1;
+      renderData.renderTemp = {};
+      return true;
+    }
+    if (renderData.object.includes(point + w - 1)) {
+      renCount = 0;
+      nextPolling = 1;
+      renderData.renderTemp = {};
+      return true;
+    }
     return false;
   }
 
