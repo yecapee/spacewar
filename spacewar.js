@@ -61,14 +61,30 @@
         })(x);
       }
     },
+    POWERSHOT: function (renCount) {
+      nextPolling = renCount+30;
+      for (var x = 0; x < 30; x++) {
+        renderData.renderTemp[renCount + x] = function () {
+          var objArr = renderData.object;
+          for (var position = 0; position < w; position++) {
+            if (position > (w/2)-3 && position < (w/2)+3) {
+              objArr.push(position);
+            }
+          }
+        };
+      }
+    },
   };
 
   function isBossCome(killCount, renCount) {
-    if (killCount % 30 == 0 && killCount != 0) {
+    if (killCount % 80 == 0 && killCount != 0) {
       bossList['WALL'](renCount);
     }
     if (killCount % 120 == 0 && killCount != 0) {
       bossList['LASER'](renCount);
+    }
+    if (killCount % 300 == 0 && killCount != 0) {
+      bossList['POWERSHOT'](renCount);
     }
   }
 
@@ -93,7 +109,6 @@
       32: function () {
         if (type == 'keydown') keyType.SPACE = true;
         if (type == 'keyup') keyType.SPACE = false;
-        actionMove();
       }
     };
 
