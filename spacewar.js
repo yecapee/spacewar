@@ -207,6 +207,8 @@
     var ww = 100 / _w.toString() + '%';
     var hh = Math.floor(100 / _h).toString() + '%';
     var rsPixel = '';
+    var bestScore = localStorage.getItem('bestScore') || 0;
+    var bestMileage = localStorage.getItem('bestMileage') || 0;
 
     if (!renderData.position && renderData.position !== 0) {
       renderData.position = w * Math.floor(h / 2) - Math.floor(w / 2);
@@ -221,6 +223,7 @@
       // document.getElementById('debug').innerHTML = nextPolling + ', ' + renCount;
       objPosition(createObj);
       renCount++;
+      if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
     }
 
     if (TYPE === 'BULLET_MOVE') {
@@ -232,7 +235,6 @@
       for (var y = 0; y < h; y++) {
         var bullet = (renderData.bullet.includes(pointCount)) ? ' bullet' : '';
         var obj = (renderData.object.includes(pointCount)) ? ' obj' : '';
-        var bestScore = localStorage.getItem('bestScore') || 0;
 
         if (renderData.bullet.includes(pointCount) && renderData.object.includes(pointCount)) {
           delArr(renderData.bullet, pointCount);
@@ -240,20 +242,25 @@
           // synth.triggerAttackRelease('C4', 0.1, 0);
           killCount++;
           if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
-          //isBossCome(killCount, renCount);
         } else if (renderData.bullet.includes(pointCount) && renderData.object.includes(pointCount + w)) {
           delArr(renderData.bullet, pointCount);
           delArr(renderData.object, pointCount + w);
           // synth.triggerAttackRelease('C4', 0.1, 0);
           killCount++;
           if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
-          //isBossCome(killCount, renCount);
         }
         isBossCome();
-        document.getElementById('score').innerHTML = 'Score: ' + killCount + '<br/>Best score: ' + (localStorage.getItem('bestScore') || 0) + '<br/> Mileage: ' + renCount;
+        document.getElementById('score').innerHTML = 'Score: ' + killCount + 
+          '<br/>Best score: ' + (localStorage.getItem('bestScore') || 0) + 
+          '<br/> Mileage: ' + renCount+
+          '<br/> Best Mileage: ' + bestMileage;
+
         var point = (pointCount == renderData.position) ? 'point' : '';
         var dead = '';
         if (isDead(renderData.position)) {
+          renCount = 0;
+          nextPolling = 1;
+          renderData.renderTemp = {};
           killCount = 0;
           dead = ' dead';
         }
@@ -269,24 +276,9 @@
   }
 
   function isDead(point) {
-    if (renderData.object.includes(point)) {
-      renCount = 0;
-      nextPolling = 1;
-      renderData.renderTemp = {};
-      return true;
-    }
-    if (renderData.object.includes(point + w + 1)) {
-      renCount = 0;
-      nextPolling = 1;
-      renderData.renderTemp = {};
-      return true;
-    }
-    if (renderData.object.includes(point + w - 1)) {
-      renCount = 0;
-      nextPolling = 1;
-      renderData.renderTemp = {};
-      return true;
-    }
+    if (renderData.object.includes(point)) return true;
+    if (renderData.object.includes(point + w + 1)) return true;
+    if (renderData.object.includes(point + w - 1)) return true;
     return false;
   }
 
