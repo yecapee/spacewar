@@ -44,7 +44,7 @@
       }
     },
     LASER: function (renCount) {
-      nextPolling = renCount+30;
+      nextPolling = renCount + 30;
       for (var x = 0; x < 30; x++) {
         renderData.renderTemp[renCount + x] = (function (x) {
           return function () {
@@ -62,12 +62,12 @@
       }
     },
     POWERSHOT: function (renCount) {
-      nextPolling = renCount+30;
+      nextPolling = renCount + 30;
       for (var x = 0; x < 30; x++) {
         renderData.renderTemp[renCount + x] = function () {
           var objArr = renderData.object;
           for (var position = 0; position < w; position++) {
-            if (position > (w/2)-3 && position < (w/2)+3) {
+            if (position > (w / 2) - 3 && position < (w / 2) + 3) {
               objArr.push(position);
             }
           }
@@ -203,7 +203,7 @@
     var hh = Math.floor(100 / _h).toString() + '%';
     var rsPixel = '';
 
-    if (!renderData.position) {
+    if (!renderData.position && renderData.position !== 0) {
       renderData.position = w * Math.floor(h / 2) - Math.floor(w / 2);
     }
 
