@@ -46,15 +46,15 @@
       }
     },
     LASER: function (renCount) {
-      nextPolling = renCount + 30;
-      for (var x = 0; x < 30; x++) {
+      nextPolling = renCount + 80;
+      for (var x = 0; x < 80; x++) {
         renderData.renderTemp[renCount + x] = (function (x) {
           return function () {
             var objArr = renderData.object;
-            var xMargin = (Math.floor(x / 10) * 3) % 6;
-            if (x % 10 < 6) {
+            var xMargin = (Math.floor(x / 20) * 3) % 7;
+            if (x % 20 < 10) {
               for (var position = 0; position < w; position++) {
-                if (position % 6 == xMargin) {
+                if (position % 7 == xMargin) {
                   objArr.push(position);
                 }
               }
@@ -79,13 +79,13 @@
   };
 
   function isBossCome() {
-    if (renCount % 40 == 0 && renCount != 0) {
+    if (renCount % 80 == 0 && renCount != 0) {
       bossList['WALL'](renCount);
     }
-    if (renCount % 120 == 0 && renCount != 0) {
+    if (renCount % 400 == 0 && renCount != 0) {
       bossList['LASER'](renCount);
     }
-    if (renCount % 300 == 0 && renCount != 0) {
+    if (renCount % 600 == 0 && renCount != 0) {
       bossList['POWERSHOT'](renCount);
     }
   }
