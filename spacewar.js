@@ -1,15 +1,4 @@
 (function () {
-  var w = Math.floor(window.innerWidth / 30);
-  var h = Math.floor(window.innerHeight / 30);
-  var objQuantity = 1;
-  var objPolling = [1, 4];
-  var renCount = 0;
-  var renderTime = 500;
-  var bulletTime = 200;
-  var moveTime = (window.innerWidth < 500) ? 100 : 80;
-  var nextPolling = 1;
-  var killCount = 0;
-  var synth = new Tone.AMSynth().toMaster();
   var atc = {
     isMobile: function () {
       var e = !1;
@@ -18,6 +7,19 @@
       }(navigator.userAgent || navigator.vendor || window.opera), e
     }
   };
+  var pixelWeigth = atc.isMobile() ? 32 : 30;
+  var w = Math.floor(window.innerWidth / pixelWeigth);
+  var h = Math.floor(window.innerHeight / pixelWeigth);
+  var objQuantity = 1;
+  var objPolling = [1, 4];
+  var renCount = 0;
+  var renderTime = 500;
+  var bulletTime = 200;
+  var moveTime = (window.innerWidth < 500) ? 300 : 80;
+  var nextPolling = 1;
+  var killCount = 0;
+  var synth = new Tone.AMSynth().toMaster();
+
 
   var renderData = {
     position: null,
@@ -178,7 +180,7 @@
 
   function shot() {
     var bulletArr = renderData.bullet;
-    bulletArr.push(renderData.position - w);
+    if(!bulletArr.includes(renderData.position - w)) bulletArr.push(renderData.position - w);
     // if (!atc.isMobile()) synth.triggerAttackRelease('C4',0.1,0);
     // synth.triggerAttackRelease('C4', 0.2, 0);
   }
@@ -250,8 +252,8 @@
           if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
         }
         isBossCome();
-        document.getElementById('score').innerHTML = 'Score: ' + killCount + 
-          '<br/>Best score: ' + (localStorage.getItem('bestScore') || 0) + 
+        document.getElementById('score').innerHTML = 'Score: <div class="score">' + killCount + 
+          '</div><br/>Best score: ' + (localStorage.getItem('bestScore') || 0) + 
           '<br/> Mileage: ' + renCount+
           '<br/> Best Mileage: ' + bestMileage;
 
@@ -304,54 +306,47 @@
     keyCodeMap(e.keyCode, 'keyup');
   }, false);
 
-  window.addEventListener('deviceorientation', function (event) {
-    var triggerDeg = 2;
-    var alpha = event.alpha;
-    var beta = Math.floor(event.beta);
-    var gamma = Math.floor(event.gamma);
-    var ps = renderData.position;
-    //document.getElementById('debug').innerHTML = 'v0.0.6 alpha:' + alpha + ' ,beta:' + beta + ' ,gamma:' + gamma;
 
-    if (beta < -triggerDeg) {
-      keyType.UP = true;
-      keyType.DOWN = false;
-    };
+  document.addEventListener('touchstart',touch, false);  
+  document.addEventListener('touchmove',touch, false);  
+  document.addEventListener('touchend',touch, false);  
+    
+  function touch (event){  
+      var event = event || window.event;  
+      event.preventDefault();  
+      var x = Math.floor(event.touches[0].pageX/pixelWeigth);
+      var y = Math.floor(event.touches[0].pageY/pixelWeigth);
+      var _ps = (w*y+x);
+      renderData.position = _ps;
+      shot();
+      document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), "+ (w*y+x);        
+  }  
 
-    if (beta > triggerDeg) {
-      keyType.DOWN = true;
-      keyType.UP = false;
-    };
 
-    if (beta > -triggerDeg && beta < triggerDeg) {
-      keyType.DOWN = false;
-      keyType.UP = false;
-    };
+//var d = document.getElementById("SomeElementYouWantToAnimate");
 
-    if (gamma < -triggerDeg) {
-      keyType.LEFT = true;
-      keyType.RIGHT = false;
-    };
+var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+window.requestAnimationFrame = requestAnimationFrame;
 
-    if (gamma > triggerDeg) {
-      keyType.RIGHT = true;
-      keyType.LEFT = false;
-    };
+var start = null;
+var frameCount = 0;
+function step(timestamp) {
+  // if(frameCount % 3 == 0) render('OBJ_MOVE');
+  
+  render('OBJ_MOVE');
+  render('BULLET_MOVE');
+  actionMove();
+  requestAnimationFrame(step);
+  frameCount++;
+}
 
-    if (gamma > -triggerDeg && gamma < triggerDeg) {
-      keyType.RIGHT = false;
-      keyType.LEFT = false;
-    };
-  }, false);
+requestAnimationFrame(step);
 
-  var view = document.getElementById('view');
-  view.addEventListener("touchstart", function (event) {
-    burst(5);
-  }, false);
-
-  setInterval(function () { render('OBJ_MOVE') }, renderTime);
-  setInterval(function () { render('BULLET_MOVE') }, bulletTime);
-  setInterval(function () { actionMove() }, moveTime);
-
+  // setInterval(function () { render('OBJ_MOVE') }, renderTime);
+  // setInterval(function () { render('BULLET_MOVE') }, bulletTime);
+  // setInterval(function () { actionMove() }, moveTime);
   // setInterval(bulletRender, bulletTime);
 })();
+
 

@@ -40,22 +40,24 @@
     top: 0;
     left: 0;
     color: white;
+    font-size: 8px;
   }
 
   #debug {
     display: block;
     position: fixed;
-    top: 0;
-    right: 0;
+    /* top: 0; */
+    left: 0;
+    bottom: 0px;
     color: white;
   }
 
   #shotBtn {
     display: block;
-    width: 50%;
-    height: 20%;
-    right: 0px;
-    bottom: 0px;
+    width: 100%;
+    height: 100%;
+    left: 0px;
+    top: 0px;
     position: fixed;
   }
 
@@ -110,6 +112,11 @@
     animation-name: deadani;
     animation-duration: .34s;
     animation-iteration-count: infinite;
+  }
+
+  .score{
+    font: bold;
+    font-size: 5rem;
   }
 
   @keyframes deadani {
