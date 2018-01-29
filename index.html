@@ -66,11 +66,23 @@
   }
 
   .pixel.point {
-    background-color: white;
+    /* background-color: white; */
     position: relative;
   }
 
   .pixel.point::before {
+    content: '';
+    width: 49px;
+    height: 65px;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: calc(50% - 25px);
+    background-image: url('./ship.png');
+    background-size: 100% auto;
+  }
+
+  /* .pixel.point::before {
     content: '';
     width: 200%;
     height: 100%;
@@ -90,14 +102,28 @@
     top: 100%;
     right: -100%;
     background-color: white;
-  }
+  } */
 
   .pixel.obj {
     background-color: white;
   }
 
   .pixel.bullet {
+    border-radius: 0%;
+    position: relative;
+  }
+
+  .pixel.bullet::before{
+    content: '';
+    display: block;
+    position: absolute;
     background-color: yellow;
+    top: 0;
+    left: calc(50% - 3px);
+    height: 50%;
+    width: 6px;
+    z-index: 99;
+    /* background: radial-gradient(circle,yellow,white,rgba(0,0,0,.5)); */
   }
 
   .pixel.bullet.obj {

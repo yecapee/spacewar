@@ -7,15 +7,15 @@
       }(navigator.userAgent || navigator.vendor || window.opera), e
     }
   };
-  var pixelWeigth = atc.isMobile() ? 32 : 30;
+  var pixelWeigth = atc.isMobile() ? 40 : 30;
   var w = Math.floor(window.innerWidth / pixelWeigth);
   var h = Math.floor(window.innerHeight / pixelWeigth);
   var objQuantity = 1;
   var objPolling = [1, 4];
   var renCount = 0;
-  var renderTime = 500;
-  var bulletTime = 200;
-  var moveTime = (window.innerWidth < 500) ? 300 : 80;
+  var renderTime = 1000/15;
+  var bulletTime = 1000/15;
+  var moveTime = (window.innerWidth < 500) ? 30 : 80;
   var nextPolling = 1;
   var killCount = 0;
   var synth = new Tone.AMSynth().toMaster();
@@ -26,6 +26,7 @@
     renderTemp: {},
     object: [],
     bullet: [],
+    preState:{},
   };
 
   var keyType = {
@@ -235,8 +236,8 @@
     var pointCount = 0;
     for (var x = 0; x < w; x++) {
       for (var y = 0; y < h; y++) {
-        var bullet = (renderData.bullet.includes(pointCount)) ? ' bullet' : '';
-        var obj = (renderData.object.includes(pointCount)) ? ' obj' : '';
+        var bullet = renderData.bullet.includes(pointCount);
+        var obj = renderData.object.includes(pointCount);
 
         if (renderData.bullet.includes(pointCount) && renderData.object.includes(pointCount)) {
           delArr(renderData.bullet, pointCount);
@@ -257,16 +258,35 @@
           '<br/> Mileage: ' + renCount+
           '<br/> Best Mileage: ' + bestMileage;
 
-        var point = (pointCount == renderData.position) ? 'point' : '';
-        var dead = '';
+        var point = (pointCount === renderData.position);
+        var dead = false;
         if (isDead(renderData.position)) {
           renCount = 0;
           nextPolling = 1;
           renderData.renderTemp = {};
           killCount = 0;
-          dead = ' dead';
+          dead = true;
         }
-        rsPixel += '<div class="pixel ' + point + obj + bullet + dead + '" style=\'width:' + ww + ';height:' + hh + '\'></div>';
+
+        if (renderData.preState['pixel_'+pointCount]){
+          document.getElementById('pixel_'+pointCount).classList.remove("point");
+          document.getElementById('pixel_'+pointCount).classList.remove("obj");
+          document.getElementById('pixel_'+pointCount).classList.remove("bullet");
+          document.getElementById('pixel_'+pointCount).classList.remove("dead");
+          delete renderData.preState['pixel_'+pointCount];
+        };
+   
+        if(document.getElementById('pixel_'+pointCount)){
+          if(point) document.getElementById('pixel_'+pointCount).classList.add("point");
+          if(obj) document.getElementById('pixel_'+pointCount).classList.add("obj");
+          if(bullet) document.getElementById('pixel_'+pointCount).classList.add("bullet");
+          if(dead) document.getElementById('pixel_'+pointCount).classList.add("dead");
+        }
+
+
+        if(point||obj||bullet||dead) renderData.preState['pixel_'+pointCount] = true;
+        //renderData.preState
+        rsPixel += '<div id="pixel_'+pointCount+'" class="pixel" style=\'width:' + ww + ';height:' + hh + '\'></div>';
         pointCount += 1;
       }
     }
@@ -274,7 +294,14 @@
       renderData.renderTemp[renCount]();
       delete renderData.renderTemp[renCount];
     }
-    return rsPixel;
+
+    firstRen(rsPixel);
+    // return rsPixel;
+  }
+
+  function firstRen(rsPixel){
+    document.getElementById('view').innerHTML = rsPixel;
+    firstRen = function(){};
   }
 
   function isDead(point) {
@@ -285,8 +312,9 @@
   }
 
   function render(TYPE) {
-    var template = gaphic(TYPE);
-    document.getElementById('view').innerHTML = template;
+    // var template = gaphic(TYPE);
+    // document.getElementById('view').innerHTML = template;
+    gaphic(TYPE);
   }
 
   function burst(time) {
@@ -325,27 +353,27 @@
 
 //var d = document.getElementById("SomeElementYouWantToAnimate");
 
-var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
-window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-window.requestAnimationFrame = requestAnimationFrame;
+// var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+// window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+// window.requestAnimationFrame = requestAnimationFrame;
 
-var start = null;
-var frameCount = 0;
-function step(timestamp) {
-  // if(frameCount % 3 == 0) render('OBJ_MOVE');
+// var start = null;
+// var frameCount = 0;
+// function step(timestamp) {
+//   // if(frameCount % 3 == 0) render('OBJ_MOVE');
   
-  render('OBJ_MOVE');
-  render('BULLET_MOVE');
-  actionMove();
-  requestAnimationFrame(step);
-  frameCount++;
-}
+//   render('OBJ_MOVE');
+//   render('BULLET_MOVE');
+//   actionMove();
+//   requestAnimationFrame(step);
+//   frameCount++;
+// }
 
-requestAnimationFrame(step);
+// requestAnimationFrame(step);
 
-  // setInterval(function () { render('OBJ_MOVE') }, renderTime);
-  // setInterval(function () { render('BULLET_MOVE') }, bulletTime);
-  // setInterval(function () { actionMove() }, moveTime);
+  setInterval(function () { render('OBJ_MOVE') }, renderTime);
+  setInterval(function () { render('BULLET_MOVE') }, bulletTime);
+  setInterval(function () { actionMove() }, moveTime);
   // setInterval(bulletRender, bulletTime);
 })();
 
