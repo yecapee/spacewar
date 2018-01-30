@@ -18,7 +18,7 @@
   var moveTime = (window.innerWidth < 500) ? 30 : 80;
   var nextPolling = 1;
   var killCount = 0;
-  var synth = new Tone.AMSynth().toMaster();
+  // var synth = new Tone.AMSynth().toMaster();
 
 
   var renderData = {
@@ -283,10 +283,10 @@
           if(dead) document.getElementById('pixel_'+pointCount).classList.add("dead");
         }
 
-
         if(point||obj||bullet||dead) renderData.preState['pixel_'+pointCount] = true;
-        //renderData.preState
-        rsPixel += '<div id="pixel_'+pointCount+'" class="pixel" style=\'width:' + ww + ';height:' + hh + '\'></div>';
+        if( firstRen() ){
+          rsPixel += '<div id="pixel_'+pointCount+'" class="pixel" style=\'width:' + ww + ';height:' + hh + '\'></div>';
+        }
         pointCount += 1;
       }
     }
@@ -296,24 +296,24 @@
     }
 
     firstRen(rsPixel);
-    // return rsPixel;
   }
 
   function firstRen(rsPixel){
-    document.getElementById('view').innerHTML = rsPixel;
-    firstRen = function(){};
+    if(rsPixel){
+      document.getElementById('view').innerHTML = rsPixel;
+      firstRen = function(){ return false };
+    }
+    return true;
   }
 
   function isDead(point) {
     if (renderData.object.includes(point)) return true;
-    if (renderData.object.includes(point + w + 1)) return true;
-    if (renderData.object.includes(point + w - 1)) return true;
+    // if (renderData.object.includes(point + w + 1)) return true;
+    // if (renderData.object.includes(point + w - 1)) return true;
     return false;
   }
 
   function render(TYPE) {
-    // var template = gaphic(TYPE);
-    // document.getElementById('view').innerHTML = template;
     gaphic(TYPE);
   }
 
@@ -350,31 +350,9 @@
     document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), "+ (w*y+x);        
   }  
 
-
-//var d = document.getElementById("SomeElementYouWantToAnimate");
-
-// var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
-// window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-// window.requestAnimationFrame = requestAnimationFrame;
-
-// var start = null;
-// var frameCount = 0;
-// function step(timestamp) {
-//   // if(frameCount % 3 == 0) render('OBJ_MOVE');
-  
-//   render('OBJ_MOVE');
-//   render('BULLET_MOVE');
-//   actionMove();
-//   requestAnimationFrame(step);
-//   frameCount++;
-// }
-
-// requestAnimationFrame(step);
-
   setInterval(function () { render('OBJ_MOVE') }, renderTime);
   setInterval(function () { render('BULLET_MOVE') }, bulletTime);
   setInterval(function () { actionMove() }, moveTime);
-  // setInterval(bulletRender, bulletTime);
 })();
 
 
