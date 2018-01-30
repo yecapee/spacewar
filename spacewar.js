@@ -340,14 +340,14 @@
   document.addEventListener('touchend',touch, false);  
     
   function touch (event){  
-      var event = event || window.event;  
-      event.preventDefault();  
-      var x = Math.floor(event.touches[0].pageX/pixelWeigth);
-      var y = Math.floor(event.touches[0].pageY/pixelWeigth);
-      var _ps = (w*y+x);
-      renderData.position = _ps;
-      shot();
-      document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), "+ (w*y+x);        
+    var event = event || window.event;  
+    event.preventDefault();  
+    var x = Math.floor(event.touches[0].pageX/pixelWeigth);
+    var y = Math.floor(event.touches[0].pageY/pixelWeigth);
+    var _ps = (w*y+x);
+    renderData.position = _ps;
+    shot();
+    document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), "+ (w*y+x);        
   }  
 
 
