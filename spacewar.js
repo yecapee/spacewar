@@ -13,20 +13,79 @@
   var objQuantity = 1;
   var objPolling = [1, 4];
   var renCount = 0;
-  var renderTime = 1000/15;
-  var bulletTime = 1000/15;
-  var moveTime = (window.innerWidth < 500) ? 30 : 80;
+  var renderTime = 1000 / 15;
+  var bulletTime = 1000 / 15;
+  var moveTime = atc.isMobile() ? 30 : 80;
   var nextPolling = 1;
   var killCount = 0;
   // var synth = new Tone.AMSynth().toMaster();
 
+  function createEnemy(obj) {
+    this.name = obj.name; //名字
+    this.life = obj.life; //生命值
+    this.position = obj.position; //位置
+    this.shot = obj.shot; //會不會發射子彈
+    this.shotTime = obj.shotTime; //連發數
+    // this.move = obj.move; //會不會移動
+    // this.willMoveOut = obj.willMoveOut; //會不會自己跑出區域
+    this.movePath = obj.movePath; //移動的路徑類型
+
+    var survivalTime = 0;
+    this.getST = function(){
+      return survivalTime;
+    };
+    this.wasHit = function () {
+      this.life--;
+      if (this.life == 0) {
+        renderData.enemy.find(function (el, index) {
+          if (el === this){
+            renderData.enemy.splice(index, 1);
+            killCount++;
+            if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
+          } 
+
+        })
+      };
+    }
+    this.action = function () {
+      if (this.move) {
+        enemyMove.call();
+      }
+
+      if (survivalTime % 10) {
+        if (this.shot) burstByEnemy(this.shotTime);
+      };
+      survivalTime++;
+    }
+  }
+
+  function enemyMove() {
+    if (movePathList[this.movePath]) return movePathList[this.movePath].call(this);
+    return this.position += 1;
+  }
+
+  var movePathList = {
+    go5stop: function () {
+      if(this.getST < 4) this.position += 1;
+    },
+    goToOut: function () {
+      this.position += 1;
+      if (this.position > w * h - 1) {
+        renderData.enemy.find(function (el, index) {
+          if (el === this) renderData.enemy.splice(index, 1);
+        })
+      };
+    },
+  };
 
   var renderData = {
     position: null,
     renderTemp: {},
-    object: [],
+    // object: [],
     bullet: [],
-    preState:{},
+    preState: {},
+    enemy: [],
+    enemyBullet: [],
   };
 
   var keyType = {
@@ -156,34 +215,56 @@
     render('PLAYER_MOVE');
   }
 
-  function objPosition(isSet) {
-    var objArr = renderData.object;
-    var quantity = objQuantity;
+  // function objPosition(isSet) {
+    //   var objArr = renderData.object;
+    //   var quantity = objQuantity;
 
-    if (isSet) {
-      for (var x = 0; x < quantity; x++) {
-        objArr.push(Math.floor(Math.random() * w));
-      }
-    }
+    //   if (isSet) {
+    //     for (var x = 0; x < quantity; x++) {
+    //       objArr.push(Math.floor(Math.random() * w));
+    //     }
+    //   }
 
-    for (var key in objArr) {
-      var val = objArr[key];
-      objArr[key] = objArr[key] + w;
-    }
+    //   for (var key in objArr) {
+    //     var val = objArr[key];
+    //     objArr[key] = objArr[key] + w;
+    //   }
 
-    for (var key in objArr) {
-      if (objArr[key] > w * h - 1) {
-        objArr.splice(key, 1);
-      };
-    }
-
-  }
+    //   for (var key in objArr) {
+    //     if (objArr[key] > w * h - 1) {
+    //       objArr.splice(key, 1);
+    //     };
+    //   }
+  // }
 
   function shot() {
     var bulletArr = renderData.bullet;
-    if(!bulletArr.includes(renderData.position - w)) bulletArr.push(renderData.position - w);
+    if (!bulletArr.includes(renderData.position - w)) bulletArr.push(renderData.position - w);
     // if (!atc.isMobile()) synth.triggerAttackRelease('C4',0.1,0);
     // synth.triggerAttackRelease('C4', 0.2, 0);
+  }
+
+  function shotByEnemy(position) {
+    var bulletArr = renderData.enemyBullet;
+    if (!bulletArr.includes(position + w)) bulletArr.push(position + w);
+  }
+
+  function burst(time) {
+    shot();
+    if (time > 0) {
+      setTimeout(function () {
+        burst(time - 1);
+      }, 100);
+    }
+  }
+
+  function burstByEnemy(time, position) {
+    shotByEnemy(position);
+    if (time > 0) {
+      setTimeout(function () {
+        burstByEnemy(time - 1, position);
+      }, 100);
+    }
   }
 
   function bulletPosition() {
@@ -217,14 +298,32 @@
       renderData.position = w * Math.floor(h / 2) - Math.floor(w / 2);
     }
 
+    // if (TYPE === 'OBJ_MOVE') {
+      //   var createObj = false;
+      //   if (renCount == nextPolling) {
+      //     createObj = true;
+      //     nextPolling = renCount + Math.floor(Math.random() * objPolling[1] + objPolling[0])
+      //   }
+      //   // document.getElementById('debug').innerHTML = nextPolling + ', ' + renCount;
+      //   objPosition(createObj);
+      //   renCount++;
+      //   if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
+    // }
+
     if (TYPE === 'OBJ_MOVE') {
-      var createObj = false;
       if (renCount == nextPolling) {
-        createObj = true;
+        for (var x = 0; x < quantity; x++) {
+          var zark = new createEnemy({
+            name:'zark',
+            life:3,
+            position:Math.floor(Math.random() * w),
+            shot:true,
+            shotTime:5,
+            movePath:'go5stop'
+          });
+        }
         nextPolling = renCount + Math.floor(Math.random() * objPolling[1] + objPolling[0])
       }
-      // document.getElementById('debug').innerHTML = nextPolling + ', ' + renCount;
-      objPosition(createObj);
       renCount++;
       if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
     }
@@ -253,9 +352,9 @@
           if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
         }
         isBossCome();
-        document.getElementById('score').innerHTML = 'Score: <div class="score">' + killCount + 
-          '</div><br/>Best score: ' + (localStorage.getItem('bestScore') || 0) + 
-          '<br/> Mileage: ' + renCount+
+        document.getElementById('score').innerHTML = 'Score: <div class="score">' + killCount +
+          '</div><br/>Best score: ' + (localStorage.getItem('bestScore') || 0) +
+          '<br/> Mileage: ' + renCount +
           '<br/> Best Mileage: ' + bestMileage;
 
         var point = (pointCount === renderData.position);
@@ -268,24 +367,24 @@
           dead = true;
         }
 
-        if (renderData.preState['pixel_'+pointCount]){
-          document.getElementById('pixel_'+pointCount).classList.remove("point");
-          document.getElementById('pixel_'+pointCount).classList.remove("obj");
-          document.getElementById('pixel_'+pointCount).classList.remove("bullet");
-          document.getElementById('pixel_'+pointCount).classList.remove("dead");
-          delete renderData.preState['pixel_'+pointCount];
+        if (renderData.preState['pixel_' + pointCount]) {
+          document.getElementById('pixel_' + pointCount).classList.remove("point");
+          document.getElementById('pixel_' + pointCount).classList.remove("obj");
+          document.getElementById('pixel_' + pointCount).classList.remove("bullet");
+          document.getElementById('pixel_' + pointCount).classList.remove("dead");
+          delete renderData.preState['pixel_' + pointCount];
         };
-   
-        if(document.getElementById('pixel_'+pointCount)){
-          if(point) document.getElementById('pixel_'+pointCount).classList.add("point");
-          if(obj) document.getElementById('pixel_'+pointCount).classList.add("obj");
-          if(bullet) document.getElementById('pixel_'+pointCount).classList.add("bullet");
-          if(dead) document.getElementById('pixel_'+pointCount).classList.add("dead");
+
+        if (document.getElementById('pixel_' + pointCount)) {
+          if (point) document.getElementById('pixel_' + pointCount).classList.add("point");
+          if (obj) document.getElementById('pixel_' + pointCount).classList.add("obj");
+          if (bullet) document.getElementById('pixel_' + pointCount).classList.add("bullet");
+          if (dead) document.getElementById('pixel_' + pointCount).classList.add("dead");
         }
 
-        if(point||obj||bullet||dead) renderData.preState['pixel_'+pointCount] = true;
-        if( firstRen() ){
-          rsPixel += '<div id="pixel_'+pointCount+'" class="pixel" style=\'width:' + ww + ';height:' + hh + '\'></div>';
+        if (point || obj || bullet || dead) renderData.preState['pixel_' + pointCount] = true;
+        if (firstRen()) {
+          rsPixel += '<div id="pixel_' + pointCount + '" class="pixel" style=\'width:' + ww + ';height:' + hh + '\'></div>';
         }
         pointCount += 1;
       }
@@ -298,10 +397,10 @@
     firstRen(rsPixel);
   }
 
-  function firstRen(rsPixel){
-    if(rsPixel){
+  function firstRen(rsPixel) {
+    if (rsPixel) {
       document.getElementById('view').innerHTML = rsPixel;
-      firstRen = function(){ return false };
+      firstRen = function () { return false };
     }
     return true;
   }
@@ -317,15 +416,6 @@
     gaphic(TYPE);
   }
 
-  function burst(time) {
-    shot();
-    if (time > 0) {
-      setTimeout(function () {
-        burst(time - 1);
-      }, 100);
-    }
-  }
-
   document.addEventListener('keydown', function (e) {
     keyCodeMap(e.keyCode, 'keydown');
   }, false);
@@ -335,20 +425,20 @@
   }, false);
 
 
-  document.addEventListener('touchstart',touch, false);  
-  document.addEventListener('touchmove',touch, false);  
-  document.addEventListener('touchend',touch, false);  
-    
-  function touch (event){  
-    var event = event || window.event;  
-    event.preventDefault();  
-    var x = Math.floor(event.touches[0].pageX/pixelWeigth);
-    var y = Math.floor(event.touches[0].pageY/pixelWeigth);
-    var _ps = (w*y+x);
+  document.addEventListener('touchstart', touch, false);
+  document.addEventListener('touchmove', touch, false);
+  document.addEventListener('touchend', touch, false);
+
+  function touch(event) {
+    var event = event || window.event;
+    event.preventDefault();
+    var x = Math.floor(event.touches[0].pageX / pixelWeigth);
+    var y = Math.floor(event.touches[0].pageY / pixelWeigth);
+    var _ps = (w * y + x);
     renderData.position = _ps;
     shot();
-    document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), "+ (w*y+x);        
-  }  
+    document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), " + (w * y + x);
+  }
 
   setInterval(function () { render('OBJ_MOVE') }, renderTime);
   setInterval(function () { render('BULLET_MOVE') }, bulletTime);
