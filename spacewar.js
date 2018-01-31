@@ -11,11 +11,12 @@
   var w = Math.floor(window.innerWidth / pixelWeigth);
   var h = Math.floor(window.innerHeight / pixelWeigth);
   var objQuantity = 1;
-  var objPolling = [1, 4];
+  var objPolling = [10, 40];
   var renCount = 0;
-  var renderTime = 1000 / 15;
-  var bulletTime = 1000 / 15;
-  var moveTime = atc.isMobile() ? 30 : 80;
+  var renderTime = 1000;
+  var bulletTime = 1000;
+  //var moveTime = atc.isMobile() ? 30 : 80;
+  var moveTime = 500;
   var nextPolling = 1;
   var killCount = 0;
   // var synth = new Tone.AMSynth().toMaster();
@@ -26,34 +27,30 @@
     this.position = obj.position; //位置
     this.shot = obj.shot; //會不會發射子彈
     this.shotTime = obj.shotTime; //連發數
-    // this.move = obj.move; //會不會移動
-    // this.willMoveOut = obj.willMoveOut; //會不會自己跑出區域
     this.movePath = obj.movePath; //移動的路徑類型
 
     var survivalTime = 0;
-    this.getST = function(){
+    this.getST = function () {
       return survivalTime;
     };
     this.wasHit = function () {
+      var me = this;
       this.life--;
-      if (this.life == 0) {
+      if (this.life < 1) {
         renderData.enemy.find(function (el, index) {
-          if (el === this){
+          if (el === me) {
+            var bestScore = localStorage.getItem('bestScore');
             renderData.enemy.splice(index, 1);
             killCount++;
             if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
-          } 
-
+          }
         })
       };
     }
     this.action = function () {
-      if (this.move) {
-        enemyMove.call();
-      }
-
-      if (survivalTime % 10) {
-        if (this.shot) burstByEnemy(this.shotTime);
+      enemyMove.call(this);
+      if (survivalTime % this.shotTime === 0) {
+        if (this.shot) shotByEnemy(this.position);
       };
       survivalTime++;
     }
@@ -61,18 +58,26 @@
 
   function enemyMove() {
     if (movePathList[this.movePath]) return movePathList[this.movePath].call(this);
-    return this.position += 1;
-  }
+    this.position += w;
+  };
 
   var movePathList = {
     go5stop: function () {
-      if(this.getST < 4) this.position += 1;
-    },
-    goToOut: function () {
-      this.position += 1;
+      var me = this;
+      if (this.getST() < 4) this.position += w;
+      if (this.getST() > 80) this.position += w;
       if (this.position > w * h - 1) {
         renderData.enemy.find(function (el, index) {
-          if (el === this) renderData.enemy.splice(index, 1);
+          if (el === me) renderData.enemy.splice(index, 1);
+        })
+      };
+    },
+    goToOut: function () {
+      this.position += w;
+      var me = this;
+      if (this.position > w * h - 1) {
+        renderData.enemy.find(function (el, index) {
+          if (el === me) renderData.enemy.splice(index, 1);
         })
       };
     },
@@ -216,25 +221,25 @@
   }
 
   // function objPosition(isSet) {
-    //   var objArr = renderData.object;
-    //   var quantity = objQuantity;
+  //   var objArr = renderData.object;
+  //   var quantity = objQuantity;
 
-    //   if (isSet) {
-    //     for (var x = 0; x < quantity; x++) {
-    //       objArr.push(Math.floor(Math.random() * w));
-    //     }
-    //   }
+  //   if (isSet) {
+  //     for (var x = 0; x < quantity; x++) {
+  //       objArr.push(Math.floor(Math.random() * w));
+  //     }
+  //   }
 
-    //   for (var key in objArr) {
-    //     var val = objArr[key];
-    //     objArr[key] = objArr[key] + w;
-    //   }
+  //   for (var key in objArr) {
+  //     var val = objArr[key];
+  //     objArr[key] = objArr[key] + w;
+  //   }
 
-    //   for (var key in objArr) {
-    //     if (objArr[key] > w * h - 1) {
-    //       objArr.splice(key, 1);
-    //     };
-    //   }
+  //   for (var key in objArr) {
+  //     if (objArr[key] > w * h - 1) {
+  //       objArr.splice(key, 1);
+  //     };
+  //   }
   // }
 
   function shot() {
@@ -258,21 +263,19 @@
     }
   }
 
-  function burstByEnemy(time, position) {
-    shotByEnemy(position);
-    if (time > 0) {
-      setTimeout(function () {
-        burstByEnemy(time - 1, position);
-      }, 100);
-    }
-  }
-
   function bulletPosition() {
     var bulletArr = renderData.bullet;
+    var enemyBulleArr = renderData.enemyBullet;
     for (var key in bulletArr) {
       bulletArr[key] = bulletArr[key] - w;
       if (bulletArr[key] < 0) {
         bulletArr.splice(key, 1);
+      };
+    }
+    for (var key in enemyBulleArr) {
+      enemyBulleArr[key] = enemyBulleArr[key] + w;
+      if (enemyBulleArr[key] > w * h + 1) {
+        enemyBulleArr.splice(key, 1);
       };
     }
   }
@@ -293,34 +296,30 @@
     var rsPixel = '';
     var bestScore = localStorage.getItem('bestScore') || 0;
     var bestMileage = localStorage.getItem('bestMileage') || 0;
+    var enemyList = {};
+
+    for (var key in renderData.enemy) {
+      var thisEnemy = renderData.enemy[key];
+      enemyList[thisEnemy.position] = thisEnemy;
+      if (TYPE === 'OBJ_MOVE') thisEnemy.action();
+    }
 
     if (!renderData.position && renderData.position !== 0) {
       renderData.position = w * Math.floor(h / 2) - Math.floor(w / 2);
     }
 
-    // if (TYPE === 'OBJ_MOVE') {
-      //   var createObj = false;
-      //   if (renCount == nextPolling) {
-      //     createObj = true;
-      //     nextPolling = renCount + Math.floor(Math.random() * objPolling[1] + objPolling[0])
-      //   }
-      //   // document.getElementById('debug').innerHTML = nextPolling + ', ' + renCount;
-      //   objPosition(createObj);
-      //   renCount++;
-      //   if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
-    // }
-
     if (TYPE === 'OBJ_MOVE') {
       if (renCount == nextPolling) {
-        for (var x = 0; x < quantity; x++) {
+        for (var x = 0; x < objQuantity; x++) {
           var zark = new createEnemy({
-            name:'zark',
-            life:3,
-            position:Math.floor(Math.random() * w),
-            shot:true,
-            shotTime:5,
-            movePath:'go5stop'
+            name: 'zark',
+            life: 1,
+            position: Math.floor(Math.random() * w),
+            shot: true,
+            shotTime: 10,
+            movePath: 'go5stop'
           });
+          renderData.enemy.push(zark);
         }
         nextPolling = renCount + Math.floor(Math.random() * objPolling[1] + objPolling[0])
       }
@@ -333,25 +332,27 @@
     }
 
     var pointCount = 0;
+
+
     for (var x = 0; x < w; x++) {
       for (var y = 0; y < h; y++) {
         var bullet = renderData.bullet.includes(pointCount);
-        var obj = renderData.object.includes(pointCount);
+        var enemyBullet = renderData.enemyBullet.includes(pointCount);
+        var enemy = false;
 
-        if (renderData.bullet.includes(pointCount) && renderData.object.includes(pointCount)) {
-          delArr(renderData.bullet, pointCount);
-          delArr(renderData.object, pointCount);
-          // synth.triggerAttackRelease('C4', 0.1, 0);
-          killCount++;
-          if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
-        } else if (renderData.bullet.includes(pointCount) && renderData.object.includes(pointCount + w)) {
-          delArr(renderData.bullet, pointCount);
-          delArr(renderData.object, pointCount + w);
-          // synth.triggerAttackRelease('C4', 0.1, 0);
-          killCount++;
-          if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
+        if (enemyList[pointCount]) {
+          var thisEnemy = enemyList[pointCount];
+          enemy = true;
+          if (renderData.bullet.includes(thisEnemy.position) && (TYPE == 'BULLET_MOVE')) {
+            delArr(renderData.bullet, pointCount);
+            thisEnemy.wasHit();
+          } else if (renderData.bullet.includes(thisEnemy.position + w) && (TYPE == 'BULLET_MOVE')) {
+            delArr(renderData.bullet, pointCount);
+            thisEnemy.wasHit();
+          }
         }
-        isBossCome();
+
+        // isBossCome();
         document.getElementById('score').innerHTML = 'Score: <div class="score">' + killCount +
           '</div><br/>Best score: ' + (localStorage.getItem('bestScore') || 0) +
           '<br/> Mileage: ' + renCount +
@@ -359,7 +360,7 @@
 
         var point = (pointCount === renderData.position);
         var dead = false;
-        if (isDead(renderData.position)) {
+        if (isDead(renderData.position, enemyList)) {
           renCount = 0;
           nextPolling = 1;
           renderData.renderTemp = {};
@@ -369,20 +370,22 @@
 
         if (renderData.preState['pixel_' + pointCount]) {
           document.getElementById('pixel_' + pointCount).classList.remove("point");
-          document.getElementById('pixel_' + pointCount).classList.remove("obj");
+          document.getElementById('pixel_' + pointCount).classList.remove("enemy");
           document.getElementById('pixel_' + pointCount).classList.remove("bullet");
           document.getElementById('pixel_' + pointCount).classList.remove("dead");
+          document.getElementById('pixel_' + pointCount).classList.remove("enemyBullet");
           delete renderData.preState['pixel_' + pointCount];
         };
 
         if (document.getElementById('pixel_' + pointCount)) {
           if (point) document.getElementById('pixel_' + pointCount).classList.add("point");
-          if (obj) document.getElementById('pixel_' + pointCount).classList.add("obj");
+          if (enemy) document.getElementById('pixel_' + pointCount).classList.add("enemy");
           if (bullet) document.getElementById('pixel_' + pointCount).classList.add("bullet");
           if (dead) document.getElementById('pixel_' + pointCount).classList.add("dead");
+          if (enemyBullet) document.getElementById('pixel_' + pointCount).classList.add("enemyBullet");
         }
 
-        if (point || obj || bullet || dead) renderData.preState['pixel_' + pointCount] = true;
+        if (point || enemy || bullet || dead || enemyBullet) renderData.preState['pixel_' + pointCount] = true;
         if (firstRen()) {
           rsPixel += '<div id="pixel_' + pointCount + '" class="pixel" style=\'width:' + ww + ';height:' + hh + '\'></div>';
         }
@@ -394,6 +397,7 @@
       delete renderData.renderTemp[renCount];
     }
 
+    // console.log(renderData.enemy.length);
     firstRen(rsPixel);
   }
 
@@ -405,8 +409,9 @@
     return true;
   }
 
-  function isDead(point) {
-    if (renderData.object.includes(point)) return true;
+  function isDead(point, enemyList) {
+    if (renderData.enemyBullet.includes(point)) return true;
+    if (enemyList[point]) return true;
     // if (renderData.object.includes(point + w + 1)) return true;
     // if (renderData.object.includes(point + w - 1)) return true;
     return false;
@@ -440,9 +445,16 @@
     document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), " + (w * y + x);
   }
 
-  setInterval(function () { render('OBJ_MOVE') }, renderTime);
-  setInterval(function () { render('BULLET_MOVE') }, bulletTime);
-  setInterval(function () { actionMove() }, moveTime);
+  // setInterval(function () { render('OBJ_MOVE') }, renderTime);
+  // setInterval(function () { render('BULLET_MOVE') }, bulletTime);
+  // setInterval(function () { actionMove() }, moveTime);
+
+
+  setInterval(function () {
+    render('OBJ_MOVE')
+    render('BULLET_MOVE')
+    actionMove()
+  }, 1000 / 20);
 })();
 
 
