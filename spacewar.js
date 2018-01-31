@@ -16,7 +16,7 @@
   var renderTime = 1000;
   var bulletTime = 1000;
   //var moveTime = atc.isMobile() ? 30 : 80;
-  var moveTime = 500;
+  var moveTime = 1000 / 30;
   var nextPolling = 1;
   var killCount = 0;
   // var synth = new Tone.AMSynth().toMaster();
@@ -28,6 +28,7 @@
     this.shot = obj.shot; //會不會發射子彈
     this.shotTime = obj.shotTime; //連發數
     this.movePath = obj.movePath; //移動的路徑類型
+    this.moveTime = obj.moveTime || 1; // 移動間隔
 
     var survivalTime = 0;
     this.getST = function () {
@@ -57,15 +58,26 @@
   }
 
   function enemyMove() {
-    if (movePathList[this.movePath]) return movePathList[this.movePath].call(this);
-    this.position += w;
+    if (movePathList[this.movePath] && this.getST() % this.moveTime == 0) return movePathList[this.movePath].call(this);
+    // this.position += w;
   };
 
   var movePathList = {
-    go5stop: function () {
+    goStop: function () {
       var me = this;
-      if (this.getST() < 4) this.position += w;
+      if (this.getST() < 6) this.position += w;
       if (this.getST() > 80) this.position += w;
+      if (this.position > w * h - 1) {
+        renderData.enemy.find(function (el, index) {
+          if (el === me) renderData.enemy.splice(index, 1);
+        })
+      };
+    },
+    gostMove: function () {
+      var me = this;
+      //this.getST();
+      var xMargin = Math.floor(Math.sin(this.getST()) * 1.2);
+      this.position += w + xMargin;
       if (this.position > w * h - 1) {
         renderData.enemy.find(function (el, index) {
           if (el === me) renderData.enemy.splice(index, 1);
@@ -220,28 +232,6 @@
     render('PLAYER_MOVE');
   }
 
-  // function objPosition(isSet) {
-  //   var objArr = renderData.object;
-  //   var quantity = objQuantity;
-
-  //   if (isSet) {
-  //     for (var x = 0; x < quantity; x++) {
-  //       objArr.push(Math.floor(Math.random() * w));
-  //     }
-  //   }
-
-  //   for (var key in objArr) {
-  //     var val = objArr[key];
-  //     objArr[key] = objArr[key] + w;
-  //   }
-
-  //   for (var key in objArr) {
-  //     if (objArr[key] > w * h - 1) {
-  //       objArr.splice(key, 1);
-  //     };
-  //   }
-  // }
-
   function shot() {
     var bulletArr = renderData.bullet;
     if (!bulletArr.includes(renderData.position - w)) bulletArr.push(renderData.position - w);
@@ -317,7 +307,8 @@
             position: Math.floor(Math.random() * w),
             shot: true,
             shotTime: 10,
-            movePath: 'go5stop'
+            movePath: 'gostMove',
+            moveTime: 10,
           });
           renderData.enemy.push(zark);
         }
@@ -454,7 +445,7 @@
     render('OBJ_MOVE')
     render('BULLET_MOVE')
     actionMove()
-  }, 1000 / 20);
+  }, 1000 / 24);
 })();
 
 
