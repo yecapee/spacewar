@@ -11,7 +11,7 @@
   var w = Math.floor(window.innerWidth / pixelWeigth);
   var h = Math.floor(window.innerHeight / pixelWeigth);
   var objQuantity = 1;
-  var objPolling = [10, 40];
+  var objPolling = [40, 90];
   var renCount = 0;
   var renderTime = 1000;
   var bulletTime = 1000;
@@ -24,6 +24,7 @@
   function createEnemy(obj) {
     this.name = obj.name; //名字
     this.life = obj.life; //生命值
+    this.mainX = obj.position;
     this.position = obj.position; //位置
     this.shot = obj.shot; //會不會發射子彈
     this.shotTime = obj.shotTime; //連發數
@@ -58,8 +59,19 @@
   }
 
   function enemyMove() {
-    if (movePathList[this.movePath] && this.getST() % this.moveTime == 0) return movePathList[this.movePath].call(this);
-    // this.position += w;
+    if (movePathList[this.movePath] && this.getST() % this.moveTime == 0) movePathList[this.movePath].call(this);
+  };
+
+  function positionLimit(nowPosition) {
+    var leftlimt = this.mainX - (this.mainX % w);
+    var rightlimt = leftlimt + w;
+    if (nowPosition > rightlimt) {
+      return rightlimt;
+    }
+    if (nowPosition < leftlimt) {
+      return leftlimt;
+    }
+    return nowPosition;
   };
 
   var movePathList = {
@@ -75,9 +87,11 @@
     },
     gostMove: function () {
       var me = this;
-      //this.getST();
-      var xMargin = Math.floor(Math.sin(this.getST()) * 1.2);
-      this.position += w + xMargin;
+      var thisY = Math.floor(this.position / h);
+      var xMargin = Math.floor(Math.sin(thisY * 15 / 57) * 5);
+      this.position = positionLimit.call(this,this.mainX + xMargin);
+      this.mainX += w;
+
       if (this.position > w * h - 1) {
         renderData.enemy.find(function (el, index) {
           if (el === me) renderData.enemy.splice(index, 1);
@@ -303,7 +317,7 @@
         for (var x = 0; x < objQuantity; x++) {
           var zark = new createEnemy({
             name: 'zark',
-            life: 1,
+            life: 3,
             position: Math.floor(Math.random() * w),
             shot: true,
             shotTime: 10,
@@ -313,6 +327,7 @@
           renderData.enemy.push(zark);
         }
         nextPolling = renCount + Math.floor(Math.random() * objPolling[1] + objPolling[0])
+        console.log(nextPolling);
       }
       renCount++;
       if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
@@ -377,6 +392,7 @@
         }
 
         if (point || enemy || bullet || dead || enemyBullet) renderData.preState['pixel_' + pointCount] = true;
+        if( enemy && bullet) console.log('hit');
         if (firstRen()) {
           rsPixel += '<div id="pixel_' + pointCount + '" class="pixel" style=\'width:' + ww + ';height:' + hh + '\'></div>';
         }
