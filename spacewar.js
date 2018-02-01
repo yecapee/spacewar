@@ -11,7 +11,7 @@
   var w = Math.floor(window.innerWidth / pixelWeigth);
   var h = Math.floor(window.innerHeight / pixelWeigth);
   var objQuantity = 1;
-  var objPolling = [40, 90];
+  var objPolling = [80, 400];
   var renCount = 0;
   var renderTime = 1000;
   var bulletTime = 1000;
@@ -88,8 +88,12 @@
     gostMove: function () {
       var me = this;
       var thisY = Math.floor(this.position / h);
-      var xMargin = Math.floor(Math.sin(thisY * 15 / 57) * 5);
-      this.position = positionLimit.call(this,this.mainX + xMargin);
+      var r = h / 4;
+      var nowY = Math.floor(this.mainX / w);
+      var margin = Math.sin(Math.PI/r*nowY);
+      var xMargin = Math.floor(margin*r);
+      //console.log(nowY, margin);
+      this.position = positionLimit.call(this, this.mainX + xMargin);
       this.mainX += w;
 
       if (this.position > w * h - 1) {
@@ -320,14 +324,14 @@
             life: 3,
             position: Math.floor(Math.random() * w),
             shot: true,
-            shotTime: 10,
+            shotTime: 3,
             movePath: 'gostMove',
-            moveTime: 10,
+            moveTime: 5,
           });
           renderData.enemy.push(zark);
         }
-        nextPolling = renCount + Math.floor(Math.random() * objPolling[1] + objPolling[0])
-        console.log(nextPolling);
+        nextPolling = renCount + Math.floor(Math.random() * objPolling[1] + objPolling[0]);
+        console.log(renCount,nextPolling);
       }
       renCount++;
       if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
@@ -392,7 +396,7 @@
         }
 
         if (point || enemy || bullet || dead || enemyBullet) renderData.preState['pixel_' + pointCount] = true;
-        if( enemy && bullet) console.log('hit');
+        if (enemy && bullet) console.log('hit');
         if (firstRen()) {
           rsPixel += '<div id="pixel_' + pointCount + '" class="pixel" style=\'width:' + ww + ';height:' + hh + '\'></div>';
         }
