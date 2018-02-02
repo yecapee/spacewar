@@ -190,7 +190,7 @@
     };
     for (var key in keyType) {
       if (keyType[key] == true) action[key]();
-      document.getElementById('debug').innerHTML = JSON.stringify(positionToXY(renderData.position),null,2);
+      document.getElementById('debug').innerHTML = JSON.stringify(positionToXY(renderData.position), null, 2);
     }
     render('PLAYER_MOVE');
   }
@@ -240,13 +240,13 @@
     var rsPixel = '';
     var bestScore = localStorage.getItem('bestScore') || 0;
     var bestMileage = localStorage.getItem('bestMileage') || 0;
-    var enemyList = {};
+    // var enemyList = {};
 
-    for (var key in renderData.enemy) {
-      var thisEnemy = renderData.enemy[key];
-      enemyList[thisEnemy.position] = thisEnemy;
-      if (TYPE === 'OBJ_MOVE') thisEnemy.action();
-    }
+    // for (var key in renderData.enemy) {
+    //   var thisEnemy = renderData.enemy[key];
+    //   enemyList[thisEnemy.position] = thisEnemy;
+    //   if (TYPE === 'OBJ_MOVE') thisEnemy.action();
+    // }
 
     if (!renderData.position && renderData.position !== 0) {
       renderData.position = w * Math.floor(h / 2) - Math.floor(w / 2);
@@ -277,84 +277,86 @@
       bulletPosition();
     }
 
-    var pointCount = 0;
+    var ctx = document.getElementById('view').getContext('2d');
+    ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+    var img = document.getElementById("shipImg");
+    var psObj = positionToXY(renderData.position);
+    ctx.drawImage(img, psObj.x, psObj.y, 49, 65);
 
+    //var pointCount = 0;
+    // for (var x = 0; x < w; x++) {
+    //   for (var y = 0; y < h; y++) {
+    //     var bullet = renderData.bullet.includes(pointCount);
+    //     var enemyBullet = renderData.enemyBullet.includes(pointCount);
+    //     var enemy = false;
 
-    for (var x = 0; x < w; x++) {
-      for (var y = 0; y < h; y++) {
-        var bullet = renderData.bullet.includes(pointCount);
-        var enemyBullet = renderData.enemyBullet.includes(pointCount);
-        var enemy = false;
+    //     if (enemyList[pointCount]) {
+    //       var thisEnemy = enemyList[pointCount];
+    //       enemy = true;
+    //       if (renderData.bullet.includes(thisEnemy.position) && (TYPE == 'BULLET_MOVE')) {
+    //         delArr(renderData.bullet, pointCount);
+    //         thisEnemy.wasHit();
+    //       } else if (renderData.bullet.includes(thisEnemy.position + w) && (TYPE == 'BULLET_MOVE')) {
+    //         delArr(renderData.bullet, pointCount);
+    //         thisEnemy.wasHit();
+    //       }
+    //     }
 
-        if (enemyList[pointCount]) {
-          var thisEnemy = enemyList[pointCount];
-          enemy = true;
-          if (renderData.bullet.includes(thisEnemy.position) && (TYPE == 'BULLET_MOVE')) {
-            delArr(renderData.bullet, pointCount);
-            thisEnemy.wasHit();
-          } else if (renderData.bullet.includes(thisEnemy.position + w) && (TYPE == 'BULLET_MOVE')) {
-            delArr(renderData.bullet, pointCount);
-            thisEnemy.wasHit();
-          }
-        }
+    document.getElementById('score').innerHTML = 'Score: <div class="score">' + killCount +
+      '</div><br/>Best score: ' + (localStorage.getItem('bestScore') || 0) +
+      '<br/> Mileage: ' + renCount +
+      '<br/> Best Mileage: ' + bestMileage;
 
-        // isBossCome();
-        document.getElementById('score').innerHTML = 'Score: <div class="score">' + killCount +
-          '</div><br/>Best score: ' + (localStorage.getItem('bestScore') || 0) +
-          '<br/> Mileage: ' + renCount +
-          '<br/> Best Mileage: ' + bestMileage;
+    //     var point = (pointCount === renderData.position);
+    //     var dead = false;
+    //     if (isDead(renderData.position, enemyList)) {
+    //       renCount = 0;
+    //       nextPolling = 20;
+    //       renderData.renderTemp = {};
+    //       killCount = 0;
+    //       dead = true;
+    //     }
 
-        var point = (pointCount === renderData.position);
-        var dead = false;
-        if (isDead(renderData.position, enemyList)) {
-          renCount = 0;
-          nextPolling = 20;
-          renderData.renderTemp = {};
-          killCount = 0;
-          dead = true;
-        }
+    //     if (renderData.preState['pixel_' + pointCount]) {
+    //       document.getElementById('pixel_' + pointCount).classList.remove("point");
+    //       document.getElementById('pixel_' + pointCount).classList.remove("enemy");
+    //       document.getElementById('pixel_' + pointCount).classList.remove("bullet");
+    //       document.getElementById('pixel_' + pointCount).classList.remove("dead");
+    //       document.getElementById('pixel_' + pointCount).classList.remove("enemyBullet");
+    //       delete renderData.preState['pixel_' + pointCount];
+    //     };
 
-        if (renderData.preState['pixel_' + pointCount]) {
-          document.getElementById('pixel_' + pointCount).classList.remove("point");
-          document.getElementById('pixel_' + pointCount).classList.remove("enemy");
-          document.getElementById('pixel_' + pointCount).classList.remove("bullet");
-          document.getElementById('pixel_' + pointCount).classList.remove("dead");
-          document.getElementById('pixel_' + pointCount).classList.remove("enemyBullet");
-          delete renderData.preState['pixel_' + pointCount];
-        };
+    //     if (document.getElementById('pixel_' + pointCount)) {
+    //       if (point) document.getElementById('pixel_' + pointCount).classList.add("point");
+    //       if (enemy) document.getElementById('pixel_' + pointCount).classList.add("enemy");
+    //       if (bullet) document.getElementById('pixel_' + pointCount).classList.add("bullet");
+    //       if (dead) document.getElementById('pixel_' + pointCount).classList.add("dead");
+    //       if (enemyBullet) document.getElementById('pixel_' + pointCount).classList.add("enemyBullet");
+    //     }
 
-        if (document.getElementById('pixel_' + pointCount)) {
-          if (point) document.getElementById('pixel_' + pointCount).classList.add("point");
-          if (enemy) document.getElementById('pixel_' + pointCount).classList.add("enemy");
-          if (bullet) document.getElementById('pixel_' + pointCount).classList.add("bullet");
-          if (dead) document.getElementById('pixel_' + pointCount).classList.add("dead");
-          if (enemyBullet) document.getElementById('pixel_' + pointCount).classList.add("enemyBullet");
-        }
-
-        if (point || enemy || bullet || dead || enemyBullet) renderData.preState['pixel_' + pointCount] = true;
-        if (enemy && bullet) console.log('hit');
-        if (firstRen()) {
-          rsPixel += '<div id="pixel_' + pointCount + '" class="pixel" style=\'width:' + ww + ';height:' + hh + '\'></div>';
-        }
-        pointCount += 1;
-      }
-    }
-    if (renderData.renderTemp[renCount]) {
-      renderData.renderTemp[renCount]();
-      delete renderData.renderTemp[renCount];
-    }
+    //     if (point || enemy || bullet || dead || enemyBullet) renderData.preState['pixel_' + pointCount] = true;
+    //     if (firstRen()) {
+    //       rsPixel += '<div id="pixel_' + pointCount + '" class="pixel" style=\'width:' + ww + ';height:' + hh + '\'></div>';
+    //     }
+    //     pointCount += 1;
+    //   }
+    // }
+    // if (renderData.renderTemp[renCount]) {
+    //   renderData.renderTemp[renCount]();
+    //   delete renderData.renderTemp[renCount];
+    // }
 
     // console.log(renderData.enemy.length);
-    firstRen(rsPixel);
+    // firstRen(rsPixel);
   }
 
-  function firstRen(rsPixel) {
-    if (rsPixel) {
-      document.getElementById('view').innerHTML = rsPixel;
-      firstRen = function () { return false };
-    }
-    return true;
-  }
+  // function firstRen(rsPixel) {
+  //   if (rsPixel) {
+  //     document.getElementById('view').innerHTML = rsPixel;
+  //     firstRen = function () { return false };
+  //   }
+  //   return true;
+  // }
 
   function isDead(point, enemyList) {
     if (renderData.enemyBullet.includes(point)) return true;
@@ -370,10 +372,10 @@
 
   function positionToXY(ps) {
     var x = ps % w;
-    var y = Math.floor(ps / h);
+    var y = Math.floor((ps-x) / h);
     return {
       x: x * pixelWeigth + pixelWeigth / 2,
-      y: y * pixelWeigth - pixelWeigth
+      y: y * pixelWeigth,
     };
   }
 
@@ -405,12 +407,16 @@
   // setInterval(function () { render('BULLET_MOVE') }, bulletTime);
   // setInterval(function () { actionMove() }, moveTime);
 
-
+  document.getElementById('view').height = window.innerHeight;
+  document.getElementById('view').width = window.innerWidth;
   setInterval(function () {
     render('OBJ_MOVE')
     render('BULLET_MOVE')
     actionMove()
-  }, 1000 / 24);
+  }, 1000 / 30);
+
+
+
 })();
 
 
