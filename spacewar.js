@@ -21,6 +21,63 @@
   var killCount = 0;
   // var synth = new Tone.AMSynth().toMaster();
 
+  var movePathList = {
+    goStop: function () {
+      var me = this;
+      if (this.getST() < 6) this.position += w;
+      if (this.getST() > 80) this.position += w;
+      if (this.position > w * h - 1) {
+        renderData.enemy.find(function (el, index) {
+          if (el === me) renderData.enemy.splice(index, 1);
+        })
+      };
+    },
+    gostMove: function () {
+      var me = this;
+      var thisY = Math.floor(this.position / h);
+      var r = h / 4;
+      var nowY = Math.floor(this.mainX / w);
+      var margin = Math.sin(Math.PI / r * nowY);
+      var xMargin = Math.floor(margin * r);
+      //console.log(nowY, margin);
+      this.position = positionLimit.call(this, this.mainX + xMargin);
+
+
+      if (this.position > w * h - 1) {
+        renderData.enemy.find(function (el, index) {
+          if (el === me) renderData.enemy.splice(index, 1);
+        })
+      };
+    },
+    goToOut: function () {
+      this.position += w;
+      var me = this;
+      if (this.position > w * h - 1) {
+        renderData.enemy.find(function (el, index) {
+          if (el === me) renderData.enemy.splice(index, 1);
+        })
+      };
+    },
+  };
+
+  var renderData = {
+    position: null,
+    renderTemp: {},
+    // object: [],
+    bullet: [],
+    preState: {},
+    enemy: [],
+    enemyBullet: [],
+  };
+
+  var keyType = {
+    UP: false,
+    RIGHT: false,
+    DOWN: false,
+    LEFT: false,
+    SPACE: false
+  };
+
   function createEnemy(obj) {
     this.name = obj.name; //名字
     this.life = obj.life; //生命值
@@ -64,7 +121,8 @@
 
   function positionLimit(nowPosition) {
     var leftlimt = this.mainX - (this.mainX % w);
-    var rightlimt = leftlimt + w;
+    var rightlimt = leftlimt + w - 1;
+    this.mainX += w;
     if (nowPosition > rightlimt) {
       return rightlimt;
     }
@@ -73,117 +131,6 @@
     }
     return nowPosition;
   };
-
-  var movePathList = {
-    goStop: function () {
-      var me = this;
-      if (this.getST() < 6) this.position += w;
-      if (this.getST() > 80) this.position += w;
-      if (this.position > w * h - 1) {
-        renderData.enemy.find(function (el, index) {
-          if (el === me) renderData.enemy.splice(index, 1);
-        })
-      };
-    },
-    gostMove: function () {
-      var me = this;
-      var thisY = Math.floor(this.position / h);
-      var r = h / 4;
-      var nowY = Math.floor(this.mainX / w);
-      var margin = Math.sin(Math.PI/r*nowY);
-      var xMargin = Math.floor(margin*r);
-      //console.log(nowY, margin);
-      this.position = positionLimit.call(this, this.mainX + xMargin);
-      this.mainX += w;
-
-      if (this.position > w * h - 1) {
-        renderData.enemy.find(function (el, index) {
-          if (el === me) renderData.enemy.splice(index, 1);
-        })
-      };
-    },
-    goToOut: function () {
-      this.position += w;
-      var me = this;
-      if (this.position > w * h - 1) {
-        renderData.enemy.find(function (el, index) {
-          if (el === me) renderData.enemy.splice(index, 1);
-        })
-      };
-    },
-  };
-
-  var renderData = {
-    position: null,
-    renderTemp: {},
-    // object: [],
-    bullet: [],
-    preState: {},
-    enemy: [],
-    enemyBullet: [],
-  };
-
-  var keyType = {
-    UP: false,
-    RIGHT: false,
-    DOWN: false,
-    LEFT: false,
-    SPACE: false
-  };
-
-  var bossList = {
-    WALL: function (renCount) {
-      renderData.renderTemp[renCount] = function () {
-        var objArr = renderData.object;
-        for (var position = 0; position < w; position++) {
-          objArr.push(position);
-        }
-      }
-    },
-    LASER: function (renCount) {
-      nextPolling = renCount + 80;
-      for (var x = 0; x < 80; x++) {
-        renderData.renderTemp[renCount + x] = (function (x) {
-          return function () {
-            var objArr = renderData.object;
-            var xMargin = (Math.floor(x / 20) * 3) % 7;
-            if (x % 20 < 10) {
-              for (var position = 0; position < w; position++) {
-                if (position % 7 == xMargin) {
-                  objArr.push(position);
-                }
-              }
-            }
-          }
-        })(x);
-      }
-    },
-    POWERSHOT: function (renCount) {
-      nextPolling = renCount + 30;
-      for (var x = 0; x < 30; x++) {
-        renderData.renderTemp[renCount + x] = function () {
-          var objArr = renderData.object;
-          for (var position = 0; position < w; position++) {
-            if (position > (w / 2) - 3 && position < (w / 2) + 3) {
-              objArr.push(position);
-            }
-          }
-        };
-      }
-    },
-  };
-
-  function isBossCome() {
-    if (renCount % 80 == 0 && renCount != 0) {
-      bossList['WALL'](renCount);
-    }
-    if (renCount % 400 == 0 && renCount != 0) {
-      bossList['LASER'](renCount);
-    }
-    if (renCount % 600 == 0 && renCount != 0) {
-      bossList['POWERSHOT'](renCount);
-    }
-  }
 
   function keyCodeMap(keycode, type) {
     var map = {
@@ -331,7 +278,7 @@
           renderData.enemy.push(zark);
         }
         nextPolling = renCount + Math.floor(Math.random() * objPolling[1] + objPolling[0]);
-        console.log(renCount,nextPolling);
+        console.log(renCount, nextPolling);
       }
       renCount++;
       if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
@@ -372,7 +319,7 @@
         var dead = false;
         if (isDead(renderData.position, enemyList)) {
           renCount = 0;
-          nextPolling = 1;
+          nextPolling = 20;
           renderData.renderTemp = {};
           killCount = 0;
           dead = true;
