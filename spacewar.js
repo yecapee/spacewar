@@ -240,8 +240,8 @@
     var rsPixel = '';
     var bestScore = localStorage.getItem('bestScore') || 0;
     var bestMileage = localStorage.getItem('bestMileage') || 0;
-    // var enemyList = {};
 
+    // var enemyList = {};
     // for (var key in renderData.enemy) {
     //   var thisEnemy = renderData.enemy[key];
     //   enemyList[thisEnemy.position] = thisEnemy;
@@ -277,11 +277,12 @@
       bulletPosition();
     }
 
-    var ctx = document.getElementById('view').getContext('2d');
-    ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
     var img = document.getElementById("shipImg");
     var psObj = positionToXY(renderData.position);
-    ctx.drawImage(img, psObj.x, psObj.y, 49, 65);
+    var viewDom = document.getElementById('view').getContext('2d');
+
+    viewDom.clearRect(0,0,window.innerWidth,window.innerHeight);
+    viewDom.drawImage(img, psObj.x, psObj.y, 49, 65);
 
     //var pointCount = 0;
     // for (var x = 0; x < w; x++) {
