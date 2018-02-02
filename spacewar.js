@@ -20,7 +20,22 @@
   var nextPolling = 1;
   var killCount = 0;
   // var synth = new Tone.AMSynth().toMaster();
-
+  var renderData = {
+    position: null,
+    renderTemp: {},
+    // object: [],
+    bullet: [],
+    preState: {},
+    enemy: [],
+    enemyBullet: [],
+  };
+  var keyType = {
+    UP: false,
+    RIGHT: false,
+    DOWN: false,
+    LEFT: false,
+    SPACE: false
+  };
   var movePathList = {
     goStop: function () {
       var me = this;
@@ -58,24 +73,6 @@
         })
       };
     },
-  };
-
-  var renderData = {
-    position: null,
-    renderTemp: {},
-    // object: [],
-    bullet: [],
-    preState: {},
-    enemy: [],
-    enemyBullet: [],
-  };
-
-  var keyType = {
-    UP: false,
-    RIGHT: false,
-    DOWN: false,
-    LEFT: false,
-    SPACE: false
   };
 
   function createEnemy(obj) {
@@ -193,6 +190,7 @@
     };
     for (var key in keyType) {
       if (keyType[key] == true) action[key]();
+      document.getElementById('debug').innerHTML = JSON.stringify(positionToXY(renderData.position),null,2);
     }
     render('PLAYER_MOVE');
   }
@@ -207,15 +205,6 @@
   function shotByEnemy(position) {
     var bulletArr = renderData.enemyBullet;
     if (!bulletArr.includes(position + w)) bulletArr.push(position + w);
-  }
-
-  function burst(time) {
-    shot();
-    if (time > 0) {
-      setTimeout(function () {
-        burst(time - 1);
-      }, 100);
-    }
   }
 
   function bulletPosition() {
@@ -377,6 +366,15 @@
 
   function render(TYPE) {
     gaphic(TYPE);
+  }
+
+  function positionToXY(ps) {
+    var x = ps % w;
+    var y = Math.floor(ps / h);
+    return {
+      x: x * pixelWeigth + pixelWeigth / 2,
+      y: y * pixelWeigth - pixelWeigth
+    };
   }
 
   document.addEventListener('keydown', function (e) {
