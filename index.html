@@ -26,13 +26,13 @@
     overflow: hidden;
   }
 
-  #view {
+  /* #view {
     display: block;
-    width: 100%;
-    height: 100%;
+    width: 1024px;
+    height: 800px;
     word-wrap: break-word;
     word-break: normal;
-  }
+  } */
 
   #score {
     display: block;
@@ -180,8 +180,9 @@
 <body>
   <div id="debug"></div>
   <div id="score"></div>
-  <div id="view"></div>
+  <canvas id="view"></canvas>
   <div id="shotBtn"></div>
+  <img id="shipImg" src="./ship.png" style="display:none">
 </body>
 <script type="text/javascript" src="spacewar.js"></script>
 
