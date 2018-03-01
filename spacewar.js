@@ -174,7 +174,8 @@
       },
       DOWN: function () {
         var ps = renderData.position;
-        renderData.position = (ps + w <= w * h - 1) ? ps + w : ps;
+        var nowY = (ps - ps%w)/h;
+        renderData.position = (nowY < h ) ? ps + w : ps;
       },
       LEFT: function () {
         var ps = renderData.position;
@@ -281,7 +282,7 @@
     var psObj = positionToXY(renderData.position);
     var viewDom = document.getElementById('view').getContext('2d');
 
-    viewDom.clearRect(0,0,window.innerWidth,window.innerHeight);
+    viewDom.clearRect(0, 0, window.innerWidth, window.innerHeight);
     viewDom.drawImage(img, psObj.x, psObj.y, 49, 65);
 
     //var pointCount = 0;
@@ -373,7 +374,7 @@
 
   function positionToXY(ps) {
     var x = ps % w;
-    var y = Math.floor((ps-x) / h);
+    var y = Math.floor((ps - x) / h);
     return {
       x: x * pixelWeigth + pixelWeigth / 2,
       y: y * pixelWeigth,
@@ -414,7 +415,7 @@
     render('OBJ_MOVE')
     render('BULLET_MOVE')
     actionMove()
-  }, 1000 / 30);
+  }, 1000 / 24);
 
 
 
