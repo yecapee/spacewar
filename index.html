@@ -21,18 +21,22 @@
 <meta property="og:description" content="A ptt style of space game" >
 
 <style>
-  html {
+  html,body {
     background-color: black;
     overflow: hidden;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
   }
 
-  #view {
+  /* #view {
     display: block;
-    width: 100%;
-    height: 100%;
+    width: 1024px;
+    height: 800px;
     word-wrap: break-word;
     word-break: normal;
-  }
+  } */
 
   #score {
     display: block;
@@ -104,7 +108,7 @@
     background-color: white;
   } */
 
-  .pixel.obj {
+  .pixel.enemy {
     background-color: white;
   }
 
@@ -126,12 +130,34 @@
     /* background: radial-gradient(circle,yellow,white,rgba(0,0,0,.5)); */
   }
 
-  .pixel.bullet.obj {
+  .pixel.enemyBullet.enemy {
     background-color: rgb(243, 243, 243);
   }
 
+  .pixel.enemyBullet {
+    border-radius: 0%;
+    position: relative;
+  }
+
+  .pixel.enemyBullet::before{
+    content: '';
+    display: block;
+    position: absolute;
+    background-color: rgb(255, 94, 0);
+    top: 0;
+    left: calc(50% - 3px);
+    height: 50%;
+    width: 6px;
+    z-index: 99;
+    /* background: radial-gradient(circle,yellow,white,rgba(0,0,0,.5)); */
+  }
+
+  .pixel.enemy.bullet  {
+    background-color: yellow;
+  }
+
   .pixel.point.bullet {
-    background-color: white;
+  /* background-color: white; */
   }
 
   .pixel.point.dead {
@@ -158,8 +184,12 @@
 <body>
   <div id="debug"></div>
   <div id="score"></div>
-  <div id="view"></div>
+  <canvas id="view"></canvas>
   <div id="shotBtn"></div>
+  <img id="shipImg" src="./ship.png" style="display:none">
+  <img id="bulletImg" src="./spacewar_icon/bullet_normal.png" style="display:none">
+  <img id="enemyImg" src="./spacewar_icon/ballbullet.png" style="display:none">
+  <img id="zarkImg" src="./spacewar_icon/zark.png" style="display:none">
 </body>
 <script type="text/javascript" src="spacewar.js"></script>
 
