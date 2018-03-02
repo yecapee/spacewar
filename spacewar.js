@@ -11,7 +11,7 @@
   var w = Math.floor(window.innerWidth / pixelWeigth);
   var h = Math.floor(window.innerHeight / pixelWeigth);
   var objQuantity = 1;
-  var objPolling = [80, 400];
+  var objPolling = [20, 40];
   var renCount = 0;
   var renderTime = 1000;
   var bulletTime = 1000;
@@ -158,6 +158,7 @@
     }
   }
 
+
   function actionMove() {
     var action = {
       UP: function () {
@@ -174,8 +175,8 @@
       },
       DOWN: function () {
         var ps = renderData.position;
-        var nowY = (ps - ps%w)/h;
-        renderData.position = (nowY < h ) ? ps + w : ps;
+        var nowY = (ps - ps % w) / h;
+        renderData.position = (nowY < h) ? ps + w : ps;
       },
       LEFT: function () {
         var ps = renderData.position;
@@ -242,13 +243,6 @@
     var bestScore = localStorage.getItem('bestScore') || 0;
     var bestMileage = localStorage.getItem('bestMileage') || 0;
 
-    // var enemyList = {};
-    // for (var key in renderData.enemy) {
-    //   var thisEnemy = renderData.enemy[key];
-    //   enemyList[thisEnemy.position] = thisEnemy;
-    //   if (TYPE === 'OBJ_MOVE') thisEnemy.action();
-    // }
-
     if (!renderData.position && renderData.position !== 0) {
       renderData.position = w * Math.floor(h / 2) - Math.floor(w / 2);
     }
@@ -268,7 +262,6 @@
           renderData.enemy.push(zark);
         }
         nextPolling = renCount + Math.floor(Math.random() * objPolling[1] + objPolling[0]);
-        console.log(renCount, nextPolling);
       }
       renCount++;
       if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
@@ -278,12 +271,55 @@
       bulletPosition();
     }
 
-    var img = document.getElementById("shipImg");
-    var psObj = positionToXY(renderData.position);
+    //canvas
     var viewDom = document.getElementById('view').getContext('2d');
-
     viewDom.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    viewDom.drawImage(img, psObj.x, psObj.y, 49, 65);
+
+    // bullet
+    var enemyBulleArr = renderData.enemyBullet;
+    var bulletImg = document.getElementById("bulletImg");
+    renderData.bullet.map(function (ps) {
+      var bulletObj = positionToXY(ps);
+      viewDom.drawImage(bulletImg, bulletObj.x + 18, bulletObj.y - 5, 13, 64);
+
+      //defense
+      // console.log(ps, enemyBulleArr);
+      if (enemyBulleArr.includes(ps)) {
+        enemyBulleArr.splice(enemyBulleArr.indexOf(ps), 1);
+      }
+      if (enemyBulleArr.includes(ps + w)) {
+        enemyBulleArr.splice(enemyBulleArr.indexOf(ps + w), 1);
+      }
+
+      //kill enemy
+      renderData.enemy.map(function (obj) {
+        if(obj.position == ps || obj.position == ps+w ){
+          obj.wasHit();
+        }
+      })
+    })
+
+    // ship
+    var shipImg = document.getElementById("shipImg");
+    var psObj = positionToXY(renderData.position);
+    viewDom.drawImage(shipImg, psObj.x, psObj.y, 49, 65);
+
+    //enmyBullet
+    var enemyImg = document.getElementById("enemyImg");
+    renderData.enemyBullet.map(function (ps) {
+      var bulletObj = positionToXY(ps);
+      viewDom.drawImage(enemyImg, bulletObj.x + 18, bulletObj.y - 5, 15, 15);
+    })
+
+    // enmy
+    var zarkImg = document.getElementById("zarkImg");
+    renderData.enemy.map(function (obj) {
+      obj.action();
+      var psObj = positionToXY(obj.position);
+      viewDom.drawImage(zarkImg, psObj.x, psObj.y, 214 / 2, 153 / 2);
+    })
+
+
 
     //var pointCount = 0;
     // for (var x = 0; x < w; x++) {
@@ -309,15 +345,17 @@
       '<br/> Mileage: ' + renCount +
       '<br/> Best Mileage: ' + bestMileage;
 
-    //     var point = (pointCount === renderData.position);
-    //     var dead = false;
-    //     if (isDead(renderData.position, enemyList)) {
-    //       renCount = 0;
-    //       nextPolling = 20;
-    //       renderData.renderTemp = {};
-    //       killCount = 0;
-    //       dead = true;
-    //     }
+    // var point = (pointCount === renderData.position);
+
+    var dead = false;
+    if (isDead(renderData.position)) {
+      renCount = 0;
+      nextPolling = 20;
+      renderData.renderTemp = {};
+      killCount = 0;
+      dead = true;
+      console.log('dead');
+    }
 
     //     if (renderData.preState['pixel_' + pointCount]) {
     //       document.getElementById('pixel_' + pointCount).classList.remove("point");
@@ -352,20 +390,13 @@
     // firstRen(rsPixel);
   }
 
-  // function firstRen(rsPixel) {
-  //   if (rsPixel) {
-  //     document.getElementById('view').innerHTML = rsPixel;
-  //     firstRen = function () { return false };
-  //   }
-  //   return true;
-  // }
-
-  function isDead(point, enemyList) {
+  function isDead(point) {
     if (renderData.enemyBullet.includes(point)) return true;
-    if (enemyList[point]) return true;
-    // if (renderData.object.includes(point + w + 1)) return true;
-    // if (renderData.object.includes(point + w - 1)) return true;
-    return false;
+    var rs = false;
+    renderData.enemy.map(function (enemy) {
+      if (point === enemy.position) rs = true;
+    })
+    return rs;
   }
 
   function render(TYPE) {
@@ -374,10 +405,11 @@
 
   function positionToXY(ps) {
     var x = ps % w;
-    var y = Math.floor((ps - x) / h);
+    var y = (ps - x);
     return {
       x: x * pixelWeigth + pixelWeigth / 2,
-      y: y * pixelWeigth,
+      y: y,
+      ps: ps,
     };
   }
 
