@@ -342,7 +342,9 @@
     // enmy
     var zarkImg = document.getElementById("zarkImg");
     renderData.enemy.map(function (obj) {
-      obj.action();
+      if (TYPE === 'OBJ_MOVE') {
+       obj.action();
+      }
       var psObj = positionToXY(obj.position);
       viewDom.drawImage(zarkImg, psObj.x, psObj.y, 214 / 2, 153 / 2);
     })
@@ -442,9 +444,6 @@
       y: y * window.innerHeight / h,
       __x: x,
       __y: y,
-      hi: window.innerHeight / h,
-      h: h,
-      w: w,
       limit: w * h -1 ,
     };
   }
@@ -481,6 +480,8 @@
   document.getElementById('view').width = window.innerWidth;
   setInterval(function () {
     render('OBJ_MOVE')
+  }, 1000 / 10);
+  setInterval(function () {
     render('BULLET_MOVE')
     actionMove()
   }, 1000 / 24);
