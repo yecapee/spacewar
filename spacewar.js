@@ -175,8 +175,10 @@
       },
       DOWN: function () {
         var ps = renderData.position;
-        var nowY = (ps - ps % w) / h;
-        renderData.position = (nowY < h) ? ps + w : ps;
+        var nowY = Math.round((ps - ps % w) / w);
+        if (ps + w < w * h) {
+          renderData.position = (nowY < h) ? ps + w : ps;
+        }
       },
       LEFT: function () {
         var ps = renderData.position;
@@ -222,7 +224,7 @@
 
   function shot() {
     var bulletArr = renderData.bullet;
-    if(!bulletArr.includes(renderData.position - w)) bulletArr.push(renderData.position - w);
+    if (!bulletArr.includes(renderData.position - w)) bulletArr.push(renderData.position - w);
     // if (!atc.isMobile()) synth.triggerAttackRelease('C4',0.1,0);
     // synth.triggerAttackRelease('C4', 0.2, 0);
   }
@@ -319,7 +321,7 @@
 
       //kill enemy
       renderData.enemy.map(function (obj) {
-        if(obj.position == ps || obj.position == ps+w ){
+        if (obj.position == ps || obj.position == ps + w) {
           obj.wasHit();
         }
       })
@@ -431,11 +433,19 @@
 
   function positionToXY(ps) {
     var x = ps % w;
-    var y = (ps - x);
+    var y = Math.round((ps - x) / w);
     return {
-      x: x * pixelWeigth + pixelWeigth / 2,
-      y: y,
       ps: ps,
+      x: x * pixelWeigth + pixelWeigth / 2,
+      //y: Math.round(y / h) * pixelWeigth,
+      // y: Math.round(y / h) * window.innerHeight / h,
+      y: y * window.innerHeight / h,
+      __x: x,
+      __y: y,
+      hi: window.innerHeight / h,
+      h: h,
+      w: w,
+      limit: w * h -1 ,
     };
   }
 
@@ -448,20 +458,20 @@
   }, false);
 
 
-  document.addEventListener('touchstart',touch, false);  
-  document.addEventListener('touchmove',touch, false);  
-  document.addEventListener('touchend',touch, false);  
-    
-  function touch (event){  
-    var event = event || window.event;  
-    event.preventDefault();  
-    var x = Math.floor(event.touches[0].pageX/pixelWeigth);
-    var y = Math.floor(event.touches[0].pageY/pixelWeigth);
-    var _ps = (w*y+x);
+  document.addEventListener('touchstart', touch, false);
+  document.addEventListener('touchmove', touch, false);
+  document.addEventListener('touchend', touch, false);
+
+  function touch(event) {
+    var event = event || window.event;
+    event.preventDefault();
+    var x = Math.floor(event.touches[0].pageX / pixelWeigth);
+    var y = Math.floor(event.touches[0].pageY / pixelWeigth);
+    var _ps = (w * y + x);
     renderData.position = _ps;
     shot();
-    document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), "+ (w*y+x);        
-  }  
+    document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), " + (w * y + x);
+  }
 
   // setInterval(function () { render('OBJ_MOVE') }, renderTime);
   // setInterval(function () { render('BULLET_MOVE') }, bulletTime);
