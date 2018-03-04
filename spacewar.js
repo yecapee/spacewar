@@ -483,7 +483,7 @@
   document.getElementById('view').width = window.innerWidth;
   setInterval(function () {
     render('OBJ_MOVE')
-  }, 1000 / 18);
+  }, 1000 / 15);
   setInterval(function () {
     render('BULLET_MOVE')
     actionMove()
