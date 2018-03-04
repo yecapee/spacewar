@@ -314,15 +314,18 @@
       // console.log(ps, enemyBulleArr);
       if (enemyBulleArr.includes(ps)) {
         enemyBulleArr.splice(enemyBulleArr.indexOf(ps), 1);
+        renderData.bullet.splice(renderData.bullet.indexOf(ps), 1);
       }
       if (enemyBulleArr.includes(ps + w)) {
         enemyBulleArr.splice(enemyBulleArr.indexOf(ps + w), 1);
+        renderData.bullet.splice(renderData.bullet.indexOf(ps), 1);
       }
 
       //kill enemy
       renderData.enemy.map(function (obj) {
-        if (obj.position == ps || obj.position == ps + w) {
+        if (obj.position == ps || obj.position == ps + w  || obj.position == ps + 1 || obj.position == ps - 1) {
           obj.wasHit();
+          renderData.bullet.splice(renderData.bullet.indexOf(ps), 1);
         }
       })
     })
@@ -346,7 +349,7 @@
        obj.action();
       }
       var psObj = positionToXY(obj.position);
-      viewDom.drawImage(zarkImg, psObj.x, psObj.y, 214 / 2, 153 / 2);
+      viewDom.drawImage(zarkImg, psObj.x - 28, psObj.y - 10 , 214 / 2, 153 / 2);
     })
 
 
