@@ -7,7 +7,9 @@
       }(navigator.userAgent || navigator.vendor || window.opera), e
     }
   };
-  var pixelWeigth = atc.isMobile() ? 20 : 30;
+  var moveFps = atc.isMobile() ? 60 : 15;
+  var bulletFps = atc.isMobile() ? 60 : 24;
+  var pixelWeigth = atc.isMobile() ? 10 : 30;
   var w = Math.floor(window.innerWidth / pixelWeigth);
   var h = Math.floor(window.innerHeight / pixelWeigth);
   var objQuantity = 1;
@@ -15,11 +17,9 @@
   var renCount = 0;
   var renderTime = 1000;
   var bulletTime = 1000;
-  //var moveTime = atc.isMobile() ? 30 : 80;
   var moveTime = 1000 / 30;
   var nextPolling = 1;
   var killCount = 0;
-  // var synth = new Tone.AMSynth().toMaster();
   var renderData = {
     position: null,
     renderTemp: {},
@@ -78,8 +78,15 @@
 
   var lookPath = {
     zark: function (ps) {
-      return [ps, ps - w + 1, ps - w - 1,]
-    }
+      var rs = [ps];
+      if ((ps - w + 1) % w !== 0) {
+        rs.push(ps - w + 1);
+      }
+      if ((ps - w - 1) % w !== w - 1) {
+        rs.push(ps - w - 1);
+      }
+      return rs;
+     }
   };
 
   function createEnemy(obj) {
@@ -93,13 +100,20 @@
     this.moveTime = obj.moveTime || 1; // 移動間隔
     this.look = obj.look;
 
+    var hit = false;
     var survivalTime = 0;
+    var hitPath = lookPath[this.look](this.position).map(function () {
+      return true;
+    });
+
     this.getST = function () {
       return survivalTime;
     };
     this.wasHit = function (bulletPs, viewDom, cb) {
       var me = this;
       if (lookPath[this.look](this.position).includes(bulletPs)) {
+        hitPath[lookPath[this.look](this.position).indexOf(bulletPs)] = false;
+        hit = true;
         this.life--;
         if (this.life < 1) {
           renderData.enemy.find(function (el, index) {
@@ -117,13 +131,15 @@
     };
 
     this.grapic = function (viewDom) {
-      var color = this.hit ? 'red' : 'white';
-      lookPath[this.look](this.position).forEach(ps => {
-        var psObj = positionToXY(ps);
-        viewDom.beginPath();
-        viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth);
-        viewDom.fillStyle = color;
-        viewDom.fill();
+      var color = hit ? 'red' : 'white';
+      lookPath[this.look](this.position).forEach(function (ps, index) {
+        if (hitPath[index]) {
+          var psObj = positionToXY(ps);
+          viewDom.beginPath();
+          viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth);
+          viewDom.fillStyle = color;
+          viewDom.fill();
+        }
       });
     };
 
@@ -135,6 +151,7 @@
           if (this.shot) shotByEnemy(this.position);
         };
         survivalTime++;
+        hit = false;
       }
     };
   }
@@ -288,11 +305,6 @@
   }
 
   function gaphic(TYPE) {
-    var _w = w;
-    var _h = h;
-    var ww = 100 / _w.toString() + '%';
-    var hh = Math.floor(100 / _h).toString() + '%';
-    var rsPixel = '';
     var bestScore = localStorage.getItem('bestScore') || 0;
     var bestMileage = localStorage.getItem('bestMileage') || 0;
 
@@ -353,6 +365,9 @@
       //kill enemy
       renderData.enemy.map(function (obj) {
         obj.wasHit(ps, viewDom, function () {
+          renderData.bullet.splice(renderData.bullet.indexOf(ps), 1);
+        });
+        obj.wasHit(ps + w, viewDom, function () {
           renderData.bullet.splice(renderData.bullet.indexOf(ps), 1);
         });
       })
@@ -453,11 +468,11 @@
   document.getElementById('view').width = window.innerWidth;
   setInterval(function () {
     render('OBJ_MOVE')
-  }, 1000 / 15);
+  }, 1000 / moveFps);
   setInterval(function () {
     render('BULLET_MOVE')
     actionMove()
-  }, 1000 / 24);
+  }, 1000 / bulletFps);
 
 
 
