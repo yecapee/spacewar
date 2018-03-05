@@ -7,7 +7,7 @@
       }(navigator.userAgent || navigator.vendor || window.opera), e
     }
   };
-  var pixelWeigth = atc.isMobile() ? 40 : 30;
+  var pixelWeigth = atc.isMobile() ? 20 : 30;
   var w = Math.floor(window.innerWidth / pixelWeigth);
   var h = Math.floor(window.innerHeight / pixelWeigth);
   var objQuantity = 1;
@@ -36,6 +36,7 @@
     LEFT: false,
     SPACE: false
   };
+
   var movePathList = {
     goStop: function () {
       var me = this;
@@ -75,6 +76,12 @@
     },
   };
 
+  var lookPath = {
+    zark: function (ps) {
+      return [ps, ps - w + 1, ps - w - 1,]
+    }
+  };
+
   function createEnemy(obj) {
     this.name = obj.name; //名字
     this.life = obj.life; //生命值
@@ -84,33 +91,55 @@
     this.shotTime = obj.shotTime; //連發數
     this.movePath = obj.movePath; //移動的路徑類型
     this.moveTime = obj.moveTime || 1; // 移動間隔
+    this.look = obj.look;
 
     var survivalTime = 0;
     this.getST = function () {
       return survivalTime;
     };
-    this.wasHit = function () {
+    this.wasHit = function (bulletPs, viewDom, cb) {
       var me = this;
-      this.life--;
-      if (this.life < 1) {
-        renderData.enemy.find(function (el, index) {
-          if (el === me) {
-            var bestScore = localStorage.getItem('bestScore');
-            renderData.enemy.splice(index, 1);
-            killCount++;
-            if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
-          }
-        })
-      };
-    }
-    this.action = function () {
-      enemyMove.call(this);
-      if (survivalTime % this.shotTime === 0) {
-        if (this.shot) shotByEnemy(this.position);
-      };
-      survivalTime++;
-    }
+      if (lookPath[this.look](this.position).includes(bulletPs)) {
+        this.life--;
+        if (this.life < 1) {
+          renderData.enemy.find(function (el, index) {
+            if (el === me) {
+              var bestScore = localStorage.getItem('bestScore');
+              renderData.enemy.splice(index, 1);
+              killCount++;
+              if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
+            }
+          })
+        };
+        this.grapic.call(this, viewDom);
+        if (cb) cb();
+      }
+    };
+
+    this.grapic = function (viewDom) {
+      var color = this.hit ? 'red' : 'white';
+      lookPath[this.look](this.position).forEach(ps => {
+        var psObj = positionToXY(ps);
+        viewDom.beginPath();
+        viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth);
+        viewDom.fillStyle = color;
+        viewDom.fill();
+      });
+    };
+
+    this.action = function (renderType, viewDom) {
+      this.grapic.call(this, viewDom);
+      if (renderType === 'OBJ_MOVE') {
+        enemyMove.call(this);
+        if (survivalTime % this.shotTime === 0) {
+          if (this.shot) shotByEnemy(this.position);
+        };
+        survivalTime++;
+      }
+    };
   }
+
+
 
   function enemyMove() {
     if (movePathList[this.movePath] && this.getST() % this.moveTime == 0) movePathList[this.movePath].call(this);
@@ -157,7 +186,6 @@
       map[keycode]();
     }
   }
-
 
   function actionMove() {
     var action = {
@@ -277,13 +305,14 @@
       if (renCount == nextPolling) {
         for (var x = 0; x < objQuantity; x++) {
           var zark = new createEnemy({
-            name: 'zark',
+            name: 'ZARK-ZERO',
             life: 3,
             position: Math.floor(Math.random() * w),
             shot: true,
             shotTime: 3,
             movePath: 'gostMove',
             moveTime: 5,
+            look: 'zark',
           });
           renderData.enemy.push(zark);
         }
@@ -308,7 +337,7 @@
     var bulletImg = document.getElementById("bulletImg");
     renderData.bullet.map(function (ps) {
       var bulletObj = positionToXY(ps);
-      viewDom.drawImage(bulletImg, bulletObj.x + 18, bulletObj.y - 5, 13, 64);
+      viewDom.drawImage(bulletImg, bulletObj.x - 13 / 2, bulletObj.y - 5, 13, 64);
 
       //defense
       // console.log(ps, enemyBulleArr);
@@ -323,62 +352,34 @@
 
       //kill enemy
       renderData.enemy.map(function (obj) {
-        if (obj.position == ps || obj.position == ps + w  || obj.position == ps + 1 || obj.position == ps - 1) {
-          obj.wasHit();
+        obj.wasHit(ps, viewDom, function () {
           renderData.bullet.splice(renderData.bullet.indexOf(ps), 1);
-        }
+        });
       })
     })
 
     // ship
     var shipImg = document.getElementById("shipImg");
     var psObj = positionToXY(renderData.position);
-    viewDom.drawImage(shipImg, psObj.x, psObj.y, 49, 65);
+    viewDom.drawImage(shipImg, psObj.x - 49 / 2, psObj.y, 49, 65);
 
     //enmyBullet
     var enemyImg = document.getElementById("enemyImg");
     renderData.enemyBullet.map(function (ps) {
       var bulletObj = positionToXY(ps);
-      viewDom.drawImage(enemyImg, bulletObj.x + 18, bulletObj.y - 5, 15, 15);
+      viewDom.drawImage(enemyImg, bulletObj.x - 15 / 2, bulletObj.y - 5, 15, 15);
     })
 
     // enmy
-    var zarkImg = document.getElementById("zarkImg");
+    // var zarkImg = document.getElementById("zarkImg");
     renderData.enemy.map(function (obj) {
-      if (TYPE === 'OBJ_MOVE') {
-       obj.action();
-      }
-      var psObj = positionToXY(obj.position);
-      viewDom.drawImage(zarkImg, psObj.x - 28, psObj.y - 10 , 214 / 2, 153 / 2);
+      obj.action(TYPE, viewDom);
     })
-
-
-
-    //var pointCount = 0;
-    // for (var x = 0; x < w; x++) {
-    //   for (var y = 0; y < h; y++) {
-    //     var bullet = renderData.bullet.includes(pointCount);
-    //     var enemyBullet = renderData.enemyBullet.includes(pointCount);
-    //     var enemy = false;
-
-    //     if (enemyList[pointCount]) {
-    //       var thisEnemy = enemyList[pointCount];
-    //       enemy = true;
-    //       if (renderData.bullet.includes(thisEnemy.position) && (TYPE == 'BULLET_MOVE')) {
-    //         delArr(renderData.bullet, pointCount);
-    //         thisEnemy.wasHit();
-    //       } else if (renderData.bullet.includes(thisEnemy.position + w) && (TYPE == 'BULLET_MOVE')) {
-    //         delArr(renderData.bullet, pointCount);
-    //         thisEnemy.wasHit();
-    //       }
-    //     }
 
     document.getElementById('score').innerHTML = 'Score: <div class="score">' + killCount +
       '</div><br/>Best score: ' + (localStorage.getItem('bestScore') || 0) +
       '<br/> Mileage: ' + renCount +
       '<br/> Best Mileage: ' + bestMileage;
-
-    // var point = (pointCount === renderData.position);
 
     var dead = false;
     if (isDead(renderData.position)) {
@@ -390,37 +391,6 @@
       console.log('dead');
     }
 
-    //     if (renderData.preState['pixel_' + pointCount]) {
-    //       document.getElementById('pixel_' + pointCount).classList.remove("point");
-    //       document.getElementById('pixel_' + pointCount).classList.remove("enemy");
-    //       document.getElementById('pixel_' + pointCount).classList.remove("bullet");
-    //       document.getElementById('pixel_' + pointCount).classList.remove("dead");
-    //       document.getElementById('pixel_' + pointCount).classList.remove("enemyBullet");
-    //       delete renderData.preState['pixel_' + pointCount];
-    //     };
-
-    //     if (document.getElementById('pixel_' + pointCount)) {
-    //       if (point) document.getElementById('pixel_' + pointCount).classList.add("point");
-    //       if (enemy) document.getElementById('pixel_' + pointCount).classList.add("enemy");
-    //       if (bullet) document.getElementById('pixel_' + pointCount).classList.add("bullet");
-    //       if (dead) document.getElementById('pixel_' + pointCount).classList.add("dead");
-    //       if (enemyBullet) document.getElementById('pixel_' + pointCount).classList.add("enemyBullet");
-    //     }
-
-    //     if (point || enemy || bullet || dead || enemyBullet) renderData.preState['pixel_' + pointCount] = true;
-    //     if (firstRen()) {
-    //       rsPixel += '<div id="pixel_' + pointCount + '" class="pixel" style=\'width:' + ww + ';height:' + hh + '\'></div>';
-    //     }
-    //     pointCount += 1;
-    //   }
-    // }
-    // if (renderData.renderTemp[renCount]) {
-    //   renderData.renderTemp[renCount]();
-    //   delete renderData.renderTemp[renCount];
-    // }
-
-    // console.log(renderData.enemy.length);
-    // firstRen(rsPixel);
   }
 
   function isDead(point) {
@@ -447,7 +417,7 @@
       y: y * window.innerHeight / h,
       __x: x,
       __y: y,
-      limit: w * h -1 ,
+      limit: w * h - 1,
     };
   }
 
