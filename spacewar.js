@@ -7,16 +7,16 @@
       }(navigator.userAgent || navigator.vendor || window.opera), e
     }
   };
-  var moveFps = atc.isMobile() ? 60 : 15;
-  var bulletFps = atc.isMobile() ? 60 : 24;
-  var pixelWeigth = atc.isMobile() ? 10 : 30;
+  var moveFps = atc.isMobile() ? 60 : 30;
+  var bulletFps = atc.isMobile() ? 60 : 30;
+  var pixelWeigth = atc.isMobile() ? 10 : 20;
   var w = Math.floor(window.innerWidth / pixelWeigth);
   var h = Math.floor(window.innerHeight / pixelWeigth);
   var objQuantity = 1;
   var objPolling = [20, 40];
   var renCount = 0;
-  var renderTime = 1000;
-  var bulletTime = 1000;
+  var renderTime = 1000 / moveFps;
+  var bulletTime = 1000 / bulletFps;
   var moveTime = 1000 / 30;
   var nextPolling = 1;
   var killCount = 0;
@@ -77,16 +77,52 @@
   };
 
   var lookPath = {
-    zark: function (ps) {
+    'zark': function (ps) {
       var rs = [ps];
-      if ((ps - w + 1) % w !== 0) {
+      if (ps % w !== w - 1) {
         rs.push(ps - w + 1);
       }
-      if ((ps - w - 1) % w !== w - 1) {
+      if (ps % w !== 0 || ps == 0) {
         rs.push(ps - w - 1);
       }
       return rs;
-     }
+    },
+    'MK-1': function (ps) {
+      var rs = [ps, ps + w, ps + 3 * w];
+      if (ps % w !== w - 1) {
+        rs.push(ps + 2 * w + 1);
+        rs.push(ps + 3 * w + 2);
+        rs.push(ps + 4 * w + 1);
+      }
+      if (ps % w !== 0) {
+        rs.push(ps + 2 * w - 1);
+        rs.push(ps + 3 * w - 2);
+        rs.push(ps + 4 * w - 1);
+      }
+      return rs;
+    },
+    'MK-2': function (ps) {
+      var rs = [ps, ps + w, ps + 3 * w];
+      if (ps % w !== w - 1) {
+        rs.push(ps + 2 * w + 1);
+      }
+      if (ps % w !== 0) {
+        rs.push(ps + 2 * w - 1);
+      }
+      return rs;
+    },
+    'MK-3': function (ps) {
+      var rs = [ps, ps + w, ps + 2 * w, ps + 4 * w,];
+      if (ps % w !== w - 1) {
+        rs.push(ps + 2 * w + 1);
+        rs.push(ps + 3 * w + 1);
+      }
+      if (ps % w !== 0) {
+        rs.push(ps + 2 * w - 1);
+        rs.push(ps + 3 * w - 1);
+      }
+      return rs;
+    },
   };
 
   function createEnemy(obj) {
@@ -155,8 +191,6 @@
       }
     };
   }
-
-
 
   function enemyMove() {
     if (movePathList[this.movePath] && this.getST() % this.moveTime == 0) movePathList[this.movePath].call(this);
@@ -304,9 +338,22 @@
     }
   }
 
+  function gaphicShip(data) {
+    // var color = hit ? 'red' : 'white';
+    var viewDom = data.viewDom;
+    lookPath[data.lookType](data.position).forEach(function (ps, index) {
+      var psObj = positionToXY(ps);
+      viewDom.beginPath();
+      viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth + 1);
+      viewDom.fillStyle = 'white';
+      viewDom.fill();
+    });
+  };
+
   function gaphic(TYPE) {
     var bestScore = localStorage.getItem('bestScore') || 0;
     var bestMileage = localStorage.getItem('bestMileage') || 0;
+    var shipLookType = 'MK-1';
 
     if (!renderData.position && renderData.position !== 0) {
       renderData.position = w * Math.floor(h / 2) - Math.floor(w / 2);
@@ -374,9 +421,11 @@
     })
 
     // ship
-    var shipImg = document.getElementById("shipImg");
-    var psObj = positionToXY(renderData.position);
-    viewDom.drawImage(shipImg, psObj.x - 49 / 2, psObj.y, 49, 65);
+    gaphicShip({
+      viewDom: viewDom,
+      lookType: shipLookType,
+      position: renderData.position,
+    });
 
     //enmyBullet
     var enemyImg = document.getElementById("enemyImg");
@@ -386,7 +435,6 @@
     })
 
     // enmy
-    // var zarkImg = document.getElementById("zarkImg");
     renderData.enemy.map(function (obj) {
       obj.action(TYPE, viewDom);
     })
@@ -397,7 +445,7 @@
       '<br/> Best Mileage: ' + bestMileage;
 
     var dead = false;
-    if (isDead(renderData.position)) {
+    if (isDead(renderData.position, shipLookType)) {
       renCount = 0;
       nextPolling = 20;
       renderData.renderTemp = {};
@@ -408,11 +456,13 @@
 
   }
 
-  function isDead(point) {
-    if (renderData.enemyBullet.includes(point)) return true;
+  function isDead(point, shipLookType) {
     var rs = false;
+    renderData.enemyBullet.forEach(function (ps) {
+      if (lookPath[shipLookType](point).includes(ps)) rs = true;
+    })
     renderData.enemy.map(function (enemy) {
-      if (point === enemy.position) rs = true;
+      if (lookPath[shipLookType](point).includes(enemy.position)) rs = true;
     })
     return rs;
   }
@@ -460,22 +510,14 @@
     document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), " + (w * y + x);
   }
 
-  // setInterval(function () { render('OBJ_MOVE') }, renderTime);
-  // setInterval(function () { render('BULLET_MOVE') }, bulletTime);
-  // setInterval(function () { actionMove() }, moveTime);
-
   document.getElementById('view').height = window.innerHeight;
   document.getElementById('view').width = window.innerWidth;
   setInterval(function () {
     render('OBJ_MOVE')
-  }, 1000 / moveFps);
+  }, renderTime);
   setInterval(function () {
     render('BULLET_MOVE')
     actionMove()
-  }, 1000 / bulletFps);
-
-
+  }, bulletTime);
 
 })();
-
-
