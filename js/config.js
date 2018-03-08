@@ -7,11 +7,13 @@ var atc = {
   }
 };
 var moveFps = atc.isMobile() ? 60 : 30;
-var bulletFps = atc.isMobile() ? 60 : 30;
+var bulletFps = atc.isMobile() ? 30 : 15;
+var controlFps = atc.isMobile() ? 60 : 30;
 var pixelWeigth = atc.isMobile() ? 10 : 20;
 
 exports.moveFps = moveFps;
 exports.bulletFps = bulletFps;
+exports.controlFps = controlFps;
 exports.pixelWeigth = pixelWeigth;
 exports.w = Math.floor(window.innerWidth / pixelWeigth);
 exports.h = Math.floor(window.innerHeight / pixelWeigth);
@@ -19,6 +21,7 @@ exports.objQuantity = 1;
 exports.objPolling = [20, 40];
 exports.renderTime = 1000 / moveFps;
 exports.bulletTime = 1000 / bulletFps;
+exports.controlTime = 1000 / controlFps;
 exports.moveTime = 1000 / 30;
 exports.renderData = {
   // position: null,

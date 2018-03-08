@@ -14,6 +14,7 @@ import {
   bulletTime,
   moveTime,
   renderData,
+  controlTime,
 } from './js/config';
 
 var renCount = 0;
@@ -122,18 +123,6 @@ function bulletPosition() {
   }
 }
 
-function gaphicShip(data) {
-  // var color = hit ? 'red' : 'white';
-  var viewDom = data.viewDom;
-  lookPath[data.lookType](data.position).forEach(function (ps, index) {
-    var psObj = positionToXY(ps);
-    viewDom.beginPath();
-    viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth + 1);
-    viewDom.fillStyle = 'white';
-    viewDom.fill();
-  });
-}
-
 var mkII = new createShip({
   name: 'MK-2',
   life: 5,
@@ -161,7 +150,7 @@ function gaphic(TYPE) {
           life: 3,
           position: Math.floor(Math.random() * w),
           shot: true,
-          shotTime: [80,12,3],
+          shotTime: [80,18,3],
           movePath: 'gostMove',
           moveTime: 5,
           look: 'zark',
@@ -179,7 +168,7 @@ function gaphic(TYPE) {
     if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
   }
 
-  if (TYPE === 'CONTROL_MOVE') {
+  if (TYPE === 'BULLET_MOVE') {
     bulletPosition();
   }
 
@@ -244,15 +233,19 @@ function touch(event) {
 
 document.getElementById('view').height = window.innerHeight;
 document.getElementById('view').width = window.innerWidth;
+
 setInterval(function () {
   render('OBJ_MOVE')
 }, renderTime);
+
 setInterval(function () {
-  render('CONTROL_MOVE')
+  render('CONTROL_MOVE');
   actionMove(mkII);
+}, controlTime);
+
+setInterval(function () {
+  render('BULLET_MOVE');
 }, bulletTime);
-
-
 //todo
 
 //* 敵機死亡效果
