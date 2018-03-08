@@ -1,6 +1,8 @@
 import lookPath from './js/lookPath';
 import movePathList from './js/movePathList';
-import { animation } from './js/aniEffectMethod'
+import createEnemy from './js/createEnemy';
+import { animation } from './js/aniEffectMethod';
+import { positionToXY } from './js/positionMethod';
 import {
   pixelWeigth,
   w,
@@ -22,93 +24,7 @@ var keyType = {
   DOWN: false,
   LEFT: false,
   SPACE: false
-};
-
-function createEnemy(obj) {
-  this.name = obj.name; //名字
-  this.life = obj.life; //生命值
-  this.mainX = obj.position;
-  this.position = obj.position; //位置
-  this.shot = obj.shot; //會不會發射子彈
-  this.shotTime = obj.shotTime; //連發數
-  this.movePath = obj.movePath; //移動的路徑類型
-  this.moveTime = obj.moveTime || 1; // 移動間隔
-  this.look = obj.look;
-
-  var hit = false;
-  var survivalTime = 0;
-  // var hitPath = lookPath[this.look](this.position).map(function () {
-  //   return true;
-  // });
-
-  this.getST = function () {
-    return survivalTime;
-  };
-  this.wasHit = function (bulletPs, viewDom, cb) {
-    var me = this;
-    if (lookPath[this.look](this.position).includes(bulletPs)) {
-      // hitPath[lookPath[this.look](this.position).indexOf(bulletPs)] = false;
-      hit = true;
-      this.life--;
-      if (this.life < 1) {
-        renderData.enemy.find(function (el, index) {
-          if (el === me) {
-            var bestScore = localStorage.getItem('bestScore');
-            renderData.enemy.splice(index, 1);
-            killCount++;
-            if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
-          }
-        })
-        this.dead();
-      } else {
-        this.grapic.call(this, viewDom);
-        if (cb) cb();
-      };
-
-    }
-  };
-
-  this.grapic = function (viewDom) {
-    var color = hit ? 'red' : 'white';
-    lookPath[this.look](this.position).forEach(function (ps, index) {
-      //if (hitPath[index]) {    
-      var psObj = positionToXY(ps);
-      viewDom.beginPath();
-      viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth);
-      viewDom.fillStyle = color;
-      viewDom.fill();
-      //}
-    });
-  };
-
-  this.action = function (renderType, viewDom) {
-    this.grapic.call(this, viewDom);
-    if (renderType === 'OBJ_MOVE') {
-      enemyMove.call(this);
-      if (survivalTime % this.shotTime === 0) {
-        if (this.shot) shotByEnemy(this.position);
-      };
-      survivalTime++;
-      hit = false;
-    }
-  };
-
-  this.dead = function () {
-    var position = this.position;
-    var deadPs = positionToXY(position);
-    var enemyImg = document.getElementById("explosion");
-    renderData.aniEffect.push(
-      animation(50,function(renCount,viewDom){
-        viewDom.drawImage(enemyImg, deadPs.x - (50 - renCount) / 2, deadPs.y, 120 - renCount  , 120 - renCount);
-      })
-    );
-  }
-
 }
-
-function enemyMove() {
-  if (movePathList[this.movePath] && this.getST() % this.moveTime == 0) movePathList[this.movePath].call(this);
-};
 
 function keyCodeMap(keycode, type) {
   var map = {
@@ -179,37 +95,9 @@ function actionMove() {
   render('PLAYER_MOVE');
 }
 
-function objPosition(isSet) {
-  var objArr = renderData.object;
-  var quantity = objQuantity;
-
-  if (isSet) {
-    for (var x = 0; x < quantity; x++) {
-      objArr.push(Math.floor(Math.random() * w));
-    }
-  }
-
-  for (var key in objArr) {
-    var val = objArr[key];
-    objArr[key] = objArr[key] + w;
-  }
-
-  for (var key in objArr) {
-    if (objArr[key] > w * h - 1) {
-      objArr.splice(key, 1);
-    };
-  }
-
-}
-
 function shot() {
   var bulletArr = renderData.bullet;
   if (!bulletArr.includes(renderData.position - w)) bulletArr.push(renderData.position - w);
-}
-
-function shotByEnemy(position) {
-  var bulletArr = renderData.enemyBullet;
-  if (!bulletArr.includes(position + w)) bulletArr.push(position + w);
 }
 
 function bulletPosition() {
@@ -247,7 +135,7 @@ function gaphicShip(data) {
     viewDom.fillStyle = 'white';
     viewDom.fill();
   });
-};
+}
 
 function gaphic(TYPE) {
   var bestScore = localStorage.getItem('bestScore') || 0;
@@ -271,13 +159,16 @@ function gaphic(TYPE) {
           movePath: 'gostMove',
           moveTime: 5,
           look: 'zark',
+          deadCb: function () {
+            killCount++;
+            if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
+          }
         });
         renderData.enemy.push(zark);
       }
       nextPolling = renCount + Math.floor(Math.random() * objPolling[1] + objPolling[0]);
     }
-    // document.getElementById('debug').innerHTML = nextPolling + ', ' + renCount;
-    objPosition(createObj);
+
     renCount++;
     if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
   }
@@ -375,21 +266,6 @@ function render(TYPE) {
   gaphic(TYPE);
 }
 
-function positionToXY(ps) {
-  var x = ps % w;
-  var y = Math.round((ps - x) / w);
-  return {
-    ps: ps,
-    x: x * pixelWeigth + pixelWeigth / 2,
-    //y: Math.round(y / h) * pixelWeigth,
-    // y: Math.round(y / h) * window.innerHeight / h,
-    y: y * window.innerHeight / h,
-    __x: x,
-    __y: y,
-    limit: w * h - 1,
-  };
-}
-
 document.addEventListener('keydown', function (e) {
   keyCodeMap(e.keyCode, 'keydown');
 }, false);
@@ -397,7 +273,6 @@ document.addEventListener('keydown', function (e) {
 document.addEventListener('keyup', function (e) {
   keyCodeMap(e.keyCode, 'keyup');
 }, false);
-
 
 document.addEventListener('touchstart', touch, false);
 document.addEventListener('touchmove', touch, false);
@@ -426,9 +301,13 @@ setInterval(function () {
 
 
 //todo
-//敵機死亡效果
+
+//* 敵機死亡效果
 //分開敵人及主角機的lookPath
 //組成像素可縮小
 //子彈種類多元
+
+
 //主角機有血量
 //主角機階段進化
+//主角機物件化？
