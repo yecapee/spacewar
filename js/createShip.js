@@ -86,7 +86,6 @@ export default function (obj) {
       if (this.life < 1) {
         this.life = 0;
         this.isDead = true;
-        deadCb();
         this.dead();
       }
     }
@@ -141,6 +140,7 @@ export default function (obj) {
         } 
       }.bind(this))
     );
+    deadCb();
   }
 
 }
