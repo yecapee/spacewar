@@ -6,13 +6,14 @@ var atc = {
     }(navigator.userAgent || navigator.vendor || window.opera), e
   }
 };
+
 var moveFps = atc.isMobile() ? 60 : 30;
 var bulletFps = atc.isMobile() ? 60 : 30;
 var pixelWeigth = atc.isMobile() ? 10 : 20;
 
 exports.moveFps = moveFps;
 exports.bulletFps = bulletFps;
-exports.pixelWeigth =pixelWeigth;
+exports.pixelWeigth = pixelWeigth;
 exports.w = Math.floor(window.innerWidth / pixelWeigth);
 exports.h = Math.floor(window.innerHeight / pixelWeigth);
 exports.objQuantity = 1;
@@ -20,3 +21,12 @@ exports.objPolling = [20, 40];
 exports.renderTime = 1000 / moveFps;
 exports.bulletTime = 1000 / bulletFps;
 exports.moveTime = 1000 / 30;
+exports.renderData = {
+  position: null,
+  renderTemp: {},
+  bullet: [],
+  preState: {},
+  enemy: [],
+  enemyBullet: [],
+  aniEffect:[],
+};
