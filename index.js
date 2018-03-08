@@ -161,7 +161,7 @@ function gaphic(TYPE) {
           life: 3,
           position: Math.floor(Math.random() * w),
           shot: true,
-          shotTime: 3,
+          shotTime: [80,12,3],
           movePath: 'gostMove',
           moveTime: 5,
           look: 'zark',

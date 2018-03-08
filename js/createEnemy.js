@@ -80,8 +80,12 @@ export default function (obj) {
     this.grapic.call(this, viewDom);
     if (renderType === 'OBJ_MOVE') {
       enemyMove.call(this);
-      if (survivalTime % this.shotTime === 0) {
-        if (this.shot) shotByEnemy(this.position);
+      // if (survivalTime % this.shotTime === 0) {
+      if (survivalTime % this.shotTime[0] < this.shotTime[1]) {
+        var shotCount = survivalTime % this.shotTime[0];
+        if (shotCount % this.shotTime[2] == 0) {
+          this.shot && shotByEnemy(this.position);
+        }
       };
       survivalTime++;
       hit = false;
