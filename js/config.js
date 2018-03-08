@@ -6,7 +6,6 @@ var atc = {
     }(navigator.userAgent || navigator.vendor || window.opera), e
   }
 };
-
 var moveFps = atc.isMobile() ? 60 : 30;
 var bulletFps = atc.isMobile() ? 60 : 30;
 var pixelWeigth = atc.isMobile() ? 10 : 20;
@@ -22,10 +21,8 @@ exports.renderTime = 1000 / moveFps;
 exports.bulletTime = 1000 / bulletFps;
 exports.moveTime = 1000 / 30;
 exports.renderData = {
-  position: null,
-  renderTemp: {},
-  bullet: [],
-  preState: {},
+  // position: null,
+  // bullet: [],
   enemy: [],
   enemyBullet: [],
   aniEffect:[],

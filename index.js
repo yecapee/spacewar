@@ -1,6 +1,7 @@
 import lookPath from './js/lookPath';
 import movePathList from './js/movePathList';
 import createEnemy from './js/createEnemy';
+import createShip from './js/createShip';
 import { animation } from './js/aniEffectMethod';
 import { positionToXY } from './js/positionMethod';
 import {
@@ -55,73 +56,69 @@ function keyCodeMap(keycode, type) {
   }
 }
 
-function actionMove() {
+function actionMove(ship) {
   var action = {
     UP: function () {
-      var ps = renderData.position;
-      renderData.position = (ps - w > -1) ? ps - w : ps;
+      var ps = ship.position;
+      //renderData.position = (ps - w > -1) ? ps - w : ps;
+      ship.position = (ps - w > -1) ? ps - w : ps;
     },
     RIGHT: function () {
-      var ps = renderData.position;
+      var ps = ship.position;
       if (ps + 1 <= w * h - 1) {
         if ((ps + 1) % w !== 0) {
-          renderData.position = ps + 1;
+          //renderData.position = ps + 1;
+          ship.position = ps + 1;
         }
       }
     },
     DOWN: function () {
-      var ps = renderData.position;
+      var ps = ship.position;
       var nowY = Math.round((ps - ps % w) / w);
       if (ps + w < w * h) {
-        renderData.position = (nowY < h) ? ps + w : ps;
+        //renderData.position = (nowY < h) ? ps + w : ps;
+        ship.position = (nowY < h) ? ps + w : ps;
       }
     },
     LEFT: function () {
-      var ps = renderData.position;
+      var ps = ship.position;
       if (ps - 1 > -1) {
         if (ps % w !== 0) {
-          renderData.position = ps - 1;
+          //renderData.position = ps - 1;
+          ship.position = ps - 1;
         }
       }
     },
     SPACE: function () {
-      shot();
+      ship.shot();
+      //shot();
     }
   };
   for (var key in keyType) {
     if (keyType[key] == true) action[key]();
     document.getElementById('debug').innerHTML = JSON.stringify(positionToXY(renderData.position), null, 2);
   }
-  render('PLAYER_MOVE');
 }
 
-function shot() {
-  var bulletArr = renderData.bullet;
-  if (!bulletArr.includes(renderData.position - w)) bulletArr.push(renderData.position - w);
-}
+// function shot() {
+//   var bulletArr = renderData.bullet;
+//   if (!bulletArr.includes(renderData.position - w)) bulletArr.push(renderData.position - w);
+// }
 
 function bulletPosition() {
-  var bulletArr = renderData.bullet;
+  // var bulletArr = renderData.bullet;
   var enemyBulleArr = renderData.enemyBullet;
-  for (var key in bulletArr) {
-    bulletArr[key] = bulletArr[key] - w;
-    if (bulletArr[key] < 0) {
-      bulletArr.splice(key, 1);
-    };
-  }
+  // for (var key in bulletArr) {
+  //   bulletArr[key] = bulletArr[key] - w;
+  //   if (bulletArr[key] < 0) {
+  //     bulletArr.splice(key, 1);
+  //   };
+  // }
   for (var key in enemyBulleArr) {
     enemyBulleArr[key] = enemyBulleArr[key] + w;
     if (enemyBulleArr[key] > w * h + 1) {
       enemyBulleArr.splice(key, 1);
     };
-  }
-}
-
-function delArr(arr, val) {
-  for (var key in arr) {
-    if (arr[key] == val) {
-      arr.splice(key, 1);
-    }
   }
 }
 
@@ -137,14 +134,23 @@ function gaphicShip(data) {
   });
 }
 
+var mkII = new createShip({
+  name: 'MK-2',
+  life: 5,
+  position: w * Math.floor(h / 2) - Math.floor(w / 2),
+  deadPosition: w * Math.floor(h / 2) - Math.floor(w / 2),
+  look: 'MK-2',
+  deadCb: function () {
+    killCount = 0;
+    // killCount++;
+    // if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
+  }
+});
+
 function gaphic(TYPE) {
   var bestScore = localStorage.getItem('bestScore') || 0;
   var bestMileage = localStorage.getItem('bestMileage') || 0;
   var shipLookType = 'MK-2';
-
-  if (!renderData.position && renderData.position !== 0) {
-    renderData.position = w * Math.floor(h / 2) - Math.floor(w / 2);
-  }
 
   if (TYPE === 'OBJ_MOVE') {
     var createObj = false;
@@ -173,7 +179,7 @@ function gaphic(TYPE) {
     if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
   }
 
-  if (TYPE === 'BULLET_MOVE') {
+  if (TYPE === 'CONTROL_MOVE') {
     bulletPosition();
   }
 
@@ -181,46 +187,13 @@ function gaphic(TYPE) {
   var viewDom = document.getElementById('view').getContext('2d');
   viewDom.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-  // dead
+  // effect
   renderData.aniEffect.forEach(function (el) {
     el(viewDom);
   })
 
-  // bullet
-  var enemyBulleArr = renderData.enemyBullet;
-  var bulletImg = document.getElementById("bulletImg");
-  renderData.bullet.map(function (ps) {
-    var bulletObj = positionToXY(ps);
-    viewDom.drawImage(bulletImg, bulletObj.x - 13 / 2, bulletObj.y - 5, 13, 64);
-
-    //defense
-    // console.log(ps, enemyBulleArr);
-    if (enemyBulleArr.includes(ps)) {
-      enemyBulleArr.splice(enemyBulleArr.indexOf(ps), 1);
-      renderData.bullet.splice(renderData.bullet.indexOf(ps), 1);
-    }
-    if (enemyBulleArr.includes(ps + w)) {
-      enemyBulleArr.splice(enemyBulleArr.indexOf(ps + w), 1);
-      renderData.bullet.splice(renderData.bullet.indexOf(ps), 1);
-    }
-
-    //kill enemy
-    renderData.enemy.map(function (obj) {
-      obj.wasHit(ps, viewDom, function () {
-        renderData.bullet.splice(renderData.bullet.indexOf(ps), 1);
-      });
-      obj.wasHit(ps + w, viewDom, function () {
-        renderData.bullet.splice(renderData.bullet.indexOf(ps), 1);
-      });
-    })
-  })
-
   // ship
-  gaphicShip({
-    viewDom: viewDom,
-    lookType: shipLookType,
-    position: renderData.position,
-  });
+  mkII.grapic(viewDom);
 
   //enmyBullet
   var enemyImg = document.getElementById("enemyImg");
@@ -237,29 +210,9 @@ function gaphic(TYPE) {
   document.getElementById('score').innerHTML = 'Score: <div class="score">' + killCount +
     '</div><br/>Best score: ' + (localStorage.getItem('bestScore') || 0) +
     '<br/> Mileage: ' + renCount +
-    '<br/> Best Mileage: ' + bestMileage;
+    '<br/> Best Mileage: ' + bestMileage +
+    '<br/> Life: ' + mkII.life;
 
-  var dead = false;
-  if (isDead(renderData.position, shipLookType)) {
-    renCount = 0;
-    nextPolling = 20;
-    renderData.renderTemp = {};
-    killCount = 0;
-    dead = true;
-    console.log('dead');
-  }
-
-}
-
-function isDead(point, shipLookType) {
-  var rs = false;
-  renderData.enemyBullet.forEach(function (ps) {
-    if (lookPath[shipLookType](point).includes(ps)) rs = true;
-  })
-  renderData.enemy.map(function (enemy) {
-    if (lookPath[shipLookType](point).includes(enemy.position)) rs = true;
-  })
-  return rs;
 }
 
 function render(TYPE) {
@@ -295,8 +248,8 @@ setInterval(function () {
   render('OBJ_MOVE')
 }, renderTime);
 setInterval(function () {
-  render('BULLET_MOVE')
-  actionMove()
+  render('CONTROL_MOVE')
+  actionMove(mkII);
 }, bulletTime);
 
 
@@ -308,6 +261,6 @@ setInterval(function () {
 //子彈種類多元
 
 
-//主角機有血量
+//*主角機有血量
 //主角機階段進化
-//主角機物件化？
+//*主角機物件化？
