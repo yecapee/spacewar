@@ -61,14 +61,12 @@ function actionMove(ship) {
   var action = {
     UP: function () {
       var ps = ship.position;
-      //renderData.position = (ps - w > -1) ? ps - w : ps;
       ship.position = (ps - w > -1) ? ps - w : ps;
     },
     RIGHT: function () {
       var ps = ship.position;
       if (ps + 1 <= w * h - 1) {
         if ((ps + 1) % w !== 0) {
-          //renderData.position = ps + 1;
           ship.position = ps + 1;
         }
       }
@@ -77,7 +75,6 @@ function actionMove(ship) {
       var ps = ship.position;
       var nowY = Math.round((ps - ps % w) / w);
       if (ps + w < w * h) {
-        //renderData.position = (nowY < h) ? ps + w : ps;
         ship.position = (nowY < h) ? ps + w : ps;
       }
     },
@@ -85,14 +82,12 @@ function actionMove(ship) {
       var ps = ship.position;
       if (ps - 1 > -1) {
         if (ps % w !== 0) {
-          //renderData.position = ps - 1;
           ship.position = ps - 1;
         }
       }
     },
     SPACE: function () {
       ship.shot();
-      //shot();
     }
   };
   for (var key in keyType) {
@@ -101,20 +96,8 @@ function actionMove(ship) {
   }
 }
 
-// function shot() {
-//   var bulletArr = renderData.bullet;
-//   if (!bulletArr.includes(renderData.position - w)) bulletArr.push(renderData.position - w);
-// }
-
 function bulletPosition() {
-  // var bulletArr = renderData.bullet;
   var enemyBulleArr = renderData.enemyBullet;
-  // for (var key in bulletArr) {
-  //   bulletArr[key] = bulletArr[key] - w;
-  //   if (bulletArr[key] < 0) {
-  //     bulletArr.splice(key, 1);
-  //   };
-  // }
   for (var key in enemyBulleArr) {
     enemyBulleArr[key] = enemyBulleArr[key] + w;
     if (enemyBulleArr[key] > w * h + 1) {
@@ -131,8 +114,6 @@ var mkII = new createShip({
   look: 'MK-2',
   deadCb: function () {
     killCount = 0;
-    // killCount++;
-    // if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
   }
 });
 

@@ -53,7 +53,6 @@ export default function (obj) {
             renderData.enemy.splice(index, 1);
           }
         })
-        deadCb();
         this.dead();
       } else {
         this.grapic.call(this, viewDom);
@@ -101,6 +100,7 @@ export default function (obj) {
         viewDom.drawImage(enemyImg, deadPs.x - (50 - renCount) / 2, deadPs.y, 120 - renCount, 120 - renCount);
       })
     );
+    deadCb();
   }
 
 }
