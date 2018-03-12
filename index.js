@@ -119,6 +119,7 @@ var mkII = new createShip({
   deadCb: function () {
     killCount = 0;
     renCount = 0;
+    nextPolling = 100;
   }
 });
 
