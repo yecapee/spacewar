@@ -28,6 +28,7 @@ exports.renderTime = 1000 / moveFps;
 exports.bulletTime = 1000 / bulletFps;
 exports.controlTime = 1000 / controlFps;
 exports.moveTime = 1000 / 30;
+exports.shipLife = 5;
 exports.renderData = {
   // position: null,
   // bullet: [],

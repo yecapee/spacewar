@@ -16,7 +16,8 @@ import {
   renderData,
   controlTime,
   vwidth,
-  vheight
+  vheight,
+  shipLife,
 } from './js/config';
 
 var renCount = 0;
@@ -111,7 +112,7 @@ function bulletPosition(shipPs) {
 
 var mkII = new createShip({
   name: 'MK-2',
-  life: 5,
+  life: shipLife,
   position: w * Math.floor(h / 2) - Math.floor(w / 2),
   deadPosition: w * Math.floor(h / 2) - Math.floor(w / 2),
   look: 'MK-2',
@@ -134,11 +135,11 @@ function gaphic(TYPE) {
           life: 3,
           position: Math.floor(Math.random() * w),
           shot: true,
-          shotTime: [200,54,9],
+          shotTime: [200, 54, 9],
           movePath: 'gostMove',
           moveTime: 5,
           look: 'zark',
-          bulletType: 'track',
+          bulletType: renCount % 2 == 0 ? 'normal' : 'track',
           deadCb: function () {
             killCount++;
             if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
@@ -160,7 +161,7 @@ function gaphic(TYPE) {
   //canvas
   var viewDom = document.getElementById('view').getContext('2d');
   viewDom.clearRect(0, 0, vwidth, vheight);
-  
+
   // effect
   renderData.aniEffect.forEach(function (el) {
     el(viewDom);
@@ -170,11 +171,12 @@ function gaphic(TYPE) {
   mkII.grapic(viewDom);
 
   //enmyBullet
-  var enemyImg = document.getElementById("enemyImg");
+
   renderData.enemyBullet.map(function (bullt) {
     var bulletObj = positionToXY(bullt.data.position);
     //viewDom.drawImage(enemyImg, bulletObj.x - 15 / 2, bulletObj.y - 5, 15, 15);
-    viewDom.drawImage(enemyImg, bullt.data.x - 15 / 2, bullt.data.y - 5, 15, 15);
+    var enemyImg = document.getElementById(bullt.data.look);
+    viewDom.drawImage(enemyImg, bullt.data.x - 15 / 2, bullt.data.y - 5, bullt.data.w, bullt.data.h);
   })
 
   // enmy
@@ -187,6 +189,8 @@ function gaphic(TYPE) {
     '<br/> Mileage: ' + renCount +
     '<br/> Best Mileage: ' + bestMileage +
     '<br/> Life: ' + mkII.life;
+
+  document.getElementById('life').style.width = (100 / shipLife * mkII.life) + '%';
 
 }
 
@@ -209,7 +213,7 @@ document.addEventListener('touchend', touch, false);
 function touch(event) {
   var event = event || window.event;
   event.preventDefault();
-  if(event.touches[0]){
+  if (event.touches[0]) {
     var x = Math.floor(event.touches[0].pageX / pixelWeigth);
     var y = Math.floor(event.touches[0].pageY / pixelWeigth);
     var _ps = (w * y + x);
@@ -234,12 +238,13 @@ setInterval(function () {
 setInterval(function () {
   render('BULLET_MOVE');
 }, bulletTime);
+
 //todo
 
 //* 敵機死亡效果
 //分開敵人及主角機的lookPath
 //組成像素可縮小
-//子彈種類多元
+//*子彈種類多元
 
 
 //*主角機有血量

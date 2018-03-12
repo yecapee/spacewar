@@ -42,7 +42,7 @@
   #score {
     display: block;
     position: fixed;
-    top: 0;
+    top: 20;
     left: 0;
     color: orange;
     font-size: 8px;
@@ -62,6 +62,15 @@
     color: white;
   }
 
+  #life{
+    position: absolute;
+    bottom: 0;
+    background-color: orange;
+    height: 10px;
+    width: 100%;
+    z-index: 2;
+  }
+
   .score{
     font: bold;
     font-size: 5rem;
@@ -72,11 +81,13 @@
 <body>
   <div id="debug"></div>
   <div id="score" unselectable="on"></div>
+  <div id="life"></div>
   <canvas id="view"></canvas>
 
   <img id="shipImg" src="./ship.png" style="display:none">
   <img id="bulletImg" src="./bullet_normal.png" style="display:none">
-  <img id="enemyImg" src="./ballbullet.png" style="display:none">
+  <img id="bulletBall" src="./bulletBall.png" style="display:none">
+  <img id="laser" src="./laser.png" style="display:none">
   <img id="zarkImg" src="./zark.png" style="display:none">
   <img id="explosion" src="./explosion.png" style="display:none">
   

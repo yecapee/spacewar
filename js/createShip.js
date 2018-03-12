@@ -41,14 +41,14 @@ function grapicBullet(viewDom) {
     viewDom.drawImage(bulletImg, bulletObj.x - 13 / 2, bulletObj.y - 5, 13, 64);
 
     // defense
-    enemyBulleArr.forEach(function(enemyBullet,index){
-      if(enemyBullet.data.position === ps ){
+    enemyBulleArr.forEach(function (enemyBullet, index) {
+      if (enemyBullet.data.position === ps) {
         enemyBulleArr.splice(index, 1);
-        thisBullet.splice(thisBullet.indexOf(ps), 1); 
+        thisBullet.splice(thisBullet.indexOf(ps), 1);
       }
-      if(enemyBullet.data.position === ps+w ){
+      if (enemyBullet.data.position === ps + w) {
         enemyBulleArr.splice(index, 1);
-        thisBullet.splice(thisBullet.indexOf(ps), 1); 
+        thisBullet.splice(thisBullet.indexOf(ps), 1);
       }
     });
 
@@ -87,12 +87,23 @@ export default function (obj) {
   var hit = false;
 
 
-  this.wasHit = function (bulletPs,  bulletIndex, viewDom) {
+  this.wasHit = function (bulletPs, bulletIndex, viewDom) {
     // console.log(this.life);
     var me = this;
     if (lookPath[this.look](this.position).includes(bulletPs)) {
       // hit = true;
       this.life--;
+      renderData.aniEffect.push(
+        animation(10, function (renCount, viewDom) {
+          lookPath[this.look](this.position).forEach(function (ps, index) {
+            var psObj = positionToXY(ps);
+            viewDom.beginPath();
+            viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth + 3, pixelWeigth + 3);
+            viewDom.fillStyle = 'red';
+            viewDom.fill();
+          });
+        }.bind(this))
+      );
       renderData.enemyBullet.splice(bulletIndex, 1);
       if (this.life < 1) {
         this.life = 0;

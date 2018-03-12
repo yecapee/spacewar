@@ -7,30 +7,32 @@ import {
 
 export default {
   normal: function (bulletPs, time) {
+    var time = 45;
     var prePs = bulletPs;
-    var count = time || 60;
+    var count = time;
     return function (shipPs) {
       count--;
       var p0 = positionTosXsY(prePs);
       var p1 = positionTosXsY(prePs + w * h);
-      var t = 1 / 60 * (60 - count);
+      var t = 1 / time * (time - count);
 
       var x = Math.round(p0.x + (p1.x - p0.x) * t);
       var y = Math.round(p0.y + (p1.y - p0.y) * t);
 
       var _p0 = positionToXY(prePs);
-      var _p1 = positionToXY(shipPs);
-      var t = 1 / 25 * (25 - count);
+      var _p1 = positionToXY(prePs + w * h);
+      var t = 1 / time * (time - count);
       var realX = _p0.x + (_p1.x - _p0.x) * t;
       var realY = _p0.y + (_p1.y - _p0.y) * t;
-      // console.log(x,y,sXsYToPosition(x,y));
-      // console.log(prePs,shipPs,p0,p1,sXsYToPosition(p0.x,p0.y),sXsYToPosition(p1.x,p1.y));
 
       return {
         position: sXsYToPosition(x, y),
         look: '',
         x:realX,
         y:realY,
+        look:'laser',
+        w:20,
+        h:60,
         clear: count < -1,
       }
     }
@@ -53,14 +55,14 @@ export default {
       var t = 1 / 25 * (25 - count);
       var realX = _p0.x + (_p1.x - _p0.x) * t;
       var realY = _p0.y + (_p1.y - _p0.y) * t;
-      // console.log(x,y,sXsYToPosition(x,y));
-      // console.log(prePs,shipPs,p0,p1,sXsYToPosition(p0.x,p0.y),sXsYToPosition(p1.x,p1.y));
 
       return {
         position: sXsYToPosition(x, y),
         x:realX,
         y:realY,
-        look: '',
+        look: 'bulletBall',
+        w:15,
+        h:15,
         clear: count < -15 || x < 0 || x > w - 1,
       }
     }
