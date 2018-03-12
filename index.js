@@ -15,6 +15,8 @@ import {
   moveTime,
   renderData,
   controlTime,
+  vwidth,
+  vheight
 } from './js/config';
 
 var renCount = 0;
@@ -157,7 +159,7 @@ function gaphic(TYPE) {
 
   //canvas
   var viewDom = document.getElementById('view').getContext('2d');
-  viewDom.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  viewDom.clearRect(0, 0, vwidth, vheight);
   
   // effect
   renderData.aniEffect.forEach(function (el) {
@@ -171,8 +173,8 @@ function gaphic(TYPE) {
   var enemyImg = document.getElementById("enemyImg");
   renderData.enemyBullet.map(function (bullt) {
     var bulletObj = positionToXY(bullt.data.position);
-    viewDom.drawImage(enemyImg, bulletObj.x - 15 / 2, bulletObj.y - 5, 15, 15);
-    //viewDom.drawImage(enemyImg, bullt.data.x - 15 / 2, bullt.data.y - 5, 15, 15);
+    //viewDom.drawImage(enemyImg, bulletObj.x - 15 / 2, bulletObj.y - 5, 15, 15);
+    viewDom.drawImage(enemyImg, bullt.data.x - 15 / 2, bullt.data.y - 5, 15, 15);
   })
 
   // enmy
@@ -217,8 +219,8 @@ function touch(event) {
   }
 }
 
-document.getElementById('view').height = window.innerHeight;
-document.getElementById('view').width = window.innerWidth;
+document.getElementById('view').height = vheight;
+document.getElementById('view').width = vwidth;
 
 setInterval(function () {
   render('OBJ_MOVE')

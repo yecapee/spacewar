@@ -22,7 +22,7 @@
 
 <style>
   html,body {
-    background-color: black;
+    background-color:rgb(51, 51, 51);
     overflow: hidden;
     height: 100%;
     width: 100%;
@@ -30,13 +30,27 @@
     padding: 0;
   }
 
+  #view{
+    right: 0;
+    left: 0;
+    margin: auto;
+    position: absolute;
+    background: black;
+    z-index: 0;
+  }
+
   #score {
     display: block;
     position: fixed;
     top: 0;
     left: 0;
-    color: white;
+    color: orange;
     font-size: 8px;
+    z-index: 1;
+    padding-left: 5px;
+    -webkit-user-select: none;   /* for Chrome */
+    -moz-user-select: none;  /* for Firefox */ 
+    user-select: none;
   }
 
   #debug {
@@ -57,7 +71,7 @@
 
 <body>
   <div id="debug"></div>
-  <div id="score"></div>
+  <div id="score" unselectable="on"></div>
   <canvas id="view"></canvas>
 
   <img id="shipImg" src="./ship.png" style="display:none">

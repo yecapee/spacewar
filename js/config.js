@@ -6,19 +6,24 @@ var atc = {
     }(navigator.userAgent || navigator.vendor || window.opera), e
   }
 };
-var moveFps = atc.isMobile() ? 60 : 30;
-var bulletFps = atc.isMobile() ? 30 : 15;
-var controlFps = atc.isMobile() ? 60 : 30;
-var pixelWeigth = atc.isMobile() ? 10 : 20;
+var moveFps = atc.isMobile() ? 60 : 40;
+var bulletFps = atc.isMobile() ? 30 : 20;
+var controlFps = atc.isMobile() ? 60 : 40;
+var pixelWeigth = atc.isMobile() ? 10 : 15;
+//var vwidth = window.innerWidth;
+var vwidth = atc.isMobile() ? window.innerWidth : window.innerHeight >= window.innerWidth ? window.innerWidth :window.innerHeight/4*3;
+var vheight = window.innerHeight;
 
 exports.moveFps = moveFps;
 exports.bulletFps = bulletFps;
 exports.controlFps = controlFps;
 exports.pixelWeigth = pixelWeigth;
-exports.w = Math.floor(window.innerWidth / pixelWeigth);
-exports.h = Math.floor(window.innerHeight / pixelWeigth);
+exports.vwidth = vwidth;
+exports.vheight = vheight;
+exports.w = Math.floor(vwidth / pixelWeigth);
+exports.h = Math.floor(vheight / pixelWeigth);
 exports.objQuantity = 1;
-exports.objPolling = [80, 400];
+exports.objPolling = [40, 100];
 exports.renderTime = 1000 / moveFps;
 exports.bulletTime = 1000 / bulletFps;
 exports.controlTime = 1000 / controlFps;
