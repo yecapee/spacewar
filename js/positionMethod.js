@@ -18,3 +18,22 @@ exports.positionToXY = function (ps) {
     limit: w * h - 1,
   };
 }
+
+exports.xyToPosition = function (x,y) {
+  var _x = (x - pixelWeigth / 2) / pixelWeigth;
+  var rs = y/pixelWeigth * w + _x;
+  return rs;
+}
+
+exports.positionTosXsY = function (position) {
+  var x = position % w;
+  var y = Math.round((position - x) / w);
+  return {
+    x:x,
+    y:y
+  };
+}
+
+exports.sXsYToPosition = function(sx,sy){
+  return sy*w+sx;
+}

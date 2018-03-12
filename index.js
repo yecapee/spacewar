@@ -96,14 +96,15 @@ function actionMove(ship) {
   }
 }
 
-function bulletPosition() {
+function bulletPosition(shipPs) {
   var enemyBulleArr = renderData.enemyBullet;
   for (var key in enemyBulleArr) {
-    enemyBulleArr[key] = enemyBulleArr[key] + w;
-    if (enemyBulleArr[key] > w * h + 1) {
+    enemyBulleArr[key].data = enemyBulleArr[key].fn(shipPs);
+    if (enemyBulleArr[key].data.clear) {
       enemyBulleArr.splice(key, 1);
     };
   }
+  //console.log(enemyBulleArr);
 }
 
 var mkII = new createShip({
@@ -131,10 +132,11 @@ function gaphic(TYPE) {
           life: 3,
           position: Math.floor(Math.random() * w),
           shot: true,
-          shotTime: [80,18,3],
+          shotTime: [200,54,9],
           movePath: 'gostMove',
           moveTime: 5,
           look: 'zark',
+          bulletType: 'track',
           deadCb: function () {
             killCount++;
             if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
@@ -150,13 +152,13 @@ function gaphic(TYPE) {
   }
 
   if (TYPE === 'BULLET_MOVE') {
-    bulletPosition();
+    bulletPosition(mkII.position);
   }
 
   //canvas
   var viewDom = document.getElementById('view').getContext('2d');
   viewDom.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
+  
   // effect
   renderData.aniEffect.forEach(function (el) {
     el(viewDom);
@@ -167,14 +169,15 @@ function gaphic(TYPE) {
 
   //enmyBullet
   var enemyImg = document.getElementById("enemyImg");
-  renderData.enemyBullet.map(function (ps) {
-    var bulletObj = positionToXY(ps);
+  renderData.enemyBullet.map(function (bullt) {
+    var bulletObj = positionToXY(bullt.data.position);
     viewDom.drawImage(enemyImg, bulletObj.x - 15 / 2, bulletObj.y - 5, 15, 15);
+    //viewDom.drawImage(enemyImg, bullt.data.x - 15 / 2, bullt.data.y - 5, 15, 15);
   })
 
   // enmy
   renderData.enemy.map(function (obj) {
-    obj.action(TYPE, viewDom);
+    obj.action(TYPE, viewDom, mkII.position);
   })
 
   document.getElementById('score').innerHTML = 'Score: <div class="score">' + killCount +

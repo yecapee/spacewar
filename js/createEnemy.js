@@ -2,6 +2,7 @@ import lookPath from './lookPath';
 import movePathList from './movePathList';
 import { animation } from './aniEffectMethod';
 import { positionToXY } from './positionMethod';
+import bulletTypeMap from './enemyBulletType';
 import {
   w,
   h,
@@ -14,9 +15,15 @@ function enemyMove() {
   if (movePathList[this.movePath] && this.getST() % this.moveTime == 0) movePathList[this.movePath].call(this);
 }
 
-function shotByEnemy(position) {
+function shotByEnemy(position, bulletType, shipPs) {
   var bulletArr = renderData.enemyBullet;
-  if (!bulletArr.includes(position + w)) bulletArr.push(position + w);
+  var dataFn = bulletTypeMap[bulletType](position);
+  if ( !bulletArr.reduce(function (rs, el) { return rs || (el.data.position === position) }, false) ) {
+    bulletArr.push({
+      data: dataFn(shipPs),
+      fn: dataFn,
+    })
+  };
 }
 
 export default function (obj) {
@@ -29,6 +36,7 @@ export default function (obj) {
   this.movePath = obj.movePath; //移動的路徑類型
   this.moveTime = obj.moveTime || 1; // 移動間隔
   this.look = obj.look;
+  this.bulletType = obj.bulletType || 'normal';
 
   var deadCb = obj.deadCb || function () { };
   var hit = false;
@@ -75,7 +83,7 @@ export default function (obj) {
     });
   };
 
-  this.action = function (renderType, viewDom) {
+  this.action = function (renderType, viewDom, shipPs) {
     this.grapic.call(this, viewDom);
     if (renderType === 'OBJ_MOVE') {
       enemyMove.call(this);
@@ -83,7 +91,7 @@ export default function (obj) {
       if (survivalTime % this.shotTime[0] < this.shotTime[1]) {
         var shotCount = survivalTime % this.shotTime[0];
         if (shotCount % this.shotTime[2] == 0) {
-          this.shot && shotByEnemy(this.position);
+          this.shot && shotByEnemy(this.position, this.bulletType, shipPs);
         }
       };
       survivalTime++;
