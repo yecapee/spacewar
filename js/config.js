@@ -7,10 +7,9 @@ var atc = {
   }
 };
 var moveFps = atc.isMobile() ? 60 : 40;
-var bulletFps = atc.isMobile() ? 30 : 20;
+var bulletFps = atc.isMobile() ? 30 : 30;
 var controlFps = atc.isMobile() ? 60 : 40;
 var pixelWeigth = atc.isMobile() ? 10 : 15;
-//var vwidth = window.innerWidth;
 var vwidth = atc.isMobile() ? window.innerWidth : window.innerHeight >= window.innerWidth ? window.innerWidth :window.innerHeight/4*3;
 var vheight = window.innerHeight;
 
@@ -30,8 +29,6 @@ exports.controlTime = 1000 / controlFps;
 exports.moveTime = 1000 / 30;
 exports.shipLife = 5;
 exports.renderData = {
-  // position: null,
-  // bullet: [],
   enemy: [],
   enemyBullet: [],
   aniEffect:[],

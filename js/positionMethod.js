@@ -10,8 +10,6 @@ exports.positionToXY = function (ps) {
   return {
     ps: ps,
     x: x * pixelWeigth + pixelWeigth / 2,
-    //y: Math.round(y / h) * pixelWeigth,
-    // y: Math.round(y / h) * window.innerHeight / h,
     y: y * window.innerHeight / h,
     __x: x,
     __y: y,

@@ -41,9 +41,6 @@ export default function (obj) {
   var deadCb = obj.deadCb || function () { };
   var hit = false;
   var survivalTime = 0;
-  // var hitPath = lookPath[this.look](this.position).map(function () {
-  //   return true;
-  // });
 
   this.getST = function () {
     return survivalTime;
@@ -51,7 +48,6 @@ export default function (obj) {
   this.wasHit = function (bulletPs, viewDom, cb) {
     var me = this;
     if (lookPath[this.look](this.position).includes(bulletPs)) {
-      // hitPath[lookPath[this.look](this.position).indexOf(bulletPs)] = false;
       hit = true;
       this.life--;
       if (this.life < 1) {
@@ -66,20 +62,17 @@ export default function (obj) {
         this.grapic.call(this, viewDom);
         if (cb) cb();
       };
-
     }
   };
 
   this.grapic = function (viewDom) {
     var color = hit ? 'red' : 'white';
     lookPath[this.look](this.position).forEach(function (ps, index) {
-      //if (hitPath[index]) {    
       var psObj = positionToXY(ps);
       viewDom.beginPath();
       viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth);
       viewDom.fillStyle = color;
       viewDom.fill();
-      //}
     });
   };
 
@@ -87,7 +80,6 @@ export default function (obj) {
     this.grapic.call(this, viewDom);
     if (renderType === 'OBJ_MOVE') {
       enemyMove.call(this);
-      // if (survivalTime % this.shotTime === 0) {
       if (survivalTime % this.shotTime[0] < this.shotTime[1]) {
         var shotCount = survivalTime % this.shotTime[0];
         if (shotCount % this.shotTime[2] == 0) {

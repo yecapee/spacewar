@@ -10,18 +10,6 @@ import {
   killCount,
 } from './config';
 
-function gaphicShip(data) {
-  // var color = hit ? 'red' : 'white';
-  var viewDom = data.viewDom;
-  lookPath[data.lookType](data.position).forEach(function (ps, index) {
-    var psObj = positionToXY(ps);
-    viewDom.beginPath();
-    viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth + 1);
-    viewDom.fillStyle = 'white';
-    viewDom.fill();
-  });
-}
-
 function bulletPosition() {
   var bulletArr = this.bullet;
   for (var key in bulletArr) {
@@ -52,15 +40,6 @@ function grapicBullet(viewDom) {
       }
     });
 
-    // if (enemyBulleArr.includes(ps)) {
-    //   enemyBulleArr.splice(enemyBulleArr.indexOf(ps), 1);
-    //   thisBullet.splice(thisBullet.indexOf(ps), 1);
-    // }
-    // if (enemyBulleArr.includes(ps + w)) {
-    //   enemyBulleArr.splice(enemyBulleArr.indexOf(ps + w), 1);
-    //   thisBullet.splice(thisBullet.indexOf(ps), 1);
-    // }
-
     // kill enemy
     renderData.enemy.map(function (obj) {
       obj.wasHit(ps, viewDom, function () {
@@ -80,27 +59,25 @@ export default function (obj) {
   this.position = obj.position; //位置
   this.killCount = 0; //擊殺數
   this.bullet = [], //子彈陣列
-    this.look = obj.look;
+  this.look = obj.look;
   this.isDead = false;
 
   var deadCb = obj.deadCb || function () { };
   var hit = false;
-
-
+  
   this.wasHit = function (bulletPs, bulletIndex, viewDom) {
     // console.log(this.life);
     var me = this;
-    if (lookPath[this.look](this.position).includes(bulletPs)) {
-      // hit = true;
+    if (lookPath[this.look](this.position).includes(bulletPs) ||
+      lookPath[this.look](this.position).includes(bulletPs + w))
+    {
       this.life--;
       renderData.aniEffect.push(
         animation(10, function (renCount, viewDom) {
           lookPath[this.look](this.position).forEach(function (ps, index) {
             var psObj = positionToXY(ps);
-            viewDom.beginPath();
-            viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth + 3, pixelWeigth + 3);
-            viewDom.fillStyle = 'red';
-            viewDom.fill();
+            viewDom.fillStyle = 'rgba(255,0,0,.8)';
+            viewDom.fillRect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth + 1);
           });
         }.bind(this))
       );
@@ -121,18 +98,15 @@ export default function (obj) {
   };
 
   this.grapic = function (viewDom) {
-    var color = hit ? 'red' : 'white';
     var _wasHit = this.wasHit.bind(this);
     var isDead = this.isDead;
     if (!isDead) {
       lookPath[this.look](this.position).forEach(function (ps, index) {
-        //if (hitPath[index]) {    
         var psObj = positionToXY(ps);
         viewDom.beginPath();
         viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth + 1);
-        viewDom.fillStyle = color;
+        viewDom.fillStyle = 'white';
         viewDom.fill();
-        //}
       });
 
       renderData.enemyBullet.forEach(function (bullet, index) {

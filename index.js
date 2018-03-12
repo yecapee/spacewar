@@ -164,11 +164,6 @@ function gaphic(TYPE) {
   var viewDom = document.getElementById('view').getContext('2d');
   viewDom.clearRect(0, 0, vwidth, vheight);
 
-  // effect
-  renderData.aniEffect.forEach(function (el) {
-    el(viewDom);
-  })
-
   // ship
   mkII.grapic(viewDom);
 
@@ -185,6 +180,11 @@ function gaphic(TYPE) {
     obj.action(TYPE, viewDom, mkII.position);
   })
 
+  // effect
+  renderData.aniEffect.forEach(function (el) {
+    el(viewDom);
+  })
+  
   document.getElementById('score').innerHTML = 'Score: <div class="score">' + killCount +
     '</div><br/>Best score: ' + (localStorage.getItem('bestScore') || 0) +
     '<br/> Mileage: ' + renCount +
