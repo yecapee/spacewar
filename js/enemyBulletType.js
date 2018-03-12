@@ -39,7 +39,7 @@ export default {
   },
   track: function (bulletPs, time) {
     var prePs = bulletPs;
-    var count = time || 25;
+    var count = time || 30;
     var p1 = null;
     var _p1 = null;
     return function (shipPs) {

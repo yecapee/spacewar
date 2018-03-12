@@ -1,1 +1,97 @@
-<html> <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-110926326-1"></script> <script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","UA-110926326-1");</script> <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/0.12.54/Tone.min.js"></script>  <noscript> <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5NN74MQ" height="0" width="0" style="display:none;visibility:hidden"></iframe> </noscript>  <meta property="og:title" content="Spacewar"> <meta property="og:url" content="https://yecapee.github.io/spacewar/"> <meta property="og:image" content="https://avatars1.githubusercontent.com/u/11836240?s=460&v=4"> <meta property="og:description" content="A ptt style of space game"> <style>body,html{background-color:#333;overflow:hidden;height:100%;width:100%;margin:0;padding:0}#view{right:0;left:0;margin:auto;position:absolute;background:#000;z-index:0}#score{top:20;color:orange;font-size:8px;z-index:1;padding-left:5px;-webkit-user-select:none;-moz-user-select:none;user-select:none}#debug,#score{display:block;position:fixed;left:0}#debug{bottom:0;color:#fff}#life{position:absolute;bottom:0;background-color:orange;height:10px;width:100%;z-index:2}.score{font:700;font-size:5rem}</style> <body> <div id="debug"></div> <div id="score" unselectable="on"></div> <div id="life"></div> <canvas id="view"></canvas> <img id="shipImg" src="d14959ad6e19f0968cee145eebd6cf40.png" style="display:none"> <img id="bulletImg" src="b375c861341f7a4103073eab68973ddc.png" style="display:none"> <img id="bulletBall" src="3f4b6817b16926f7a69df2c0e73d9966.png" style="display:none"> <img id="laser" src="2a21841aed75bec4a7c8eadad8ad1dc9.png" style="display:none"> <img id="zarkImg" src="08d69f491e7e8907ee8a7e26e8889c53.png" style="display:none"> <img id="explosion" src="e90879be181979a2794eb65db3b067e0.png" style="display:none"> </body> <script src="6432f0833db0b42044849fceaf81427b.js"></script> </html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-110926326-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'UA-110926326-1');
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/0.12.54/Tone.min.js"></script>
+<!-- Google Tag Manager (noscript) -->
+<noscript>
+  <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5NN74MQ" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<meta property="og:title" content="Spacewar">
+<meta property="og:url" content="https://yecapee.github.io/spacewar/">
+<meta property="og:image" content="https://avatars1.githubusercontent.com/u/11836240?s=460&v=4">
+<meta property="og:description" content="A ptt style of space game">
+
+<style>
+  html,body {
+    background-color:rgb(51, 51, 51);
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  #view{
+    right: 0;
+    left: 0;
+    margin: auto;
+    position: absolute;
+    background: black;
+    z-index: 0;
+  }
+
+  #score {
+    display: block;
+    position: fixed;
+    top: 20;
+    left: 0;
+    color: orange;
+    font-size: 8px;
+    z-index: 1;
+    padding-left: 5px;
+    -webkit-user-select: none;   /* for Chrome */
+    -moz-user-select: none;  /* for Firefox */ 
+    user-select: none;
+  }
+
+  #debug {
+    display: block;
+    position: fixed;
+    /* top: 0; */
+    left: 0;
+    bottom: 0px;
+    color: white;
+  }
+
+  #life{
+    position: absolute;
+    bottom: 0;
+    background-color: orange;
+    height: 10px;
+    width: 100%;
+    z-index: 2;
+  }
+
+  .score{
+    font: bold;
+    font-size: 5rem;
+  }
+
+</style>
+
+<body>
+  <div id="debug"></div>
+  <div id="score" unselectable="on"></div>
+  <div id="life"></div>
+  <canvas id="view"></canvas>
+
+  <img id="shipImg" src="/dist/d14959ad6e19f0968cee145eebd6cf40.png" style="display:none">
+  <img id="bulletImg" src="/dist/b375c861341f7a4103073eab68973ddc.png" style="display:none">
+  <img id="bulletBall" src="/dist/3f4b6817b16926f7a69df2c0e73d9966.png" style="display:none">
+  <img id="laser" src="/dist/2a21841aed75bec4a7c8eadad8ad1dc9.png" style="display:none">
+  <img id="zarkImg" src="/dist/08d69f491e7e8907ee8a7e26e8889c53.png" style="display:none">
+  <img id="explosion" src="/dist/e90879be181979a2794eb65db3b067e0.png" style="display:none">
+  
+</body>
+<script type="text/javascript" src="/dist/6432f0833db0b42044849fceaf81427b.js"></script>
+
+</html>
