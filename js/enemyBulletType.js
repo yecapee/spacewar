@@ -28,11 +28,11 @@ export default {
       return {
         position: sXsYToPosition(x, y),
         look: '',
-        x:realX,
-        y:realY,
-        look:'laser',
-        w:20,
-        h:60,
+        x: realX,
+        y: realY,
+        look: 'laser',
+        w: 20,
+        h: 60,
         clear: count < -1,
       }
     }
@@ -58,11 +58,11 @@ export default {
 
       return {
         position: sXsYToPosition(x, y),
-        x:realX,
-        y:realY,
+        x: realX,
+        y: realY,
         look: 'bulletBall',
-        w:15,
-        h:15,
+        w: 15,
+        h: 15,
         clear: count < -15 || x < 0 || x > w - 1,
       }
     }

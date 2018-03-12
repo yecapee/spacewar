@@ -95,7 +95,7 @@ function actionMove(ship) {
   };
   for (var key in keyType) {
     if (keyType[key] == true) action[key]();
-    document.getElementById('debug').innerHTML = JSON.stringify(positionToXY(renderData.position), null, 2);
+    //document.getElementById('debug').innerHTML = JSON.stringify(positionToXY(renderData.position), null, 2);
   }
 }
 
@@ -118,6 +118,7 @@ var mkII = new createShip({
   look: 'MK-2',
   deadCb: function () {
     killCount = 0;
+    renCount = 0;
   }
 });
 
@@ -171,7 +172,6 @@ function gaphic(TYPE) {
   mkII.grapic(viewDom);
 
   //enmyBullet
-
   renderData.enemyBullet.map(function (bullt) {
     var bulletObj = positionToXY(bullt.data.position);
     //viewDom.drawImage(enemyImg, bulletObj.x - 15 / 2, bulletObj.y - 5, 15, 15);
@@ -219,7 +219,7 @@ function touch(event) {
     var _ps = (w * y + x);
     mkII.position = _ps;
     mkII.shot();
-    document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), " + (w * y + x);
+    //document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), " + (w * y + x);
   }
 }
 
