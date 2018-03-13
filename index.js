@@ -4,6 +4,7 @@ import createEnemy from './js/createEnemy';
 import createShip from './js/createShip';
 import { animation } from './js/aniEffectMethod';
 import { positionToXY } from './js/positionMethod';
+import './main.css';
 import {
   pixelWeigth,
   w,
@@ -23,6 +24,7 @@ import {
 var renCount = 0;
 var nextPolling = 1;
 var killCount = 0;
+var pgCount = 0;
 var keyType = {
   UP: false,
   RIGHT: false,
@@ -152,6 +154,7 @@ function gaphic(TYPE) {
       nextPolling = renCount + Math.floor(Math.random() * objPolling[1] + objPolling[0]);
     }
 
+    pgCount++;
     renCount++;
     if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
   }
@@ -192,7 +195,7 @@ function gaphic(TYPE) {
     '<br/> Life: ' + mkII.life;
 
   document.getElementById('life').style.width = (100 / shipLife * mkII.life) + '%';
-
+  document.getElementById('view').style.backgroundPositionY = pgCount/4 + 'px';
 }
 
 function render(TYPE) {
@@ -240,14 +243,20 @@ setInterval(function () {
   render('BULLET_MOVE');
 }, bulletTime);
 
-//todo
+//todo *做了 -不做了
 
-//* 敵機死亡效果
-//分開敵人及主角機的lookPath
-//組成像素可縮小
+//*敵機死亡效果
+//-分開敵人及主角機的lookPath
+//-組成像素可縮小
 //*子彈種類多元
 
-
 //*主角機有血量
-//主角機階段進化
+// 主角機階段進化
 //*主角機物件化？
+
+// 子彈發射時間間隔可調整
+// 子彈發射時間pc與mobile驅動方式一致
+
+// *加入背景
+
+// 關卡設計
