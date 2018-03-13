@@ -68,13 +68,19 @@ export default function (obj) {
   this.wasHit = function (bulletPs, bulletIndex, viewDom) {
     // console.log(this.life);
     var me = this;
-    if (lookPath[this.look](this.position).includes(bulletPs) ||
-      lookPath[this.look](this.position).includes(bulletPs + w))
+    var path = lookPath[this.look](this.position);
+    var enemyMap = renderData.enemy.reduce(function(total,el){
+      return [...total,...lookPath[el.look](el.position)]
+    },[]);
+    var touchEnemy = path.reduce(function(total,el){
+      return total || enemyMap.includes(el);
+    },false);
+    if (path.includes(bulletPs) || path.includes(bulletPs + w) || touchEnemy)
     {
       this.life--;
       renderData.aniEffect.push(
         animation(10, function (renCount, viewDom) {
-          lookPath[this.look](this.position).forEach(function (ps, index) {
+          path.forEach(function (ps, index) {
             var psObj = positionToXY(ps);
             viewDom.fillStyle = 'rgba(255,0,0,.8)';
             viewDom.fillRect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth + 1);
