@@ -208,6 +208,9 @@ function gaphic(TYPE) {
     el(viewDom);
   })
   
+  //bg
+  document.getElementById('view').style.backgroundPositionY = pgCount + 'px';
+
   document.getElementById('score').innerHTML = 'Score: <div class="score">' + killCount +
     '</div><br/>Best score: ' + (localStorage.getItem('bestScore') || 0) +
     '<br/> Mileage: ' + renCount +
@@ -215,7 +218,7 @@ function gaphic(TYPE) {
     '<br/> Life: ' + mkII.life;
 
   document.getElementById('life').style.width = (100 / shipLife * mkII.life) + '%';
-  document.getElementById('view').style.backgroundPositionY = pgCount/4 + 'px';
+  
 }
 
 function render(TYPE) {
