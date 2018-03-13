@@ -6,13 +6,15 @@ var atc = {
     }(navigator.userAgent || navigator.vendor || window.opera), e
   }
 };
-var moveFps = atc.isMobile() ? 60 : 40;
+var moveFps = atc.isMobile() ? 40 : 40;
 var bulletFps = atc.isMobile() ? 30 : 30;
 var controlFps = atc.isMobile() ? 60 : 40;
+var shotFps = 8;
 var pixelWeigth = atc.isMobile() ? 10 : 15;
 var vwidth = atc.isMobile() ? window.innerWidth : window.innerHeight >= window.innerWidth ? window.innerWidth :window.innerHeight/4*3;
 var vheight = window.innerHeight;
 
+exports.atc = atc;
 exports.moveFps = moveFps;
 exports.bulletFps = bulletFps;
 exports.controlFps = controlFps;
@@ -22,10 +24,11 @@ exports.vheight = vheight;
 exports.w = Math.floor(vwidth / pixelWeigth);
 exports.h = Math.floor(vheight / pixelWeigth);
 exports.objQuantity = 1;
-exports.objPolling = [20, 60];
+exports.objPolling = [20, 100];
 exports.renderTime = 1000 / moveFps;
 exports.bulletTime = 1000 / bulletFps;
 exports.controlTime = 1000 / controlFps;
+exports.shotTime = 1000 / shotFps;
 exports.moveTime = 1000 / 30;
 exports.shipLife = 5;
 exports.renderData = {

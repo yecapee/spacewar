@@ -1,11 +1,12 @@
+import './main.css';
 import lookPath from './js/lookPath';
 import movePathList from './js/movePathList';
 import createEnemy from './js/createEnemy';
 import createShip from './js/createShip';
 import { animation } from './js/aniEffectMethod';
 import { positionToXY } from './js/positionMethod';
-import './main.css';
 import {
+  atc,
   pixelWeigth,
   w,
   h,
@@ -19,12 +20,14 @@ import {
   vwidth,
   vheight,
   shipLife,
+  shotTime,
 } from './js/config';
 
 var renCount = 0;
 var nextPolling = 1;
 var killCount = 0;
 var pgCount = 0;
+var shotFn;
 var keyType = {
   UP: false,
   RIGHT: false,
@@ -52,7 +55,10 @@ function keyCodeMap(keycode, type) {
       if (type == 'keyup') keyType.LEFT = false;
     },
     32: function () {
-      if (type == 'keydown') keyType.SPACE = true;
+      if (type == 'keydown'){
+        keyType.SPACE = true;
+        mkII.shot();
+      } 
       if (type == 'keyup') keyType.SPACE = false;
     }
   };
@@ -92,13 +98,27 @@ function actionMove(ship) {
       }
     },
     SPACE: function () {
-      ship.shot();
+      shotDriver();
     }
   };
   for (var key in keyType) {
     if (keyType[key] == true) action[key]();
     //document.getElementById('debug').innerHTML = JSON.stringify(positionToXY(renderData.position), null, 2);
   }
+  if(!keyType.SPACE) closeShot();
+}
+
+function shotDriver(){
+  if(!shotFn){
+    shotFn = setInterval(function(){
+      mkII.shot();
+    },shotTime);
+  } 
+}
+
+function closeShot(){
+  clearInterval(shotFn);
+  shotFn = null;
 }
 
 function bulletPosition(shipPs) {
@@ -136,7 +156,7 @@ function gaphic(TYPE) {
       for (var x = 0; x < objQuantity; x++) {
         var zark = new createEnemy({
           name: 'ZARK-ZERO',
-          life: 3,
+          life: 1,
           position: Math.floor(Math.random() * w),
           shot: true,
           shotTime: [200, 54, 9],
@@ -205,15 +225,20 @@ function render(TYPE) {
 document.addEventListener('keydown', function (e) {
   keyCodeMap(e.keyCode, 'keydown');
 }, false);
-
 document.addEventListener('keyup', function (e) {
   keyCodeMap(e.keyCode, 'keyup');
 }, false);
 
+
+
 document.addEventListener('touchstart', touch, false);
 document.addEventListener('touchmove', touch, false);
-document.addEventListener('touchend', touch, false);
+document.addEventListener('touchend', function(){
+  clearInterval(shotFn);
+  shotFn = null;
+}, false);
 
+var ss;
 function touch(event) {
   var event = event || window.event;
   event.preventDefault();
@@ -222,10 +247,12 @@ function touch(event) {
     var y = Math.floor(event.touches[0].pageY / pixelWeigth);
     var _ps = (w * y + x);
     mkII.position = _ps;
-    mkII.shot();
+    shotDriver();
     //document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), " + (w * y + x);
   }
 }
+
+
 
 document.getElementById('view').height = vheight;
 document.getElementById('view').width = vwidth;
@@ -234,10 +261,12 @@ setInterval(function () {
   render('OBJ_MOVE')
 }, renderTime);
 
-setInterval(function () {
-  render('CONTROL_MOVE');
-  actionMove(mkII);
-}, controlTime);
+
+  setInterval(function () {
+    render('CONTROL_MOVE');
+    !atc.isMobile() && actionMove(mkII);
+  }, controlTime);
+
 
 setInterval(function () {
   render('BULLET_MOVE');
@@ -254,8 +283,8 @@ setInterval(function () {
 // 主角機階段進化
 //*主角機物件化？
 
-// 子彈發射時間間隔可調整
-// 子彈發射時間pc與mobile驅動方式一致
+// *子彈發射時間間隔可調整
+// *子彈發射時間pc與mobile驅動方式一致
 
 // *加入背景
 
