@@ -265,10 +265,10 @@ setInterval(function () {
 }, renderTime);
 
 
-  setInterval(function () {
-    render('CONTROL_MOVE');
-    !atc.isMobile() && actionMove(mkII);
-  }, controlTime);
+setInterval(function () {
+  render('CONTROL_MOVE');
+  !atc.isMobile() && actionMove(mkII);
+}, controlTime);
 
 
 setInterval(function () {
@@ -286,9 +286,12 @@ setInterval(function () {
 // 主角機階段進化
 //*主角機物件化？
 
-// *子彈發射時間間隔可調整
-// *子彈發射時間pc與mobile驅動方式一致
+//*子彈發射時間間隔可調整
+//*子彈發射時間pc與mobile驅動方式一致
 
-// *加入背景
+//*加入背景
 
+// 射擊效果
+// 增強道具(切換武器或增加生命)
+// BOSS設計
 // 關卡設計
