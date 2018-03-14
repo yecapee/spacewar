@@ -111,15 +111,14 @@ export default function (obj) {
           var margin4 = Math.random() * 5;
           var ap0 = positionToXY(shotPositon);
           var t = 1 / 30 * (30 - renCount);
-          
+
           var ax = (1 - t) * (1 - t) * ap0.x + 2 * t * (1 - t) * ap0.x + t * t * (ap0.x - margin1);
           var ay = (1 - t) * (1 - t) * ap0.y + 2 * t * (1 - t) * (ap0.y - margin1) + t * t * (ap0.y - margin1);
           var bx = (1 - t) * (1 - t) * ap0.x + 2 * t * (1 - t) * ap0.x + t * t * (ap0.x + margin2);
           var by = (1 - t) * (1 - t) * ap0.y + 2 * t * (1 - t) * (ap0.y - margin2) + t * t * (ap0.y - margin2);
 
-          viewDom.fillStyle = 'rgba(255,255,255,.8)';
+          viewDom.fillStyle = renCount % 2 ? 'rgba(255,255,255,.8)' : 'rgba(255,255,0,.8)';
           viewDom.fillRect(ax - margin3, ay, 3, 3);
-          viewDom.fillStyle = 'rgba(255,255,0,.8)';
           viewDom.fillRect(bx + margin4, by, 3, 3);
         }.bind(this))
       );
