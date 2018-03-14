@@ -160,6 +160,7 @@ function gaphic(TYPE) {
         enemyObj.position = Math.floor(Math.random() * w);
         enemyObj.deadCb = function(){
           killCount++;
+          if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
         };
         var enemy = new createEnemy(enemyObj);
         
@@ -206,8 +207,8 @@ function gaphic(TYPE) {
   document.getElementById('view').style.backgroundPositionY = pgCount + 'px';
 
   document.getElementById('score').innerHTML = 'Score: <div class="score">' + killCount +
-    '</div><br/>Best score: ' + (localStorage.getItem('bestScore') || 0) +
-    '<br/> Mileage: ' + renCount +
+    '</div><br/> Mileage: ' + renCount +
+    '<br/>Best score: ' + (localStorage.getItem('bestScore') || 0) +
     '<br/> Best Mileage: ' + bestMileage +
     '<br/> Life: ' + mkII.life;
 

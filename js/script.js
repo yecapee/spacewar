@@ -53,7 +53,6 @@ var script = {
     enemyPolling: [15, 75],
     enemyQuantity: 1,
   }
-
 };
 
 export default function (reCount, ruleObj) {
