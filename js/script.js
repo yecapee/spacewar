@@ -4,7 +4,7 @@ import createEnemy from './createEnemy';
 var Zark0 = {
   name: 'ZARK-ZERO',
   life: 1,
-  position: Math.floor(Math.random() * w),
+  // position: Math.floor(Math.random() * w),
   shot: true,
   shotTime: [200, 54, 9],
   movePath: 'gostMove',
@@ -15,12 +15,12 @@ var Zark0 = {
 
 var Zark1 = {
   name: 'ZARK-ZERO',
-  life: 3,
-  position: Math.floor(Math.random() * w),
+  life: 1,
+  // position: Math.floor(Math.random() * w),
   shot: true,
-  shotTime: [200, 54, 9],
+  shotTime: [200, 81, 9],
   movePath: 'gostMove',
-  moveTime: 5,
+  moveTime: 3,
   look: 'zark',
   bulletType: 'normal',
 }
@@ -28,7 +28,7 @@ var Zark1 = {
 var Fort0 = {
   name: 'FORT',
   life: 1,
-  position: Math.floor(Math.random() * w),
+  // position: Math.floor(Math.random() * w),
   shot: true,
   shotTime: [200, 54, 9],
   movePath: 'goToOut',

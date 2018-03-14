@@ -156,8 +156,14 @@ function gaphic(TYPE) {
     var createObj = false;
     if (renCount == nextPolling) {
       for (var x = 0; x < ruleObj.enemyQuantity; x++) {
-        var zark = new createEnemy(ruleObj.enemy[(renCount % ruleObj.enemy.length)]);
-        renderData.enemy.push(zark);
+        var enemyObj = ruleObj.enemy[(renCount % ruleObj.enemy.length)];
+        enemyObj.position = Math.floor(Math.random() * w);
+        enemyObj.deadCb = function(){
+          killCount++;
+        };
+        var enemy = new createEnemy(enemyObj);
+        
+        renderData.enemy.push(enemy);
       }
       nextPolling = renCount + Math.floor(Math.random() * ruleObj.enemyPolling[1] + ruleObj.enemyPolling[0]);
     }
