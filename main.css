@@ -13,7 +13,7 @@ html, body {
   margin: auto;
   position: absolute;
   z-index: 0;
-  background-image: url("./spacebg.png");
+  background-image: url("./img/spacebg.png");
   background-size: 100% auto;
 }
 

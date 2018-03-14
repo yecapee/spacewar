@@ -120,7 +120,7 @@ export default function (obj) {
           viewDom.fillStyle = renCount % 2 ? 'rgba(255,255,255,.8)' : 'rgba(255,255,0,.8)';
           viewDom.fillRect(ax - margin3, ay, 3, 3);
           viewDom.fillRect(bx + margin4, by, 3, 3);
-        }.bind(this))
+        })
       );
 
     }
