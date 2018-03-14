@@ -1,5 +1,6 @@
 import lookPath from './lookPath';
 import movePathList from './movePathList';
+import shipBulletTtpe from './shipBulletType';
 import { animation } from './aniEffectMethod';
 import {
   positionToXY,
@@ -16,8 +17,8 @@ import {
 function bulletPosition() {
   var bulletArr = this.bullet;
   for (var key in bulletArr) {
-    bulletArr[key] = bulletArr[key] - w;
-    if (bulletArr[key] < 0) {
+    bulletArr[key].data = bulletArr[key].fn();
+    if (bulletArr[key].data.clear) {
       bulletArr.splice(key, 1);
     };
   }
@@ -25,31 +26,34 @@ function bulletPosition() {
 
 function grapicBullet(viewDom) {
   var enemyBulleArr = renderData.enemyBullet;
-  var bulletImg = document.getElementById("bulletImg");
+
   var thisBullet = this.bullet;
-  thisBullet.map(function (ps) {
-    var bulletObj = positionToXY(ps);
-    viewDom.drawImage(bulletImg, bulletObj.x - 13 / 2, bulletObj.y - 5, 13, 64);
+
+  thisBullet.map(function (el) {
+    var ps = el.data.position;
+    var bulletImg = document.getElementById(el.data.look);
+
+    viewDom.drawImage(bulletImg, el.data.x - 13 / 2, el.data.y - 5, 13, 64);
 
     // defense
     enemyBulleArr.forEach(function (enemyBullet, index) {
       if (enemyBullet.data.position === ps) {
         enemyBulleArr.splice(index, 1);
-        thisBullet.splice(thisBullet.indexOf(ps), 1);
+        thisBullet.splice(thisBullet.indexOf(el), 1);
       }
       if (enemyBullet.data.position === ps + w) {
         enemyBulleArr.splice(index, 1);
-        thisBullet.splice(thisBullet.indexOf(ps), 1);
+        thisBullet.splice(thisBullet.indexOf(el), 1);
       }
     });
 
     // kill enemy
     renderData.enemy.map(function (obj) {
       obj.wasHit(ps, viewDom, function () {
-        thisBullet.splice(thisBullet.indexOf(ps), 1);
+        thisBullet.splice(thisBullet.indexOf(el), 1);
       });
       obj.wasHit(ps + w, viewDom, function () {
-        thisBullet.splice(thisBullet.indexOf(ps), 1);
+        thisBullet.splice(thisBullet.indexOf(el), 1);
       });
     })
   })
@@ -61,15 +65,15 @@ export default function (obj) {
   this.deadPosition = obj.position; //復活位置
   this.position = obj.position; //位置
   this.killCount = 0; //擊殺數
-  this.bullet = [], //子彈陣列
-    this.look = obj.look;
+  this.bullet = []; //子彈陣列
+  this.bulletType = 'normal';
+  this.look = obj.look;
   this.isDead = false;
 
   var deadCb = obj.deadCb || function () { };
   var hit = false;
 
   this.wasHit = function (bulletPs, bulletIndex, viewDom) {
-    // console.log(this.life);
     var me = this;
     var path = lookPath[this.look](this.position);
     var enemyMap = renderData.enemy.reduce(function (total, el) {
@@ -100,8 +104,9 @@ export default function (obj) {
 
   this.shot = function () {
     if (!this.isDead) {
-      var bulletArr = this.bullet;
-      if (!bulletArr.includes(this.position - w)) bulletArr.push(this.position - w);
+      //
+      shipBulletTtpe[this.bulletType](this.position, this.bullet);
+      //
       var shotPositon = this.position;
       renderData.aniEffect.push(
         animation(30, function (renCount, viewDom) {

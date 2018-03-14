@@ -10,6 +10,22 @@ export default {
     }
     return rs;
   },
+  'fort': function (ps) {
+    var rs = [ps];
+    if (ps % w !== w - 1) {
+      rs.push(ps - w + 1);
+    }
+    if (ps % w !== 0 || ps == 0) {
+      rs.push(ps - w - 1);
+    }
+    if (ps - 2 * w > 0) {
+      rs.push(ps - 2 * w);
+    }
+    return rs;
+  },
+  'point':function(ps){
+    return [ps];
+  },
   'MK-1': function (ps) {
     var rs = [ps, ps + w, ps + 3 * w];
     if (ps % w !== w - 1) {

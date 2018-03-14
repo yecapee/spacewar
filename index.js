@@ -1,6 +1,7 @@
 import './main.css';
 import lookPath from './js/lookPath';
 import movePathList from './js/movePathList';
+import script from './js/script';
 import createEnemy from './js/createEnemy';
 import createShip from './js/createShip';
 import { animation } from './js/aniEffectMethod';
@@ -10,8 +11,6 @@ import {
   pixelWeigth,
   w,
   h,
-  objQuantity,
-  objPolling,
   renderTime,
   bulletTime,
   moveTime,
@@ -28,6 +27,8 @@ var nextPolling = 1;
 var killCount = 0;
 var pgCount = 0;
 var shotFn;
+var ruleObj = {};
+
 var keyType = {
   UP: false,
   RIGHT: false,
@@ -55,10 +56,10 @@ function keyCodeMap(keycode, type) {
       if (type == 'keyup') keyType.LEFT = false;
     },
     32: function () {
-      if (type == 'keydown'){
+      if (type == 'keydown') {
         keyType.SPACE = true;
         mkII.shot();
-      } 
+      }
       if (type == 'keyup') keyType.SPACE = false;
     }
   };
@@ -105,18 +106,18 @@ function actionMove(ship) {
     if (keyType[key] == true) action[key]();
     //document.getElementById('debug').innerHTML = JSON.stringify(positionToXY(renderData.position), null, 2);
   }
-  if(!keyType.SPACE) closeShot();
+  if (!keyType.SPACE) closeShot();
 }
 
-function shotDriver(){
-  if(!shotFn){
-    shotFn = setInterval(function(){
+function shotDriver() {
+  if (!shotFn) {
+    shotFn = setInterval(function () {
       mkII.shot();
-    },shotTime);
-  } 
+    }, shotTime);
+  }
 }
 
-function closeShot(){
+function closeShot() {
   clearInterval(shotFn);
   shotFn = null;
 }
@@ -150,28 +151,15 @@ function gaphic(TYPE) {
   var bestMileage = localStorage.getItem('bestMileage') || 0;
   var shipLookType = 'MK-2';
 
+  script(renCount, ruleObj);
   if (TYPE === 'OBJ_MOVE') {
     var createObj = false;
     if (renCount == nextPolling) {
-      for (var x = 0; x < objQuantity; x++) {
-        var zark = new createEnemy({
-          name: 'ZARK-ZERO',
-          life: 1,
-          position: Math.floor(Math.random() * w),
-          shot: true,
-          shotTime: [200, 54, 9],
-          movePath: 'gostMove',
-          moveTime: 5,
-          look: 'zark',
-          bulletType: renCount % 2 == 0 ? 'normal' : 'track',
-          deadCb: function () {
-            killCount++;
-            if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
-          }
-        });
+      for (var x = 0; x < ruleObj.enemyQuantity; x++) {
+        var zark = new createEnemy(ruleObj.enemy[(renCount % ruleObj.enemy.length)]);
         renderData.enemy.push(zark);
       }
-      nextPolling = renCount + Math.floor(Math.random() * objPolling[1] + objPolling[0]);
+      nextPolling = renCount + Math.floor(Math.random() * ruleObj.enemyPolling[1] + ruleObj.enemyPolling[0]);
     }
 
     pgCount++;
@@ -207,7 +195,7 @@ function gaphic(TYPE) {
   renderData.aniEffect.forEach(function (el) {
     el(viewDom);
   })
-  
+
   //bg
   document.getElementById('view').style.backgroundPositionY = pgCount + 'px';
 
@@ -218,7 +206,7 @@ function gaphic(TYPE) {
     '<br/> Life: ' + mkII.life;
 
   document.getElementById('life').style.width = (100 / shipLife * mkII.life) + '%';
-  
+
 }
 
 function render(TYPE) {
@@ -232,17 +220,11 @@ document.addEventListener('keyup', function (e) {
   keyCodeMap(e.keyCode, 'keyup');
 }, false);
 
+document.addEventListener('touchstart', touchAction, false);
+document.addEventListener('touchmove', touchAction, false);
+document.addEventListener('touchend', closeShot, false);
 
-
-document.addEventListener('touchstart', touch, false);
-document.addEventListener('touchmove', touch, false);
-document.addEventListener('touchend', function(){
-  clearInterval(shotFn);
-  shotFn = null;
-}, false);
-
-var ss;
-function touch(event) {
+function touchAction(event) {
   var event = event || window.event;
   event.preventDefault();
   if (event.touches[0]) {
@@ -254,8 +236,6 @@ function touch(event) {
     //document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), " + (w * y + x);
   }
 }
-
-
 
 document.getElementById('view').height = vheight;
 document.getElementById('view').width = vwidth;
@@ -280,7 +260,7 @@ setInterval(function () {
 //*敵機死亡效果
 //-分開敵人及主角機的lookPath
 //-組成像素可縮小
-//*子彈種類多元
+//*敵機子彈種類多元
 
 //*主角機有血量
 // 主角機階段進化
@@ -292,6 +272,9 @@ setInterval(function () {
 //*加入背景
 
 //*射擊效果
-// 增強道具(切換武器或增加生命)
+// 增強道具
+//*主角機可切換子彈
+// 出彈頻率應該綁在SHIP物件
+
 // BOSS設計
 // 關卡設計
