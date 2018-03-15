@@ -4,6 +4,7 @@ import movePathList from './js/movePathList';
 import script from './js/script';
 import createEnemy from './js/createEnemy';
 import createShip from './js/createShip';
+import createItem from './js/createItem';
 import { animation } from './js/aniEffectMethod';
 import { positionToXY } from './js/positionMethod';
 import {
@@ -24,7 +25,7 @@ import {
 var renCount = 0;
 var nextPolling = 1;
 var killCount = 0;
-var pgCount = 0;
+var bgCount = 0;
 var shotFn;
 var ruleObj = {};
 
@@ -138,7 +139,7 @@ var ship = new createShip({
   position: w * Math.floor(h / 2) - Math.floor(w / 2),
   deadPosition: w * Math.floor(h / 2) - Math.floor(w / 2),
   look: 'MK-2',
-  deadCb: function () {
+  deadCb: function (ship) {
     killCount = 0;
     renCount = 0;
     nextPolling = 100;
@@ -153,22 +154,30 @@ function gaphic(TYPE) {
   script(renCount, ruleObj);
   if (TYPE === 'OBJ_MOVE') {
     var createObj = false;
+    var item = ruleObj.item;
+
     if (renCount == nextPolling) {
       for (var x = 0; x < ruleObj.enemyQuantity; x++) {
         var enemyObj = ruleObj.enemy[(renCount % ruleObj.enemy.length)];
         enemyObj.position = Math.floor(Math.random() * w);
-        enemyObj.deadCb = function(){
+        enemyObj.deadCb = function () {
           killCount++;
           if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
         };
-        var enemy = new createEnemy(enemyObj);
-        
-        renderData.enemy.push(enemy);
+        renderData.enemy.push(new createEnemy(enemyObj));
       }
       nextPolling = renCount + Math.floor(Math.random() * ruleObj.enemyPolling[1] + ruleObj.enemyPolling[0]);
     }
 
-    pgCount++;
+    if(item){
+      item.forEach(function(itemData){
+        itemData.position = Math.floor(Math.random() * w);
+        renderData.item.push(new createItem(itemData));  
+      });
+      ruleObj.item = null;
+    }
+
+    bgCount++;
     renCount++;
     if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
   }
@@ -193,7 +202,12 @@ function gaphic(TYPE) {
   })
 
   // enmy
-  renderData.enemy.map(function (obj) {
+  renderData.enemy.forEach(function (obj) {
+    obj.action(TYPE, viewDom, ship.position);
+  })
+
+  // item
+  renderData.item.forEach(function (obj) {
     obj.action(TYPE, viewDom, ship.position);
   })
 
@@ -203,15 +217,15 @@ function gaphic(TYPE) {
   })
 
   //bg
-  document.getElementById('view').style.backgroundPositionY = pgCount + 'px';
+  document.getElementById('view').style.backgroundPositionY = bgCount + 'px';
 
   document.getElementById('score').innerHTML = 'Score: <div class="score">' + killCount +
     '</div><br/> Mileage: ' + renCount +
     '<br/>Best score: ' + (localStorage.getItem('bestScore') || 0) +
     '<br/> Best Mileage: ' + bestMileage +
-    '<br/> Life: ' + ship.life;
+    '<br/> Life: ' + ship.life +'/'+ ship.maxLife;
 
-  document.getElementById('life').style.width = (100 / shipLife * ship.life) + '%';
+  document.getElementById('life').style.width = (100 / ship.maxLife * ship.life) + '%';
 
 }
 
@@ -278,9 +292,10 @@ setInterval(function () {
 //*加入背景
 
 //*射擊效果
-// 增強道具
+//*增強道具
 //*主角機可切換子彈
 //*出彈頻率應該綁在SHIP物件
+// 來一點速度感的特效
 
 // BOSS設計
 //*關卡設計

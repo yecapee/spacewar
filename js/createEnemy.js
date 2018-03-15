@@ -77,7 +77,7 @@ export default function (obj) {
   };
 
   this.action = function (renderType, viewDom, shipPs) {
-    this.grapic.call(this, viewDom);
+    this.grapic(viewDom);
     if (renderType === 'OBJ_MOVE') {
       enemyMove.call(this);
       if (survivalTime % this.shotTime[0] < this.shotTime[1]) {
@@ -94,10 +94,10 @@ export default function (obj) {
   this.dead = function () {
     var position = this.position;
     var deadPs = positionToXY(position);
-    var enemyImg = document.getElementById("explosion");
+    var explosion = document.getElementById("explosion");
     renderData.aniEffect.push(
       animation(50, function (renCount, viewDom) {
-        viewDom.drawImage(enemyImg, deadPs.x - (50 - renCount) / 2, deadPs.y, 120 - renCount, 120 - renCount);
+        viewDom.drawImage(explosion, deadPs.x - (50 - renCount) / 2, deadPs.y, 120 - renCount, 120 - renCount);
       })
     );
     deadCb();

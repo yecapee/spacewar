@@ -70,24 +70,25 @@ export default function (obj) {
   this.look = obj.look;
   this.isDead = false;
   this.shotFps = 8;
+  this.maxLife = obj.life;
 
   var deadCb = obj.deadCb || function () { };
   var hit = false;
 
-  this.wasHit = function (bulletPs, bulletIndex, viewDom) {
+  this.wasHit = function (data) {
+    var {
+      bulletPs,
+      bulletIndex,
+      viewDom,
+      touchEnemy,
+      shipPath 
+    } = data;
     var me = this;
-    var path = lookPath[this.look](this.position);
-    var enemyMap = renderData.enemy.reduce(function (total, el) {
-      return [...total, ...lookPath[el.look](el.position)]
-    }, []);
-    var touchEnemy = path.reduce(function (total, el) {
-      return total || enemyMap.includes(el);
-    }, false);
-    if (path.includes(bulletPs) || path.includes(bulletPs + w) || touchEnemy) {
+    if (shipPath.includes(bulletPs) || shipPath.includes(bulletPs + w) || touchEnemy) {
       this.life--;
       renderData.aniEffect.push(
         animation(10, function (renCount, viewDom) {
-          path.forEach(function (ps, index) {
+          shipPath.forEach(function (ps, index) {
             var psObj = positionToXY(ps);
             viewDom.fillStyle = 'rgba(255,0,0,.8)';
             viewDom.fillRect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth + 1);
@@ -133,8 +134,10 @@ export default function (obj) {
   };
 
   this.grapic = function (viewDom) {
+    var _ = this;
     var _wasHit = this.wasHit.bind(this);
     var isDead = this.isDead;
+    var path = lookPath[this.look](this.position);
     bulletPosition.call(this);
     grapicBullet.call(this, viewDom);
 
@@ -147,22 +150,49 @@ export default function (obj) {
         viewDom.fill();
       });
 
+      //hit or touchEnemy
+      var enemyMap = renderData.enemy.reduce(function (total, el) {
+        return [...total, ...lookPath[el.look](el.position)]
+      }, []);
+      var touchEnemy = path.reduce(function (total, el) {
+        return total || enemyMap.includes(el);
+      }, false);
       renderData.enemyBullet.forEach(function (bullet, index) {
-        _wasHit(bullet.data.position, index, viewDom);
+        _wasHit({
+          bulletPs: bullet.data.position,
+          bulletIndex: index,
+          viewDom: viewDom,
+          touchEnemy: touchEnemy,
+          shipPath: path,
+        });
       })
+
+      // touch item
+      renderData.item.forEach(function(item, index){
+        var itemMap = lookPath[item.look](item.position);
+        var touchItem = path.reduce(function (total, el) {
+          return total || itemMap.includes(el);
+        }, false);  
+
+        if(touchItem){
+          item.wasPickUp(_);
+        }
+      })      
+
     }
   };
 
   this.dead = function () {
     var position = this.position;
     var deadPs = positionToXY(position);
-    var enemyImg = document.getElementById("explosion");
+    var explosion = document.getElementById("explosion");
     renderData.aniEffect.push(
       animation(50, function (renCount, viewDom) {
-        viewDom.drawImage(enemyImg, deadPs.x - (50 - renCount) / 2, deadPs.y, 120 - renCount, 120 - renCount);
+        viewDom.drawImage(explosion, deadPs.x - (50 - renCount) / 2, deadPs.y, 120 - renCount, 120 - renCount);
         //console.log(renCount);
         if (renCount == 50) {
           this.life = obj.life;
+          this.maxLife = obj.life;
           this.position = this.deadPosition;
           this.isDead = false;
           this.bullet = [];

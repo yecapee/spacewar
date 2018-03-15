@@ -40,15 +40,19 @@ var Fort0 = {
 
 
 // enhancing item
-
-// life:['liftReset','liftMax-6','liftRestore-6'],
-// bullet:[],
-// look:'point',
-// effect:function(){},
-// color:'green',
+// restoreLife:['liftReset','liftMax-6','liftRestore-6'],
+// changeBullet:[],
 
 var GreenPoint = {
-
+  name: 'greenPoint',
+  life: 1,
+  // position: Math.floor(Math.random() * w),
+  movePath: 'goToOut',
+  moveTime: 10,
+  restoreLife: ['liftMax-2','liftReset'],
+  look: 'point',
+  color: 'rgba(0,255,0,1)',
+  effect: function () { },
 }
 
 var script = {
@@ -66,7 +70,10 @@ var script = {
     enemy: [Zark1, Fort0],
     enemyPolling: [15, 75],
     enemyQuantity: 1,
-  }
+  },
+  1601: {
+    item: [GreenPoint],
+  },
 };
 
 export default function (reCount, ruleObj) {
@@ -76,4 +83,4 @@ export default function (reCount, ruleObj) {
       ruleObj[key] = rule[key];
     })
   }
-}
+};
