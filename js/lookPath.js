@@ -31,7 +31,7 @@ export default {
     if (ps % w - 1 > 0) {
       rs = [...rs, (ps - w) - 1, (ps + w) - 1];
     }
-    if (ps % w + 1 <= w) {
+    if (ps % w + 1 < w) {
       rs = [...rs, (ps - w) + 1, (ps + w) + 1];
     }
     return rs;
