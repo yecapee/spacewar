@@ -1,6 +1,7 @@
 import { w } from './config';
 import createEnemy from './createEnemy';
 
+// enemy
 var Zark0 = {
   name: 'ZARK-ZERO',
   life: 1,
@@ -14,7 +15,7 @@ var Zark0 = {
 }
 
 var Zark1 = {
-  name: 'ZARK-ZERO',
+  name: 'ZARK-PLUS',
   life: 1,
   // position: Math.floor(Math.random() * w),
   shot: true,
@@ -35,6 +36,19 @@ var Fort0 = {
   moveTime: 5,
   look: 'fort',
   bulletType: 'track',
+}
+
+
+// enhancing item
+
+// life:['liftReset','liftMax-6','liftRestore-6'],
+// bullet:[],
+// look:'point',
+// effect:function(){},
+// color:'green',
+
+var GreenPoint = {
+
 }
 
 var script = {

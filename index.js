@@ -19,7 +19,6 @@ import {
   vwidth,
   vheight,
   shipLife,
-  shotTime,
 } from './js/config';
 
 var renCount = 0;
@@ -58,7 +57,7 @@ function keyCodeMap(keycode, type) {
     32: function () {
       if (type == 'keydown') {
         keyType.SPACE = true;
-        mkII.shot();
+        ship.shot();
       }
       if (type == 'keyup') keyType.SPACE = false;
     }
@@ -112,8 +111,8 @@ function actionMove(ship) {
 function shotDriver() {
   if (!shotFn) {
     shotFn = setInterval(function () {
-      mkII.shot();
-    }, shotTime);
+      ship.shot();
+    }, 1000 / ship.shotFps);
   }
 }
 
@@ -133,7 +132,7 @@ function bulletPosition(shipPs) {
   //console.log(enemyBulleArr);
 }
 
-var mkII = new createShip({
+var ship = new createShip({
   name: 'MK-2',
   life: shipLife,
   position: w * Math.floor(h / 2) - Math.floor(w / 2),
@@ -175,7 +174,7 @@ function gaphic(TYPE) {
   }
 
   if (TYPE === 'BULLET_MOVE') {
-    bulletPosition(mkII.position);
+    bulletPosition(ship.position);
   }
 
   //canvas
@@ -183,7 +182,7 @@ function gaphic(TYPE) {
   viewDom.clearRect(0, 0, vwidth, vheight);
 
   // ship
-  mkII.grapic(viewDom);
+  ship.grapic(viewDom);
 
   //enmyBullet
   renderData.enemyBullet.map(function (bullt) {
@@ -195,7 +194,7 @@ function gaphic(TYPE) {
 
   // enmy
   renderData.enemy.map(function (obj) {
-    obj.action(TYPE, viewDom, mkII.position);
+    obj.action(TYPE, viewDom, ship.position);
   })
 
   // effect
@@ -210,9 +209,9 @@ function gaphic(TYPE) {
     '</div><br/> Mileage: ' + renCount +
     '<br/>Best score: ' + (localStorage.getItem('bestScore') || 0) +
     '<br/> Best Mileage: ' + bestMileage +
-    '<br/> Life: ' + mkII.life;
+    '<br/> Life: ' + ship.life;
 
-  document.getElementById('life').style.width = (100 / shipLife * mkII.life) + '%';
+  document.getElementById('life').style.width = (100 / shipLife * ship.life) + '%';
 
 }
 
@@ -238,7 +237,7 @@ function touchAction(event) {
     var x = Math.floor(event.touches[0].pageX / pixelWeigth);
     var y = Math.floor(event.touches[0].pageY / pixelWeigth);
     var _ps = (w * y + x);
-    mkII.position = _ps;
+    ship.position = _ps;
     shotDriver();
     //document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), " + (w * y + x);
   }
@@ -254,7 +253,7 @@ setInterval(function () {
 
 setInterval(function () {
   render('CONTROL_MOVE');
-  !atc.isMobile() && actionMove(mkII);
+  !atc.isMobile() && actionMove(ship);
 }, controlTime);
 
 
@@ -270,7 +269,7 @@ setInterval(function () {
 //*敵機子彈種類多元
 
 //*主角機有血量
-// 主角機階段進化
+//-主角機階段進化
 //*主角機物件化？
 
 //*子彈發射時間間隔可調整
@@ -281,7 +280,7 @@ setInterval(function () {
 //*射擊效果
 // 增強道具
 //*主角機可切換子彈
-// 出彈頻率應該綁在SHIP物件
+//*出彈頻率應該綁在SHIP物件
 
 // BOSS設計
-// 關卡設計
+//*關卡設計

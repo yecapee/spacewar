@@ -1,6 +1,6 @@
 import lookPath from './lookPath';
 import movePathList from './movePathList';
-import shipBulletTtpe from './shipBulletType';
+import shipBulletType from './shipBulletType';
 import { animation } from './aniEffectMethod';
 import {
   positionToXY,
@@ -69,6 +69,7 @@ export default function (obj) {
   this.bulletType = 'normal';
   this.look = obj.look;
   this.isDead = false;
+  this.shotFps = 8;
 
   var deadCb = obj.deadCb || function () { };
   var hit = false;
@@ -105,7 +106,7 @@ export default function (obj) {
   this.shot = function () {
     if (!this.isDead) {
       //
-      shipBulletTtpe[this.bulletType](this.position, this.bullet);
+      shipBulletType[this.bulletType](this.position, this.bullet);
       //
       var shotPositon = this.position;
       renderData.aniEffect.push(

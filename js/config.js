@@ -9,7 +9,6 @@ var atc = {
 var moveFps = atc.isMobile() ? 40 : 40;
 var bulletFps = atc.isMobile() ? 30 : 30;
 var controlFps = atc.isMobile() ? 60 : 40;
-var shotFps = 8;
 var pixelWeigth = atc.isMobile() ? 10 : 15;
 var vwidth = atc.isMobile() ? window.innerWidth : window.innerHeight >= window.innerWidth ? window.innerWidth : window.innerHeight/4*3;
 var vheight = window.innerHeight;
@@ -26,7 +25,6 @@ exports.h = Math.floor(vheight / pixelWeigth);
 exports.renderTime = 1000 / moveFps;
 exports.bulletTime = 1000 / bulletFps;
 exports.controlTime = 1000 / controlFps;
-exports.shotTime = 1000 / shotFps;
 exports.moveTime = 1000 / 30;
 exports.shipLife = 5;
 exports.renderData = {
