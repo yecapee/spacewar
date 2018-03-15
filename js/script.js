@@ -1,5 +1,18 @@
-import { w } from './config';
+import {
+  w,
+  pixelWeigth,
+  renderData
+} from './config';
 import createEnemy from './createEnemy';
+import {
+  animation,
+  circle
+} from './aniEffectMethod';
+import {
+  positionToXY,
+  positionTosXsY,
+  sXsYToPosition
+} from './positionMethod';
 
 // enemy
 var Zark0 = {
@@ -45,14 +58,24 @@ var Fort0 = {
 
 var GreenPoint = {
   name: 'greenPoint',
-  life: 1,
-  // position: Math.floor(Math.random() * w),
   movePath: 'goToOut',
   moveTime: 10,
-  restoreLife: ['liftMax-2','liftReset'],
+  restoreLife: ['liftMax-2', 'liftReset'],
   look: 'point',
   color: 'rgba(0,255,0,1)',
-  effect: function () { },
+  effect: function (ship) {
+    renderData.aniEffect.push(
+      animation(30, function (renCount, viewDom) {
+        var p0 = positionToXY(ship.position);
+        var all = 5;
+        for (var i = 1; i <= all; i++) {
+          var nowPs = circle(p0.x,p0.y, 1.5*renCount, all, i)
+          viewDom.fillStyle = 'rgba(0,255,0,.8)';
+          viewDom.fillRect(nowPs.x, nowPs.y, 15, 15);       
+        }
+      })
+    );
+  },
 }
 
 var script = {

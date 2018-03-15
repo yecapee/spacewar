@@ -104,7 +104,6 @@ function actionMove(ship) {
   };
   for (var key in keyType) {
     if (keyType[key] == true) action[key]();
-    //document.getElementById('debug').innerHTML = JSON.stringify(positionToXY(renderData.position), null, 2);
   }
   if (!keyType.SPACE) closeShot();
 }

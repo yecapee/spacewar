@@ -93,7 +93,7 @@ export default function (obj) {
       ship.bulletType = changeBullet;
     }
 
-    effect();
+    effect(ship);
     delete this;
   }
 
