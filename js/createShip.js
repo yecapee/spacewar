@@ -196,6 +196,7 @@ export default function (obj) {
           this.position = this.deadPosition;
           this.isDead = false;
           this.bullet = [];
+          this.bulletType = 'normal';
         }
       }.bind(this))
     );

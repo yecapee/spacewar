@@ -61,16 +61,60 @@ var GreenPoint = {
   movePath: 'goToOut',
   moveTime: 10,
   restoreLife: ['liftMax-2', 'liftReset'],
-  look: 'point',
+  look: 'hp+',
   color: 'rgba(0,255,0,1)',
   effect: function (ship) {
     renderData.aniEffect.push(
-      animation(30, function (renCount, viewDom) {
+      animation(80, function (renCount, viewDom) {
         var p0 = positionToXY(ship.position);
         var all = 5;
         for (var i = 1; i <= all; i++) {
           var nowPs = circle(p0.x,p0.y, 1.5*renCount, all, i)
           viewDom.fillStyle = 'rgba(0,255,0,.8)';
+          viewDom.fillRect(nowPs.x, nowPs.y, 15, 15);       
+        }
+      })
+    );
+  },
+}
+
+var hp_1 = {
+  name: 'greenPoint',
+  movePath: 'goToOut',
+  moveTime: 10,
+  restoreLife: ['liftRestore-1', ],
+  look: 'hp+',
+  color: 'rgba(255,255,0,1)',
+  effect: function (ship) {
+    renderData.aniEffect.push(
+      animation(80, function (renCount, viewDom) {
+        var p0 = positionToXY(ship.position);
+        var all = 5;
+        for (var i = 1; i <= all; i++) {
+          var nowPs = circle(p0.x,p0.y, 1.5*renCount, all, i)
+          viewDom.fillStyle = 'rgba(255,255,0,.8)';
+          viewDom.fillRect(nowPs.x, nowPs.y, 15, 15);       
+        }
+      })
+    );
+  },
+}
+
+var TrebleBullet = {
+  name: 'greenPoint',
+  movePath: 'goToOut',
+  moveTime: 10,
+  changeBullet:'treble',
+  look: 'hp+',
+  color: 'rgba(255,0,0,1)',
+  effect: function (ship) {
+    renderData.aniEffect.push(
+      animation(80, function (renCount, viewDom) {
+        var p0 = positionToXY(ship.position);
+        var all = 5;
+        for (var i = 1; i <= all; i++) {
+          var nowPs = circle(p0.x,p0.y, 1.5*renCount, all, i)
+          viewDom.fillStyle = 'rgba(255,0,0,.8)';
           viewDom.fillRect(nowPs.x, nowPs.y, 15, 15);       
         }
       })
@@ -97,6 +141,30 @@ var script = {
   1601: {
     item: [GreenPoint],
   },
+  1800:{
+    item: [hp_1],
+  },
+  3000:{
+    item: [TrebleBullet],
+  },
+  3100:{
+    enemy: [Zark1, Fort0],
+    enemyPolling: [15, 55],
+    item: [GreenPoint],
+  },
+  4400:{
+    item: [hp_1],
+  },
+  4500:{
+    enemyPolling: [15, 45],
+  },
+  5600:{
+    item: [hp_1],
+  },
+  5700:{
+    enemyPolling: [10, 35],   
+  }
+
 };
 
 export default function (reCount, ruleObj) {

@@ -23,8 +23,18 @@ export default {
     }
     return rs;
   },
-  'point':function(ps){
+  'point': function (ps) {
     return [ps];
+  },
+  'hp+': function (ps) {
+    var rs = [];
+    if (ps % w - 1 > 0) {
+      rs = [...rs, (ps - w) - 1, (ps + w) - 1];
+    }
+    if (ps % w + 1 <= w) {
+      rs = [...rs, (ps - w) + 1, (ps + w) + 1];
+    }
+    return rs;
   },
   'MK-1': function (ps) {
     var rs = [ps, ps + w, ps + 3 * w];
