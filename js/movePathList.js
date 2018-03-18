@@ -7,13 +7,16 @@ import {
 function positionLimit(nowPosition) {
   var leftlimt = this.mainX - (this.mainX % w);
   var rightlimt = leftlimt + w - 1;
-  this.mainX += w;
+  
   if (nowPosition > rightlimt) {
-    return rightlimt;
+    this.mainX -= 1;
+    return -1;
   }
   if (nowPosition < leftlimt) {
-    return leftlimt;
+    this.mainX += 1;
+    return -1;
   }
+  this.mainX += w;
   return nowPosition;
 };
 
@@ -37,6 +40,9 @@ export default {
     var xMargin = Math.floor(margin * r);
     //console.log(nowY, margin);
     this.position = positionLimit.call(this, this.mainX + xMargin);
+    while( this.position == -1 ) {
+      　this.position = positionLimit.call(this, this.mainX + xMargin)
+    }
     if (this.position > w * h - 1) {
       renderData.enemy.find(function (el, index) {
         if (el === me) renderData.enemy.splice(index, 1);
