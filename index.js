@@ -261,18 +261,23 @@ document.getElementById('view').width = vwidth;
 
 setInterval(function () {
   render('OBJ_MOVE')
+  //
+  render('CONTROL_MOVE');
+  !atc.isMobile() && actionMove(ship);
+  //
+  render('BULLET_MOVE');
 }, renderTime);
 
 
-setInterval(function () {
-  render('CONTROL_MOVE');
-  !atc.isMobile() && actionMove(ship);
-}, controlTime);
+// setInterval(function () {
+//   render('CONTROL_MOVE');
+//   !atc.isMobile() && actionMove(ship);
+// }, controlTime);
 
 
-setInterval(function () {
-  render('BULLET_MOVE');
-}, bulletTime);
+// setInterval(function () {
+//   render('BULLET_MOVE');
+// }, bulletTime);
 
 //todo *做了 -不做了
 

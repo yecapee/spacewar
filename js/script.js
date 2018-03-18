@@ -124,7 +124,7 @@ var TrebleBullet = {
 
 var script = {
   0: {
-    enemy: [Zark0],
+    enemy: [Zark0,Fort0],
     enemyPolling: [20, 100],
     enemyQuantity: 1,
   },
