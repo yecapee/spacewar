@@ -148,7 +148,6 @@ var ship = new createShip({
 function gaphic(TYPE) {
   var bestScore = localStorage.getItem('bestScore') || 0;
   var bestMileage = localStorage.getItem('bestMileage') || 0;
-  var shipLookType = 'MK-2';
 
   script(renCount, ruleObj);
   if (TYPE === 'OBJ_MOVE') {
