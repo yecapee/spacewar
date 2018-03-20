@@ -26,8 +26,8 @@ function normal(bulletPs, arr, time) {
 export default {
   normal: normal,
   treble: function (bulletPs, arr, time) {
-    normal(bulletPs - 1, arr);
     normal(bulletPs, arr);
-    normal(bulletPs + 1, arr);
+    if (bulletPs % w > 1) normal(bulletPs - 1, arr);
+    if (bulletPs % w < w-1) normal(bulletPs + 1, arr);
   },
 }
