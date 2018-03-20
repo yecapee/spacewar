@@ -35,3 +35,11 @@ exports.positionTosXsY = function (position) {
 exports.sXsYToPosition = function(sx,sy){
   return sy*w+sx;
 }
+
+exports.ezPosition = function (position) {
+  var ps = position;
+  return function(x,y) {
+    var rs = ps+y*w+x;
+    return rs;
+  };
+}
