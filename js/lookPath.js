@@ -1,5 +1,5 @@
 import { w } from './config';
-import { ezPosition } from './positionMethod'
+import { ezPosition } from './positionMethod';
 export default {
   'zark': function (ps) {
     var rs = [ps];

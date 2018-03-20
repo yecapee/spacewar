@@ -51,6 +51,17 @@ var Fort0 = {
   bulletType: 'track',
 }
 
+var test = {
+  name: 'test',
+  life: 1,
+  // position: Math.floor(Math.random() * w),
+  shot: false,
+  shotTime: [200, 54, 9],
+  movePath: 'pingpong',
+  moveTime: 5,
+  look: 'point',
+  bulletType: 'track',
+}
 
 // enhancing item
 // restoreLife:['liftReset','liftMax-6','liftRestore-6'],
@@ -124,10 +135,15 @@ var TrebleBullet = {
 
 var script = {
   0: {
-    enemy: [Zark0],
+    enemy: [test],
     enemyPolling: [20, 100],
     enemyQuantity: 1,
   },
+  // 0: {
+  //   enemy: [Zark0],
+  //   enemyPolling: [20, 100],
+  //   enemyQuantity: 1,
+  // },
   800: {
     enemy: [Zark0, Fort0],
     enemyPolling: [15, 80],

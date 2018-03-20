@@ -1,13 +1,18 @@
-import { 
+import {
   w,
   h,
-  renderData 
+  renderData
 } from './config';
+
+import {
+  positionTosXsY,
+  ezPosition,
+} from './positionMethod';
 
 function positionLimit(nowPosition) {
   var leftlimt = this.mainX - (this.mainX % w);
   var rightlimt = leftlimt + w - 1;
-  
+
   if (nowPosition > rightlimt) {
     this.mainX -= 1;
     return -1;
@@ -18,6 +23,16 @@ function positionLimit(nowPosition) {
   }
   this.mainX += w;
   return nowPosition;
+};
+
+function positionScope(position) {
+  var ps = positionTosXsY(position);
+  return {
+    TOP: ps.y === 0,
+    RIGHT: ps.x === w - 1,
+    BOTTOM: ps.y === h - 1,
+    LEFT: ps.x === 0,
+  };
 };
 
 export default {
@@ -40,8 +55,8 @@ export default {
     var xMargin = Math.floor(margin * r);
     //console.log(nowY, margin);
     this.position = positionLimit.call(this, this.mainX + xMargin);
-    while( this.position == -1 ) {
-      　this.position = positionLimit.call(this, this.mainX + xMargin)
+    while (this.position == -1) {
+      this.position = positionLimit.call(this, this.mainX + xMargin)
     }
     if (this.position > w * h - 1) {
       renderData.enemy.find(function (el, index) {
@@ -57,5 +72,55 @@ export default {
         if (el === me) renderData.enemy.splice(index, 1);
       })
     };
+  },
+  pingpong: function () {
+    var xy = ezPosition(this.position);
+    var prePs = positionTosXsY(this.prePosition);
+    var nowPs = positionTosXsY(this.position);
+
+    if (!this.prePosition) {
+      this.prePosition = this.position;
+      this.position = xy(1, 1);
+      // console.log(this.prePosition,this.position,xy(1, 1));
+      return;
+    };
+
+    var directionX = prePs.x < nowPs.x; // 1 >, 0 <
+    var directionY = prePs.y < nowPs.y; // 1 V, 0 ^
+    this.prePosition = this.position;
+
+    var scope = positionScope(this.position);
+    if (!directionX && !directionY) {
+      if (xy.x == 0 && xy.y == 0) return;
+
+      if (scope.LEFT) return this.position = xy(1, -1);
+      if (scope.TOP) return this.position = xy(-1, 1);
+      return this.position = xy(-1, -1);
+    };
+
+    if (!directionX && directionY) {
+      if (xy.x == 0 && xy.y == h) return;
+
+      if (scope.LEFT) return this.position = xy(1, 1);
+      if (scope.BOTTOM) return this.position = xy(-1, -1);
+      return this.position = xy(-1, 1);
+    };
+
+    if (directionX && !directionY) {
+      if (xy.x == w && xy.y == 0) return;
+
+      if (scope.RIGHT) return this.position = xy(-1, -1);
+      if (scope.TOP) return this.position = xy(1, 1);
+      return this.position = xy(1, -1);
+    };
+
+    if (directionX && directionY) {
+      if (xy.x == w && xy.y == h) return;
+
+      if (scope.RIGHT) return this.position = xy(-1, 1);
+      if (scope.BOTTOM) return this.position = xy(1, -1);
+      return this.position = xy(1, 1);
+    };
+
   },
 };

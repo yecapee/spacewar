@@ -64,6 +64,7 @@ export default function (obj) {
   this.life = obj.life; //生命值
   this.deadPosition = obj.position; //復活位置
   this.position = obj.position; //位置
+  this.prePosition;
   this.killCount = 0; //擊殺數
   this.bullet = []; //子彈陣列
   this.bulletType = 'normal';
