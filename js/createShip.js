@@ -81,11 +81,10 @@ export default function (obj) {
       bulletPs,
       bulletIndex,
       viewDom,
-      touchEnemy,
       shipPath 
     } = data;
-    var me = this;
-    if (shipPath.includes(bulletPs) || shipPath.includes(bulletPs + w) || touchEnemy) {
+
+    if (shipPath.includes(bulletPs) || shipPath.includes(bulletPs + w)) {
       this.life--;
       renderData.aniEffect.push(
         animation(10, function (renCount, viewDom) {
@@ -97,6 +96,33 @@ export default function (obj) {
         }.bind(this))
       );
       renderData.enemyBullet.splice(bulletIndex, 1);
+      if (this.life < 1) {
+        this.life = 0;
+        this.isDead = true;
+        this.dead();
+      }
+    }
+  };
+
+  this.touch = function (data) {
+    var {
+      viewDom,
+      shipPath,
+      touchEnemy
+    } = data;
+
+    var me = this;
+    if (touchEnemy) {
+      this.life--;
+      renderData.aniEffect.push(
+        animation(10, function (renCount, viewDom) {
+          shipPath.forEach(function (ps, index) {
+            var psObj = positionToXY(ps);
+            viewDom.fillStyle = 'rgba(255,0,0,.8)';
+            viewDom.fillRect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth + 1);
+          });
+        }.bind(this))
+      );
       if (this.life < 1) {
         this.life = 0;
         this.isDead = true;
@@ -137,6 +163,7 @@ export default function (obj) {
   this.grapic = function (viewDom) {
     var _ = this;
     var _wasHit = this.wasHit.bind(this);
+    var _touch = this.touch.bind(this); 
     var isDead = this.isDead;
     var path = lookPath[this.look](this.position);
     bulletPosition.call(this);
@@ -151,22 +178,32 @@ export default function (obj) {
         viewDom.fill();
       });
 
-      //hit or touchEnemy
+      // touchEnemy
       var enemyMap = renderData.enemy.reduce(function (total, el) {
         return [...total, ...lookPath[el.look](el.position)]
       }, []);
       var touchEnemy = path.reduce(function (total, el) {
+        //console.log('arr',enemyMap, el);
         return total || enemyMap.includes(el);
       }, false);
+
+      _touch({
+        touchEnemy,
+        viewDom,
+        shipPath: path,
+      });
+
+      // was hit
       renderData.enemyBullet.forEach(function (bullet, index) {
         _wasHit({
           bulletPs: bullet.data.position,
           bulletIndex: index,
           viewDom: viewDom,
-          touchEnemy: touchEnemy,
           shipPath: path,
         });
       })
+
+      
 
       // touch item
       renderData.item.forEach(function(item, index){

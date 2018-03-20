@@ -59,7 +59,7 @@ var test = {
   shotTime: [200, 54, 9],
   movePath: 'pingpong',
   moveTime: 5,
-  look: 'point',
+  look: 'CIRCLE',
   bulletType: 'track',
 }
 
