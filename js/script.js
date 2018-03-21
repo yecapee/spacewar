@@ -51,14 +51,14 @@ var Fort0 = {
   bulletType: 'track',
 }
 
-var test = {
+var circleKiller = {
   name: 'test',
-  life: 1,
+  life: 20,
   // position: Math.floor(Math.random() * w),
-  shot: false,
-  shotTime: [200, 54, 9],
+  shot: true,
+  shotTime: [100, 54, 9],
   movePath: 'pingpong',
-  moveTime: 5,
+  moveTime: 3,
   look: 'CIRCLE',
   bulletType: 'track',
 }
@@ -80,9 +80,9 @@ var GreenPoint = {
         var p0 = positionToXY(ship.position);
         var all = 5;
         for (var i = 1; i <= all; i++) {
-          var nowPs = circle(p0.x,p0.y, 1.5*renCount, all, i)
+          var nowPs = circle(p0.x, p0.y, 1.5 * renCount, all, i)
           viewDom.fillStyle = 'rgba(0,255,0,.8)';
-          viewDom.fillRect(nowPs.x, nowPs.y, 15, 15);       
+          viewDom.fillRect(nowPs.x, nowPs.y, 15, 15);
         }
       })
     );
@@ -93,7 +93,7 @@ var hp_1 = {
   name: 'greenPoint',
   movePath: 'goToOut',
   moveTime: 10,
-  restoreLife: ['liftRestore-1', ],
+  restoreLife: ['liftRestore-1',],
   look: 'hp+',
   color: 'rgba(255,255,0,1)',
   effect: function (ship) {
@@ -102,9 +102,9 @@ var hp_1 = {
         var p0 = positionToXY(ship.position);
         var all = 5;
         for (var i = 1; i <= all; i++) {
-          var nowPs = circle(p0.x,p0.y, 1.5*renCount, all, i)
+          var nowPs = circle(p0.x, p0.y, 1.5 * renCount, all, i)
           viewDom.fillStyle = 'rgba(255,255,0,.8)';
-          viewDom.fillRect(nowPs.x, nowPs.y, 15, 15);       
+          viewDom.fillRect(nowPs.x, nowPs.y, 15, 15);
         }
       })
     );
@@ -115,7 +115,7 @@ var TrebleBullet = {
   name: 'greenPoint',
   movePath: 'goToOut',
   moveTime: 10,
-  changeBullet:'treble',
+  changeBullet: 'treble',
   look: 'hp+',
   color: 'rgba(255,0,0,1)',
   effect: function (ship) {
@@ -124,9 +124,9 @@ var TrebleBullet = {
         var p0 = positionToXY(ship.position);
         var all = 5;
         for (var i = 1; i <= all; i++) {
-          var nowPs = circle(p0.x,p0.y, 1.5*renCount, all, i)
+          var nowPs = circle(p0.x, p0.y, 1.5 * renCount, all, i)
           viewDom.fillStyle = 'rgba(255,0,0,.8)';
-          viewDom.fillRect(nowPs.x, nowPs.y, 15, 15);       
+          viewDom.fillRect(nowPs.x, nowPs.y, 15, 15);
         }
       })
     );
@@ -135,15 +135,11 @@ var TrebleBullet = {
 
 var script = {
   0: {
-    enemy: [test],
+    enemy: [Zark0],
     enemyPolling: [20, 100],
     enemyQuantity: 1,
+    stopCount: false,
   },
-  // 0: {
-  //   enemy: [Zark0],
-  //   enemyPolling: [20, 100],
-  //   enemyQuantity: 1,
-  // },
   800: {
     enemy: [Zark0, Fort0],
     enemyPolling: [15, 80],
@@ -157,34 +153,48 @@ var script = {
   1601: {
     item: [GreenPoint],
   },
-  1800:{
+  1700:{
+    enemy: [],
+  },
+  1800: {
     item: [hp_1],
   },
-  3000:{
+  1805: {
+    boss: [circleKiller],
+    stopCount: true,
+  },
+  1806: {
+    boss: [circleKiller],
+    stopCount: true,
+  },
+  1809: {
+    stopCount: false,
+  },
+  3000: {
     item: [TrebleBullet],
   },
-  3100:{
+  3100: {
     enemy: [Zark1, Fort0],
     enemyPolling: [15, 55],
     item: [GreenPoint],
   },
-  4400:{
+  4400: {
     item: [hp_1],
   },
-  4500:{
+  4500: {
     enemyPolling: [15, 45],
   },
-  5600:{
+  5600: {
     item: [hp_1],
   },
-  5700:{
-    enemyPolling: [10, 35],   
+  5700: {
+    enemyPolling: [10, 35],
   }
 
 };
 
-export default function (reCount, ruleObj) {
-  var rule = script[reCount];
+export default function (renCount, ruleObj) {
+  var rule = script[renCount];
   if (rule) {
     Object.keys(rule).forEach(function (key) {
       ruleObj[key] = rule[key];

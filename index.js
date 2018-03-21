@@ -129,7 +129,13 @@ function bulletPosition(shipPs) {
       enemyBulleArr.splice(key, 1);
     };
   }
-  //console.log(enemyBulleArr);
+}
+
+function clearRenderData() {
+  renderData.enemy = [];
+  // renderData.enemyBullet = [];
+  // renderData.aniEffect = [];
+  renderData.item = [];
 }
 
 var ship = new createShip({
@@ -142,41 +148,66 @@ var ship = new createShip({
     killCount = 0;
     renCount = 0;
     nextPolling = 100;
+    clearRenderData();
   }
 });
 
 function gaphic(TYPE) {
   var bestScore = localStorage.getItem('bestScore') || 0;
   var bestMileage = localStorage.getItem('bestMileage') || 0;
-
+  var stopCount = ruleObj.stopCount;
+  var boss = ruleObj.boss || [];
   script(renCount, ruleObj);
   if (TYPE === 'OBJ_MOVE') {
     var createObj = false;
     var item = ruleObj.item;
 
-    if (renCount == nextPolling) {
+    // enemy push
+    if (renCount == nextPolling && !stopCount) {
       for (var x = 0; x < ruleObj.enemyQuantity; x++) {
         var enemyObj = ruleObj.enemy[(renCount % ruleObj.enemy.length)];
-        enemyObj.position = Math.floor(Math.random() * w);
+        if (enemyObj) {
+          enemyObj.position = Math.floor(Math.random() * w);
+          enemyObj.deadCb = function () {
+            killCount++;
+            if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
+          };
+          renderData.enemy.push(new createEnemy(enemyObj));
+        }
+      }
+      if (ruleObj.enemyPolling) {
+        nextPolling = renCount + Math.floor(Math.random() * ruleObj.enemyPolling[1] + ruleObj.enemyPolling[0]);
+      }
+    }
+
+    // boss push
+    if (boss.length) {
+      var defPosition = Math.floor(Math.random() * w);
+      boss.forEach(function (enemyObj, index) {
+        enemyObj.position = defPosition;
         enemyObj.deadCb = function () {
           killCount++;
           if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
+          renCount++;
         };
         renderData.enemy.push(new createEnemy(enemyObj));
-      }
-      nextPolling = renCount + Math.floor(Math.random() * ruleObj.enemyPolling[1] + ruleObj.enemyPolling[0]);
+      });
+      ruleObj.boss = [];
+      defPosition += Math.floor(w / 3);
+      renCount++;
     }
+    //
 
-    if(item){
-      item.forEach(function(itemData){
+    if (item) {
+      item.forEach(function (itemData) {
         itemData.position = Math.floor(Math.random() * w);
-        renderData.item.push(new createItem(itemData));  
+        renderData.item.push(new createItem(itemData));
       });
       ruleObj.item = null;
     }
 
     bgCount++;
-    renCount++;
+    !stopCount && renCount++;
     if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
   }
 
@@ -221,7 +252,7 @@ function gaphic(TYPE) {
     '</div><br/> Mileage: ' + renCount +
     '<br/>Best score: ' + (localStorage.getItem('bestScore') || 0) +
     '<br/> Best Mileage: ' + bestMileage +
-    '<br/> Life: ' + ship.life +'/'+ ship.maxLife;
+    '<br/> Life: ' + ship.life + '/' + ship.maxLife;
 
   document.getElementById('life').style.width = (100 / ship.maxLife * ship.life) + '%';
 
@@ -259,7 +290,7 @@ document.getElementById('view').height = vheight;
 document.getElementById('view').width = vwidth;
 
 setInterval(function () {
-  render('OBJ_MOVE')
+  render('OBJ_MOVE');
   //
   render('CONTROL_MOVE');
   !atc.isMobile() && actionMove(ship);

@@ -47,7 +47,7 @@ export default function (obj) {
   };
   this.wasHit = function (bulletPs, viewDom, cb) {
     var me = this;
-    if (lookPath[this.look](this.position).includes(bulletPs)) {
+    if (lookPath[this.look](this.position,'GETMAP').includes(bulletPs)) {
       hit = true;
       this.life--;
       if (this.life < 1) {

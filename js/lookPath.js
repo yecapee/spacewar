@@ -1,4 +1,7 @@
-import { w } from './config';
+import { 
+  w,
+  h 
+} from './config';
 import {
   ezPosition,
   positionTosXsY,
@@ -7,12 +10,28 @@ import {
 
 function circle(x, y, r, all, now, margin) {
   var ang = Math.PI * 2 / all;
-  //var _margin = 2 * Math.PI / 360 * (margin || 0);
-  var _margin = 0;
+  var _margin = 2 * Math.PI / 360 * (margin || 0);
   var _x = Math.round(x + r * Math.cos(ang * now + _margin));
   var _y = Math.round(y + r * Math.sin(ang * now + _margin));
-  // console.log(x,y,_x,_y);
-  return sXsYToPosition(_x, _y);
+  return {
+    position: sXsYToPosition(_x, _y),
+    outScope: _x < 0 || _x > w - 1 || _y < 0 || _y > h - 1,
+  }
+}
+
+function circleMap() {
+  var renCount = 0;
+  return function (ps,getmap) {
+    var p0 = positionTosXsY(ps);
+    var pointLength = 8;
+    var rs = [];
+    for (var i = 0; i <= pointLength; i++) {
+      var psData = circle(p0.x, p0.y, 5, pointLength, i, Math.round(renCount / 20));
+      !psData.outScope && rs.push(psData.position);
+    }
+    if(!getmap) renCount++;
+    return rs;
+  }
 }
 
 export default {
@@ -122,14 +141,5 @@ export default {
     }
     return rs;
   },
-  'CIRCLE': function (ps) {
-    //var p0 = ezPosition(ps);
-    var p0 = positionTosXsY(ps);
-    var pointLength = 20;
-    var rs = [];
-    for (var i = 0; i <= pointLength; i++) {
-      rs.push(circle(p0.x, p0.y, 5, pointLength, i, 0));
-    }
-    return rs;
-  }
+  'CIRCLE': circleMap()
 };

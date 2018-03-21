@@ -203,21 +203,18 @@ export default function (obj) {
         });
       })
 
-      
-
       // touch item
       renderData.item.forEach(function(item, index){
         var itemMap = lookPath[item.look](item.position);
         var touchItem = path.reduce(function (total, el) {
           return total || itemMap.includes(el);
         }, false);  
-
         if(touchItem){
           item.wasPickUp(_);
         }
       })      
-
     }
+
   };
 
   this.dead = function () {
