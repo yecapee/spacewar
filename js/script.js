@@ -171,6 +171,8 @@ var script = {
     stopCount: false,
   },
   1820: {
+    enemy: [Zark1, Fort0],
+    enemyPolling: [15, 75],
     item: [TrebleBullet],
   },
   2100: {
