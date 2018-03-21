@@ -170,15 +170,15 @@ var script = {
   1809: {
     stopCount: false,
   },
-  3000: {
+  1820: {
     item: [TrebleBullet],
   },
-  3100: {
+  2100: {
     enemy: [Zark1, Fort0],
     enemyPolling: [15, 55],
     item: [GreenPoint],
   },
-  4400: {
+  3400: {
     item: [hp_1],
   },
   4500: {
