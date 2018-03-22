@@ -1,11 +1,13 @@
-import { 
+import {
   w,
-  h 
+  h
 } from './config';
 import {
   ezPosition,
   positionTosXsY,
   sXsYToPosition,
+  touchScope,
+  ezPositionWithCheckScope
 } from './positionMethod';
 
 function circle(x, y, r, all, now, margin) {
@@ -21,7 +23,7 @@ function circle(x, y, r, all, now, margin) {
 
 function circleMap() {
   var renCount = 0;
-  return function (ps,getmap) {
+  return function (ps, getmap) {
     var p0 = positionTosXsY(ps);
     var pointLength = 8;
     var rs = [];
@@ -29,7 +31,7 @@ function circleMap() {
       var psData = circle(p0.x, p0.y, 5, pointLength, i, Math.round(renCount / 20));
       !psData.outScope && rs.push(psData.position);
     }
-    if(!getmap) renCount++;
+    if (!getmap) renCount++;
     return rs;
   }
 }
@@ -82,14 +84,18 @@ export default {
     }
     return rs;
   },
-  'TALONS': function (ps) {
-    var xy = ezPosition(ps);
+  'TALONS': function (ps, type) {
+    var xy = ezPositionWithCheckScope(ps);
     var rs = [xy(0, -2), xy(0, 1)];
-    if (ps % w !== w - 1) {
-      rs = [...rs, xy(1, 0), xy(2, -1), xy(2, -2), xy(2, -3)];
+    var open = type === 'OPEN';
+
+    if (open) {
+      rs = [...rs, ...[xy(1, 0), xy(2, -1), xy(2, -2), xy(2, -3)]];
+      rs = [...rs, ...[xy(-1, 0), xy(-2, -1), xy(-2, -2), xy(-2, -3)]];
     }
-    if (ps % w !== 0) {
-      rs = [...rs, xy(-1, 0), xy(-2, -1), xy(-2, -2), xy(-2, -3)];
+    if (!open) {
+      rs = [...rs, ...[xy(1, 0), xy(1, -1), xy(1, -2), xy(1, -3)]];
+      rs = [...rs, ...[xy(-1, 0), xy(-1, -1), xy(-1, -2), xy(-1, -3)]];
     }
     return rs;
   },

@@ -112,12 +112,14 @@ function shotDriver() {
   if (!shotFn) {
     shotFn = setInterval(function () {
       ship.shot();
+      ship.lookType='OPEN';
     }, 1000 / ship.shotFps);
   }
 }
 
 function closeShot() {
   clearInterval(shotFn);
+  ship.lookType='CLOSE';
   shotFn = null;
 }
 

@@ -13,7 +13,6 @@ import {
   positionTosXsY,
   sXsYToPosition
 } from './positionMethod';
-import _ from 'lodash';
 
 // enemy
 var Zark0 = {
@@ -73,7 +72,7 @@ var circleKiller2 = Object.assign({}, circleKiller, { position: Math.round(w / 3
 
 var GreenPoint = {
   name: 'greenPoint',
-  movePath: 'goToOut',
+  movePath: 'pingpong',
   moveTime: 10,
   restoreLife: ['liftMax-2', 'liftReset'],
   look: 'hp+',
@@ -95,7 +94,7 @@ var GreenPoint = {
 
 var hp_1 = {
   name: 'greenPoint',
-  movePath: 'goToOut',
+  movePath: 'pingpong',
   moveTime: 10,
   restoreLife: ['liftRestore-1',],
   look: 'hp+',
@@ -117,12 +116,13 @@ var hp_1 = {
 
 var TrebleBullet = {
   name: 'greenPoint',
-  movePath: 'goToOut',
+  movePath: 'pingpong',
   moveTime: 10,
   changeBullet: 'treble',
   look: 'hp+',
   color: 'rgba(255,0,0,1)',
   effect: function (ship) {
+    ship.look = 'TALONS';
     renderData.aniEffect.push(
       animation(80, function (renCount, viewDom) {
         var p0 = positionToXY(ship.position);
@@ -207,3 +207,5 @@ export default function (renCount, ruleObj) {
     })
   }
 };
+
+

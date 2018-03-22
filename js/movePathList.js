@@ -7,6 +7,7 @@ import {
 import {
   positionTosXsY,
   ezPosition,
+  touchScope,  
 } from './positionMethod';
 
 function positionLimit(nowPosition) {
@@ -23,16 +24,6 @@ function positionLimit(nowPosition) {
   }
   this.mainX += w;
   return nowPosition;
-};
-
-function positionScope(position) {
-  var ps = positionTosXsY(position);
-  return {
-    TOP: ps.y === 0,
-    RIGHT: ps.x === w - 1,
-    BOTTOM: ps.y === h - 1,
-    LEFT: ps.x === 0,
-  };
 };
 
 export default {
@@ -89,7 +80,7 @@ export default {
     var directionY = prePs.y < nowPs.y; // 1 V, 0 ^
     this.prePosition = this.position;
 
-    var scope = positionScope(this.position);
+    var scope = touchScope(this.position);
 
     if (!directionX && !directionY) {
       if (scope.LEFT && scope.TOP) return xy(1, 1);

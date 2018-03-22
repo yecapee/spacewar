@@ -165,12 +165,12 @@ export default function (obj) {
     var _wasHit = this.wasHit.bind(this);
     var _touch = this.touch.bind(this); 
     var isDead = this.isDead;
-    var path = lookPath[this.look](this.position);
+    var path = lookPath[this.look](this.position,this.lookType);
     bulletPosition.call(this);
     grapicBullet.call(this, viewDom);
 
     if (!isDead) {
-      lookPath[this.look](this.position).forEach(function (ps, index) {
+      lookPath[this.look](this.position,this.lookType).forEach(function (ps, index) {
         var psObj = positionToXY(ps);
         viewDom.beginPath();
         viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth + 1);
@@ -232,6 +232,7 @@ export default function (obj) {
           this.isDead = false;
           this.bullet = [];
           this.bulletType = 'normal';
+          this.look = obj.look;
         }
       }.bind(this))
     );
