@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/yecapee/spacewar/issues"
   },
-  "homepage": "https://github.com/yecapee/spacewar#readme"
+  "homepage": "https://github.com/yecapee/spacewar#readme",
+  "dependencies": {
+    "lodash": "^4.17.5"
+  }
 }

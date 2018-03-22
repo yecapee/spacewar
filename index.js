@@ -184,7 +184,7 @@ function gaphic(TYPE) {
     if (boss.length) {
       var defPosition = Math.floor(Math.random() * w);
       boss.forEach(function (enemyObj, index) {
-        enemyObj.position = defPosition;
+        console.log(enemyObj.position);
         enemyObj.deadCb = function () {
           killCount++;
           if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
@@ -193,7 +193,6 @@ function gaphic(TYPE) {
         renderData.enemy.push(new createEnemy(enemyObj));
       });
       ruleObj.boss = [];
-      defPosition += Math.floor(w / 3);
       renCount++;
     }
     //

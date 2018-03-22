@@ -13,6 +13,7 @@ import {
   positionTosXsY,
   sXsYToPosition
 } from './positionMethod';
+import _ from 'lodash';
 
 // enemy
 var Zark0 = {
@@ -60,8 +61,11 @@ var circleKiller = {
   movePath: 'pingpong',
   moveTime: 3,
   look: 'CIRCLE',
+  position: Math.round(w / 3) - 5,
   bulletType: 'track',
 }
+
+var circleKiller2 = Object.assign({}, circleKiller, { position: Math.round(w / 3) * 2 + 5 });
 
 // enhancing item
 // restoreLife:['liftReset','liftMax-6','liftRestore-6'],
@@ -153,7 +157,7 @@ var script = {
   1601: {
     item: [GreenPoint],
   },
-  1700:{
+  1700: {
     enemy: [],
   },
   1800: {
@@ -164,7 +168,7 @@ var script = {
     stopCount: true,
   },
   1806: {
-    boss: [circleKiller],
+    boss: [circleKiller2],
     stopCount: true,
   },
   1809: {

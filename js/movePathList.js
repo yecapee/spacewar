@@ -90,8 +90,9 @@ export default {
     this.prePosition = this.position;
 
     var scope = positionScope(this.position);
+
     if (!directionX && !directionY) {
-      if (xy.x == 0 && xy.y == 0) return xy(1, 1);
+      if (scope.LEFT && scope.TOP) return xy(1, 1);
 
       if (scope.LEFT) return this.position = xy(1, -1);
       if (scope.TOP) return this.position = xy(-1, 1);
@@ -99,7 +100,7 @@ export default {
     };
 
     if (!directionX && directionY) {
-      if (xy.x == 0 && xy.y == h - 1) return xy(1, -1);
+      if (scope.LEFT && scope.BOTTOM) return xy(1, -1);
 
       if (scope.LEFT) return this.position = xy(1, 1);
       if (scope.BOTTOM) return this.position = xy(-1, -1);
@@ -107,7 +108,7 @@ export default {
     };
 
     if (directionX && !directionY) {
-      if (xy.x == w - 1 && xy.y == 0) return xy(-1, 1);
+      if (scope.RIGHT && scope.TOP) return xy(-1, 1);
 
       if (scope.RIGHT) return this.position = xy(-1, -1);
       if (scope.TOP) return this.position = xy(1, 1);
@@ -115,7 +116,7 @@ export default {
     };
 
     if (directionX && directionY) {
-      if (xy.x == w - 1 && xy.y == h - 1) return xy(-1, -1);
+      if (scope.RIGHT && scope.BOTTOM) return xy(-1, -1);
 
       if (scope.RIGHT) return this.position = xy(-1, 1);
       if (scope.BOTTOM) return this.position = xy(1, -1);
