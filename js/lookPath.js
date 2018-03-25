@@ -82,6 +82,7 @@ export default {
     if (ps % w !== 0) {
       rs = [...rs, xy(-1, -1), xy(-1, -2), xy(-1, 1)];
     }
+    xy(0, 0, true);
     return rs;
   },
   'TALONS': function (ps, type) {
@@ -97,6 +98,7 @@ export default {
       rs = [...rs, ...[xy(1, 0), xy(1, -1), xy(1, -2), xy(1, -3)]];
       rs = [...rs, ...[xy(-1, 0), xy(-1, -1), xy(-1, -2), xy(-1, -3)]];
     }
+    xy(0, 0, true);
     return rs;
   },
   'MK-1': function (ps) {
@@ -122,6 +124,7 @@ export default {
     if (ps % w !== 0) {
       rs.push(xy(-1, 2));
     }
+    xy(0, 0, true);
     return rs;
   },
   'MK-2.LIGHT': function (ps) {
@@ -133,6 +136,7 @@ export default {
     if (ps % w !== 0) {
       rs.push(xy(-1, 2));
     }
+    xy(0, 0, true);
     return rs;
   },
   'MK-3': function (ps) {

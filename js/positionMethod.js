@@ -40,8 +40,11 @@ exports.sXsYToPosition = function (sx, sy) {
 
 exports.ezPosition = function (position) {
   var ps = position;
-  return function (x, y) {
+  return function (x, y, clear) {
     var rs = ps + y * w + x;
+    if (clear) {
+      ps = null;
+    }
     return rs;
   };
 }
@@ -49,10 +52,15 @@ exports.ezPosition = function (position) {
 exports.ezPositionWithCheckScope = function (position) {
   var ps = position;
   var psXy = positionTosXsY(ps);
-  return function (x, y) {
+  return function (x, y, clear) {
     var _x = psXy.x + x;
     var _y = psXy.y + y;
     var rs = ps + y * w + x;
+    if (clear) {
+      ps = null;
+      psXy = null;
+      return;
+    }
     return (_x < 0 || _x > w - 1 || _y < 0 || _y > h - 1) ? undefined : rs;
   };
 }

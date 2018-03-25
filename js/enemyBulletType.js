@@ -10,7 +10,7 @@ export default {
     var time = 45;
     var prePs = bulletPs;
     var count = time;
-    return function (taPs) {
+    return function (taPs,clear) {
       count--;
       var p0 = positionTosXsY(prePs);
       var p1 = positionTosXsY(prePs + w * h);
@@ -25,6 +25,11 @@ export default {
       var realX = _p0.x + (_p1.x - _p0.x) * t;
       var realY = _p0.y + (_p1.y - _p0.y) * t;
 
+      if(clear){
+        time = null;
+        prePs = null;
+        count = null;
+      }
       return {
         position: sXsYToPosition(x, y),
         x: realX,
@@ -36,7 +41,7 @@ export default {
       }
     }
   },
-  track: function (bulletPs) {
+  track: function (bulletPs,clear) {
     var prePs = bulletPs;
     var time;
     var count;
@@ -61,7 +66,15 @@ export default {
       var realX = (_p0.x + marginX + (_p1.x - _p0.x + marginX) * t);
       var realY = (_p0.y + marginY + (_p1.y - _p0.y + marginY) * t);
       count--;
-    
+
+      if(clear){
+        time = null;
+        prePs = null;
+        count = null;
+        p1 = null;
+        _p1 = null;
+      }
+
       return {
         position: sXsYToPosition(x, y),
         x: realX,

@@ -128,6 +128,7 @@ function bulletPosition(shipPs) {
   for (var key in enemyBulleArr) {
     enemyBulleArr[key].data = enemyBulleArr[key].fn(shipPs);
     if (enemyBulleArr[key].data.clear) {
+      enemyBulleArr[key].fn(shipPs,true);
       enemyBulleArr.splice(key, 1);
     };
   }
