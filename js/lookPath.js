@@ -113,14 +113,17 @@ export default {
     }
     return rs;
   },
-  'MK-2': function (ps) {
-    var xy = ezPosition(ps);
-    var rs = [xy(0, 0), xy(0, 1), xy(0, 3)];
-    if (ps % w !== w - 1) {
-      rs.push(xy(1, 2));
+  'MK-2': function (ps, type) {
+    var xy = ezPositionWithCheckScope(ps);
+    var rs = [xy(0, 2)];
+    //var open = type === 'OPEN';
+    var open = false;
+
+    if (open) {
+      rs = [...rs, xy(1, 1), xy(-1, 1), xy(1, -1), xy(1, 0), xy(-1, -1), xy(-1, 0)];
     }
-    if (ps % w !== 0) {
-      rs.push(xy(-1, 2));
+    if (!open) {
+      rs = [...rs, xy(0, -1), xy(0, 0), xy(1, 1), xy(-1, 1)];
     }
     return rs;
   },
