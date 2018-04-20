@@ -2,6 +2,8 @@ import lookPath from './lookPath';
 import movePathList from './movePathList';
 import shipBulletType from './shipBulletType';
 import { animation } from './aniEffectMethod';
+import bricks from './bricks';
+
 import {
   positionToXY,
   positionTosXsY
@@ -81,17 +83,16 @@ export default function (obj) {
       bulletPs,
       bulletIndex,
       viewDom,
-      shipPath 
+      shipPath,
+      pathObj
     } = data;
 
     if (shipPath.includes(bulletPs) || shipPath.includes(bulletPs + w)) {
       this.life--;
       renderData.aniEffect.push(
         animation(10, function (renCount, viewDom) {
-          shipPath.forEach(function (ps, index) {
-            var psObj = positionToXY(ps);
-            viewDom.fillStyle = 'rgba(255,0,0,.8)';
-            viewDom.fillRect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth + 1);
+          pathObj.forEach(function (ps, index) {
+            bricks(ps, viewDom,'rgba(255,0,0,.8)');
           });
         }.bind(this))
       );
@@ -107,19 +108,16 @@ export default function (obj) {
   this.touch = function (data) {
     var {
       viewDom,
-      shipPath,
-      touchEnemy
+      touchEnemy,
+      pathObj
     } = data;
 
-    var me = this;
     if (touchEnemy) {
       this.life--;
       renderData.aniEffect.push(
         animation(10, function (renCount, viewDom) {
-          shipPath.forEach(function (ps, index) {
-            var psObj = positionToXY(ps);
-            viewDom.fillStyle = 'rgba(255,0,0,.8)';
-            viewDom.fillRect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth + 1);
+          pathObj.forEach(function (ps, index) {
+            bricks(ps, viewDom,'rgba(255,0,0,.8)');
           });
         }.bind(this))
       );
@@ -165,17 +163,14 @@ export default function (obj) {
     var _wasHit = this.wasHit.bind(this);
     var _touch = this.touch.bind(this); 
     var isDead = this.isDead;
-    var path = lookPath[this.look](this.position,this.lookType);
+    var path = lookPath[this.look](this.position,this.lookType).map(el => el.ps);
+    var pathObj = lookPath[this.look](this.position,this.lookType);
     bulletPosition.call(this);
     grapicBullet.call(this, viewDom);
 
     if (!isDead) {
       lookPath[this.look](this.position,this.lookType).forEach(function (ps, index) {
-        var psObj = positionToXY(ps);
-        viewDom.beginPath();
-        viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth + 1);
-        viewDom.fillStyle = 'white';
-        viewDom.fill();
+        bricks(ps,viewDom);
       });
 
       // touchEnemy
@@ -190,7 +185,7 @@ export default function (obj) {
       _touch({
         touchEnemy,
         viewDom,
-        shipPath: path,
+        pathObj
       });
 
       // was hit
@@ -200,6 +195,7 @@ export default function (obj) {
           bulletIndex: index,
           viewDom: viewDom,
           shipPath: path,
+          pathObj,
         });
       })
 
