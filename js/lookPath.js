@@ -2,6 +2,7 @@ import {
   w,
   h
 } from './config';
+
 import {
   ezPosition,
   positionTosXsY,
@@ -85,18 +86,25 @@ export default {
     xy(0, 0, true);
     return rs;
   },
-  'TALONS': function (ps, type) {
+  'crystal-plus': function (ps, type) {
     var xy = ezPositionWithCheckScope(ps);
-    var rs = [xy(0, -2), xy(0, 1)];
+    var rs = [];
     var open = type === 'OPEN';
+    //var open = false;
 
     if (open) {
-      rs = [...rs, ...[xy(1, 0), xy(2, -1), xy(2, -2), xy(2, -3)]];
-      rs = [...rs, ...[xy(-1, 0), xy(-2, -1), xy(-2, -2), xy(-2, -3)]];
+      rs = [
+        { ps: xy(-1, -1), brickType: 'd0' }, { ps: xy(1, -1), brickType: 'b0' },
+        { ps: xy(-2, 0), brickType: 'd0' }, { ps: xy(-1, 0), brickType: 'd1' }, { ps: xy(0, 0), brickType: '7' }, { ps: xy(1, 0), brickType: 'b1' }, { ps: xy(2, 0), brickType: 'b0' },
+        { ps: xy(-2, 1), brickType: 'crystal5' }, { ps: xy(-1, 1), brickType: '2' }, { ps: xy(0, 1), brickType: '5' }, { ps: xy(1, 1), brickType: '3' }, { ps: xy(2, 1), brickType: 'crystal3' },
+      ];
     }
     if (!open) {
-      rs = [...rs, ...[xy(1, 0), xy(1, -1), xy(1, -2), xy(1, -3)]];
-      rs = [...rs, ...[xy(-1, 0), xy(-1, -1), xy(-1, -2), xy(-1, -3)]];
+      rs = [
+        { ps: xy(0, -1), brickType: 'crystal1' },
+        { ps: xy(-2, 0), brickType: 'd0' }, { ps: xy(-1, 0), brickType: 'd0' }, { ps: xy(0, 0), brickType: '0' }, { ps: xy(1, 0), brickType: 'b0' }, { ps: xy(2, 0), brickType: 'b0' },
+        { ps: xy(-2, 1), brickType: 'crystal5' },{ ps: xy(-1, 1), brickType: 'crystal5' }, { ps: xy(0, 1), brickType: 'crystal4' }, { ps: xy(1, 1), brickType: 'crystal3' }, { ps: xy(2, 1), brickType: 'crystal3' },
+      ];
     }
     xy(0, 0, true);
     return rs;
@@ -115,14 +123,25 @@ export default {
     }
     return rs;
   },
-  'MK-2': function (ps) {
-    var xy = ezPosition(ps);
-    var rs = [xy(0, 0), xy(0, 1), xy(0, 3)];
-    if (ps % w !== w - 1) {
-      rs.push(xy(1, 2));
+  'crystal': function (ps, type) {
+    var xy = ezPositionWithCheckScope(ps);
+    var rs = [];
+    var open = type === 'OPEN';
+    //var open = false;
+
+    if (open) {
+      rs = [
+        { ps: xy(-1, -1), brickType: 'd0' }, { ps: xy(1, -1), brickType: 'b0' },
+        { ps: xy(-1, 0), brickType: 'd1' }, { ps: xy(0, 0), brickType: '7' }, { ps: xy(1, 0), brickType: 'b1' },
+        { ps: xy(-1, 1), brickType: '2' }, { ps: xy(0, 1), brickType: '5' }, { ps: xy(1, 1), brickType: '3' }, 
+      ];
     }
-    if (ps % w !== 0) {
-      rs.push(xy(-1, 2));
+    if (!open) {
+      rs = [
+        { ps: xy(0, -1), brickType: 'crystal1' },
+        { ps: xy(-1, 0), brickType: 'd0' }, { ps: xy(0, 0), brickType: '0' }, { ps: xy(1, 0), brickType: 'b0' },
+        { ps: xy(-1, 1), brickType: 'crystal5' }, { ps: xy(0, 1), brickType: 'crystal4' }, { ps: xy(1, 1), brickType: 'crystal3' },
+      ];
     }
     xy(0, 0, true);
     return rs;

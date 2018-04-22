@@ -142,11 +142,11 @@ function clearRenderData() {
 }
 
 var ship = new createShip({
-  name: 'MK-2',
+  name: 'CrystalShip',
   life: shipLife,
   position: w * Math.floor(h / 2) - Math.floor(w / 2),
   deadPosition: w * Math.floor(h / 2) - Math.floor(w / 2),
-  look: 'MK-2',
+  look: 'crystal',
   deadCb: function (ship) {
     killCount = 0;
     renCount = 0;
@@ -187,7 +187,7 @@ function gaphic(TYPE) {
     if (boss.length) {
       var defPosition = Math.floor(Math.random() * w);
       boss.forEach(function (enemyObj, index) {
-        console.log(enemyObj.position);
+        // console.log(enemyObj.position);
         enemyObj.deadCb = function () {
           killCount++;
           if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
@@ -291,14 +291,34 @@ function touchAction(event) {
 document.getElementById('view').height = vheight;
 document.getElementById('view').width = vwidth;
 
-setInterval(function () {
-  render('OBJ_MOVE');
-  //
-  render('CONTROL_MOVE');
-  !atc.isMobile() && actionMove(ship);
-  //
-  render('BULLET_MOVE');
-}, renderTime);
+// setInterval(function () {
+//   render('OBJ_MOVE');
+//   //
+//   render('CONTROL_MOVE');
+//   !atc.isMobile() && actionMove(ship);
+//   //
+//   render('BULLET_MOVE');
+// }, renderTime);
+
+var preTimetamp = null;
+function step(timestamp) {
+  var progress;
+  if (preTimetamp === null) preTimetamp = timestamp;
+  progress = timestamp - preTimetamp;
+
+  if (progress >= renderTime) {
+    preTimetamp = timestamp;
+    //animation
+    render('OBJ_MOVE');
+    render('CONTROL_MOVE');
+    !atc.isMobile() && actionMove(ship);
+    render('BULLET_MOVE');
+    //
+  }
+  requestAnimationFrame(step);
+}
+
+requestAnimationFrame(step);
 
 
 // setInterval(function () {

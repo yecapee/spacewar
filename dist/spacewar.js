@@ -71,7 +71,7 @@ require = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({35:[function(require,module,exports) {
+})({26:[function(require,module,exports) {
 var bundleURL = null;
 function getBundleURLCached() {
   if (!bundleURL) {
@@ -101,7 +101,7 @@ function getBaseURL(url) {
 
 exports.getBundleURL = getBundleURLCached;
 exports.getBaseURL = getBaseURL;
-},{}],26:[function(require,module,exports) {
+},{}],23:[function(require,module,exports) {
 var bundle = require('./bundle-url');
 
 function updateLink(link) {
@@ -132,13 +132,13 @@ function reloadCSS() {
 }
 
 module.exports = reloadCSS;
-},{"./bundle-url":35}],10:[function(require,module,exports) {
+},{"./bundle-url":26}],10:[function(require,module,exports) {
 
         var reloadCSS = require('_css_loader');
         module.hot.dispose(reloadCSS);
         module.hot.accept(reloadCSS);
       
-},{"./img/spacebg.png":[["0be558690d0b1f803f034b043d9bd2f2.png",30],30],"_css_loader":26}],19:[function(require,module,exports) {
+},{"./img/spacebg.png":[["0be558690d0b1f803f034b043d9bd2f2.png",24],24],"_css_loader":23}],19:[function(require,module,exports) {
 var atc = {
   isMobile: function isMobile() {
     var e = !1;
@@ -347,18 +347,17 @@ exports.default = {
     xy(0, 0, true);
     return rs;
   },
-  'TALONS': function TALONS(ps, type) {
+  'crystal-plus': function crystalPlus(ps, type) {
     var xy = (0, _positionMethod.ezPositionWithCheckScope)(ps);
-    var rs = [xy(0, -2), xy(0, 1)];
+    var rs = [];
     var open = type === 'OPEN';
+    //var open = false;
 
     if (open) {
-      rs = [].concat(_toConsumableArray(rs), [xy(1, 0), xy(2, -1), xy(2, -2), xy(2, -3)]);
-      rs = [].concat(_toConsumableArray(rs), [xy(-1, 0), xy(-2, -1), xy(-2, -2), xy(-2, -3)]);
+      rs = [{ ps: xy(-1, -1), brickType: 'd0' }, { ps: xy(1, -1), brickType: 'b0' }, { ps: xy(-2, 0), brickType: 'd0' }, { ps: xy(-1, 0), brickType: 'd1' }, { ps: xy(0, 0), brickType: '7' }, { ps: xy(1, 0), brickType: 'b1' }, { ps: xy(2, 0), brickType: 'b0' }, { ps: xy(-2, 1), brickType: 'crystal5' }, { ps: xy(-1, 1), brickType: '2' }, { ps: xy(0, 1), brickType: '5' }, { ps: xy(1, 1), brickType: '3' }, { ps: xy(2, 1), brickType: 'crystal3' }];
     }
     if (!open) {
-      rs = [].concat(_toConsumableArray(rs), [xy(1, 0), xy(1, -1), xy(1, -2), xy(1, -3)]);
-      rs = [].concat(_toConsumableArray(rs), [xy(-1, 0), xy(-1, -1), xy(-1, -2), xy(-1, -3)]);
+      rs = [{ ps: xy(0, -1), brickType: 'crystal1' }, { ps: xy(-2, 0), brickType: 'd0' }, { ps: xy(-1, 0), brickType: 'd0' }, { ps: xy(0, 0), brickType: '0' }, { ps: xy(1, 0), brickType: 'b0' }, { ps: xy(2, 0), brickType: 'b0' }, { ps: xy(-2, 1), brickType: 'crystal5' }, { ps: xy(-1, 1), brickType: 'crystal5' }, { ps: xy(0, 1), brickType: 'crystal4' }, { ps: xy(1, 1), brickType: 'crystal3' }, { ps: xy(2, 1), brickType: 'crystal3' }];
     }
     xy(0, 0, true);
     return rs;
@@ -377,14 +376,17 @@ exports.default = {
     }
     return rs;
   },
-  'MK-2': function MK2(ps) {
-    var xy = (0, _positionMethod.ezPosition)(ps);
-    var rs = [xy(0, 0), xy(0, 1), xy(0, 3)];
-    if (ps % _config.w !== _config.w - 1) {
-      rs.push(xy(1, 2));
+  'crystal': function crystal(ps, type) {
+    var xy = (0, _positionMethod.ezPositionWithCheckScope)(ps);
+    var rs = [];
+    var open = type === 'OPEN';
+    //var open = false;
+
+    if (open) {
+      rs = [{ ps: xy(-1, -1), brickType: 'd0' }, { ps: xy(1, -1), brickType: 'b0' }, { ps: xy(-1, 0), brickType: 'd1' }, { ps: xy(0, 0), brickType: '7' }, { ps: xy(1, 0), brickType: 'b1' }, { ps: xy(-1, 1), brickType: '2' }, { ps: xy(0, 1), brickType: '5' }, { ps: xy(1, 1), brickType: '3' }];
     }
-    if (ps % _config.w !== 0) {
-      rs.push(xy(-1, 2));
+    if (!open) {
+      rs = [{ ps: xy(0, -1), brickType: 'crystal1' }, { ps: xy(-1, 0), brickType: 'd0' }, { ps: xy(0, 0), brickType: '0' }, { ps: xy(1, 0), brickType: 'b0' }, { ps: xy(-1, 1), brickType: 'crystal5' }, { ps: xy(0, 1), brickType: 'crystal4' }, { ps: xy(1, 1), brickType: 'crystal3' }];
     }
     xy(0, 0, true);
     return rs;
@@ -555,7 +557,7 @@ exports.circle = function (x, y, r, all, now) {
     y: y + r * Math.sin(ang * now)
   };
 };
-},{"./config":19}],34:[function(require,module,exports) {
+},{"./config":19}],25:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -768,7 +770,7 @@ function shotByEnemy(position, bulletType, shipPs) {
     });
   };
 }
-},{"./lookPath":11,"./movePathList":12,"./aniEffectMethod":17,"./positionMethod":18,"./enemyBulletType":34,"./config":19}],13:[function(require,module,exports) {
+},{"./lookPath":11,"./movePathList":12,"./aniEffectMethod":17,"./positionMethod":18,"./enemyBulletType":25,"./config":19}],13:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -781,6 +783,7 @@ exports.default = function (renCount, ruleObj) {
     Object.keys(rule).forEach(function (key) {
       ruleObj[key] = rule[key];
     });
+    console.log('script : ', ruleObj);
   }
 };
 
@@ -900,7 +903,7 @@ var TrebleBullet = {
   look: 'hp+',
   color: 'rgba(255,0,0,1)',
   effect: function effect(ship) {
-    ship.look = 'TALONS';
+    ship.look = 'crystal-plus';
     _config.renderData.aniEffect.push((0, _aniEffectMethod.animation)(80, function (renCount, viewDom) {
       var p0 = (0, _positionMethod.positionToXY)(ship.position);
       var all = 5;
@@ -976,7 +979,7 @@ var script = {
 };
 
 ;
-},{"./config":19,"./createEnemy":14,"./aniEffectMethod":17,"./positionMethod":18}],32:[function(require,module,exports) {
+},{"./config":19,"./createEnemy":14,"./aniEffectMethod":17,"./positionMethod":18}],27:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1013,7 +1016,241 @@ exports.default = {
     if (bulletPs % _config.w < _config.w - 1) normal(bulletPs + 1, arr);
   }
 };
-},{"./config":19,"./positionMethod":18}],15:[function(require,module,exports) {
+},{"./config":19,"./positionMethod":18}],28:[function(require,module,exports) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (brickObj, viewDom, color) {
+  if (!brickObj) return;
+  if (typeof brickObj === 'number') {
+    return brickMap[0](brickObj, viewDom, color);
+  }
+  return brickMap[brickObj.brickType](brickObj.ps, viewDom, color);
+};
+
+var _positionMethod = require('./positionMethod');
+
+var _config = require('./config');
+
+var brickMap = {
+  0: function _(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    viewDom.beginPath();
+    viewDom.rect(psObj.x - _config.pixelWeigth / 2, psObj.y, _config.pixelWeigth, _config.pixelWeigth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  1: function _(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+    viewDom.moveTo(defX, psObj.y);
+    viewDom.lineTo(defX, psObj.y + _config.pixelWeigth);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y + _config.pixelWeigth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  2: function _(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+    viewDom.moveTo(defX, psObj.y);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y + _config.pixelWeigth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  3: function _(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+    viewDom.moveTo(defX, psObj.y);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y);
+    viewDom.lineTo(defX, psObj.y + _config.pixelWeigth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  4: function _(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+
+    viewDom.moveTo(defX + _config.pixelWeigth, psObj.y);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y + _config.pixelWeigth);
+    viewDom.lineTo(defX, psObj.y + _config.pixelWeigth + 1);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  5: function _(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+    var halfzWidth = _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+
+    viewDom.moveTo(defX, psObj.y);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y);
+    viewDom.lineTo(defX + halfzWidth, psObj.y + halfzWidth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  6: function _(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+    var halfzWidth = _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+
+    viewDom.moveTo(defX + _config.pixelWeigth, psObj.y);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y + _config.pixelWeigth);
+    viewDom.lineTo(defX + halfzWidth, psObj.y + halfzWidth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  7: function _(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+    var halfzWidth = _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+
+    viewDom.moveTo(defX + halfzWidth, psObj.y + halfzWidth);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y + _config.pixelWeigth);
+    viewDom.lineTo(defX, psObj.y + _config.pixelWeigth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  8: function _(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+    var halfzWidth = _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+
+    viewDom.moveTo(defX, psObj.y);
+    viewDom.lineTo(defX + halfzWidth, psObj.y + halfzWidth);
+    viewDom.lineTo(defX, psObj.y + _config.pixelWeigth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  b0: function b0(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+    var halfzWidth = _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+
+    viewDom.moveTo(defX, psObj.y);
+    viewDom.lineTo(defX + halfzWidth, psObj.y + _config.pixelWeigth);
+    viewDom.lineTo(defX, psObj.y + _config.pixelWeigth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  b1: function b1(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+    var halfzWidth = _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+
+    viewDom.moveTo(defX, psObj.y);
+    viewDom.lineTo(defX + halfzWidth, psObj.y);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y + _config.pixelWeigth);
+    viewDom.lineTo(defX, psObj.y + _config.pixelWeigth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  d0: function d0(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+    var halfzWidth = _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+
+    viewDom.moveTo(defX + _config.pixelWeigth, psObj.y);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y + _config.pixelWeigth);
+    viewDom.lineTo(defX + halfzWidth, psObj.y + _config.pixelWeigth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  d1: function d1(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+    var halfzWidth = _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+
+    viewDom.moveTo(defX + halfzWidth, psObj.y);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y + _config.pixelWeigth);
+    viewDom.lineTo(defX, psObj.y + _config.pixelWeigth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  crystal1: function crystal1(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+    var halfzWidth = _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+
+    viewDom.moveTo(defX + halfzWidth, psObj.y);
+    viewDom.lineTo(defX, psObj.y + _config.pixelWeigth);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y + _config.pixelWeigth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  crystal3: function crystal3(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+    var halfzWidth = _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+
+    viewDom.moveTo(defX, psObj.y);
+    viewDom.lineTo(defX + halfzWidth, psObj.y);
+    viewDom.lineTo(defX, psObj.y + halfzWidth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  crystal4: function crystal4(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+    var halfzWidth = _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+
+    viewDom.moveTo(defX, psObj.y);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y + halfzWidth);
+    viewDom.lineTo(defX + halfzWidth, psObj.y + _config.pixelWeigth);
+    viewDom.lineTo(defX, psObj.y + halfzWidth);
+
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  },
+  crystal5: function crystal5(ps, viewDom, color) {
+    var psObj = (0, _positionMethod.positionToXY)(ps);
+    var defX = psObj.x - _config.pixelWeigth / 2;
+    var halfzWidth = _config.pixelWeigth / 2;
+
+    viewDom.beginPath();
+
+    viewDom.moveTo(defX + halfzWidth, psObj.y);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y);
+    viewDom.lineTo(defX + _config.pixelWeigth, psObj.y + halfzWidth);
+    viewDom.fillStyle = color || 'white';
+    viewDom.fill();
+  }
+};
+},{"./positionMethod":18,"./config":19}],15:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1041,16 +1278,15 @@ exports.default = function (obj) {
     var bulletPs = data.bulletPs,
         bulletIndex = data.bulletIndex,
         viewDom = data.viewDom,
-        shipPath = data.shipPath;
+        shipPath = data.shipPath,
+        pathObj = data.pathObj;
 
 
     if (shipPath.includes(bulletPs) || shipPath.includes(bulletPs + _config.w)) {
       this.life--;
       _config.renderData.aniEffect.push((0, _aniEffectMethod.animation)(10, function (renCount, viewDom) {
-        shipPath.forEach(function (ps, index) {
-          var psObj = (0, _positionMethod.positionToXY)(ps);
-          viewDom.fillStyle = 'rgba(255,0,0,.8)';
-          viewDom.fillRect(psObj.x - _config.pixelWeigth / 2, psObj.y, _config.pixelWeigth, _config.pixelWeigth + 1);
+        pathObj.forEach(function (ps, index) {
+          (0, _bricks2.default)(ps, viewDom, 'rgba(255,0,0,.8)');
         });
       }.bind(this)));
       _config.renderData.enemyBullet.splice(bulletIndex, 1);
@@ -1064,18 +1300,15 @@ exports.default = function (obj) {
 
   this.touch = function (data) {
     var viewDom = data.viewDom,
-        shipPath = data.shipPath,
-        touchEnemy = data.touchEnemy;
+        touchEnemy = data.touchEnemy,
+        pathObj = data.pathObj;
 
 
-    var me = this;
     if (touchEnemy) {
       this.life--;
       _config.renderData.aniEffect.push((0, _aniEffectMethod.animation)(10, function (renCount, viewDom) {
-        shipPath.forEach(function (ps, index) {
-          var psObj = (0, _positionMethod.positionToXY)(ps);
-          viewDom.fillStyle = 'rgba(255,0,0,.8)';
-          viewDom.fillRect(psObj.x - _config.pixelWeigth / 2, psObj.y, _config.pixelWeigth, _config.pixelWeigth + 1);
+        pathObj.forEach(function (ps, index) {
+          (0, _bricks2.default)(ps, viewDom, 'rgba(255,0,0,.8)');
         });
       }.bind(this)));
       if (this.life < 1) {
@@ -1117,17 +1350,16 @@ exports.default = function (obj) {
     var _wasHit = this.wasHit.bind(this);
     var _touch = this.touch.bind(this);
     var isDead = this.isDead;
-    var path = _lookPath2.default[this.look](this.position, this.lookType);
+    var path = _lookPath2.default[this.look](this.position, this.lookType).map(function (el) {
+      return el.ps;
+    });
+    var pathObj = _lookPath2.default[this.look](this.position, this.lookType);
     bulletPosition.call(this);
     grapicBullet.call(this, viewDom);
 
     if (!isDead) {
       _lookPath2.default[this.look](this.position, this.lookType).forEach(function (ps, index) {
-        var psObj = (0, _positionMethod.positionToXY)(ps);
-        viewDom.beginPath();
-        viewDom.rect(psObj.x - _config.pixelWeigth / 2, psObj.y, _config.pixelWeigth, _config.pixelWeigth + 1);
-        viewDom.fillStyle = 'white';
-        viewDom.fill();
+        (0, _bricks2.default)(ps, viewDom);
       });
 
       // touchEnemy
@@ -1142,7 +1374,7 @@ exports.default = function (obj) {
       _touch({
         touchEnemy: touchEnemy,
         viewDom: viewDom,
-        shipPath: path
+        pathObj: pathObj
       });
 
       // was hit
@@ -1151,7 +1383,8 @@ exports.default = function (obj) {
           bulletPs: bullet.data.position,
           bulletIndex: index,
           viewDom: viewDom,
-          shipPath: path
+          shipPath: path,
+          pathObj: pathObj
         });
       });
 
@@ -1202,6 +1435,10 @@ var _shipBulletType = require('./shipBulletType');
 var _shipBulletType2 = _interopRequireDefault(_shipBulletType);
 
 var _aniEffectMethod = require('./aniEffectMethod');
+
+var _bricks = require('./bricks');
+
+var _bricks2 = _interopRequireDefault(_bricks);
 
 var _positionMethod = require('./positionMethod');
 
@@ -1255,7 +1492,7 @@ function grapicBullet(viewDom) {
     });
   });
 }
-},{"./lookPath":11,"./movePathList":12,"./shipBulletType":32,"./aniEffectMethod":17,"./positionMethod":18,"./config":19}],16:[function(require,module,exports) {
+},{"./lookPath":11,"./movePathList":12,"./shipBulletType":27,"./aniEffectMethod":17,"./bricks":28,"./positionMethod":18,"./config":19}],16:[function(require,module,exports) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1523,11 +1760,11 @@ function clearRenderData() {
 }
 
 var ship = new _createShip2.default({
-  name: 'MK-2',
+  name: 'CrystalShip',
   life: _config.shipLife,
   position: _config.w * Math.floor(_config.h / 2) - Math.floor(_config.w / 2),
   deadPosition: _config.w * Math.floor(_config.h / 2) - Math.floor(_config.w / 2),
-  look: 'MK-2',
+  look: 'crystal',
   deadCb: function deadCb(ship) {
     killCount = 0;
     renCount = 0;
@@ -1568,7 +1805,7 @@ function gaphic(TYPE) {
     if (boss.length) {
       var defPosition = Math.floor(Math.random() * _config.w);
       boss.forEach(function (enemyObj, index) {
-        console.log(enemyObj.position);
+        // console.log(enemyObj.position);
         enemyObj.deadCb = function () {
           killCount++;
           if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
@@ -1667,14 +1904,34 @@ function touchAction(event) {
 document.getElementById('view').height = _config.vheight;
 document.getElementById('view').width = _config.vwidth;
 
-setInterval(function () {
-  render('OBJ_MOVE');
-  //
-  render('CONTROL_MOVE');
-  !_config.atc.isMobile() && actionMove(ship);
-  //
-  render('BULLET_MOVE');
-}, _config.renderTime);
+// setInterval(function () {
+//   render('OBJ_MOVE');
+//   //
+//   render('CONTROL_MOVE');
+//   !atc.isMobile() && actionMove(ship);
+//   //
+//   render('BULLET_MOVE');
+// }, renderTime);
+
+var preTimetamp = null;
+function step(timestamp) {
+  var progress;
+  if (preTimetamp === null) preTimetamp = timestamp;
+  progress = timestamp - preTimetamp;
+
+  if (progress >= _config.renderTime) {
+    preTimetamp = timestamp;
+    //animation
+    render('OBJ_MOVE');
+    render('CONTROL_MOVE');
+    !_config.atc.isMobile() && actionMove(ship);
+    render('BULLET_MOVE');
+    //
+  }
+  requestAnimationFrame(step);
+}
+
+requestAnimationFrame(step);
 
 // setInterval(function () {
 //   render('CONTROL_MOVE');
@@ -1710,7 +1967,7 @@ setInterval(function () {
 
 // BOSS設計
 //*關卡設計
-},{"./main.css":10,"./js/lookPath":11,"./js/movePathList":12,"./js/script":13,"./js/createEnemy":14,"./js/createShip":15,"./js/createItem":16,"./js/aniEffectMethod":17,"./js/positionMethod":18,"./js/config":19}],36:[function(require,module,exports) {
+},{"./main.css":10,"./js/lookPath":11,"./js/movePathList":12,"./js/script":13,"./js/createEnemy":14,"./js/createShip":15,"./js/createItem":16,"./js/aniEffectMethod":17,"./js/positionMethod":18,"./js/config":19}],30:[function(require,module,exports) {
 
 var global = (1, eval)('this');
 var OldModule = module.bundle.Module;
@@ -1732,7 +1989,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '62966' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '59300' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -1833,5 +2090,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.require, id);
   });
 }
-},{}]},{},[36,2])
+},{}]},{},[30,2])
 //# sourceMappingURL=/dist/spacewar.map

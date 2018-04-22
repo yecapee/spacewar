@@ -122,7 +122,7 @@ var TrebleBullet = {
   look: 'hp+',
   color: 'rgba(255,0,0,1)',
   effect: function (ship) {
-    ship.look = 'TALONS';
+    ship.look = 'crystal-plus';
     renderData.aniEffect.push(
       animation(80, function (renCount, viewDom) {
         var p0 = positionToXY(ship.position);
@@ -205,6 +205,7 @@ export default function (renCount, ruleObj) {
     Object.keys(rule).forEach(function (key) {
       ruleObj[key] = rule[key];
     })
+    console.log('script : ',ruleObj);
   }
 };
 
