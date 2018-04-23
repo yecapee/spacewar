@@ -112,14 +112,14 @@ function shotDriver() {
   if (!shotFn) {
     shotFn = setInterval(function () {
       ship.shot();
-      ship.lookType='OPEN';
+      ship.lookType = 'OPEN';
     }, 1000 / ship.shotFps);
   }
 }
 
 function closeShot() {
   clearInterval(shotFn);
-  ship.lookType='CLOSE';
+  ship.lookType = 'CLOSE';
   shotFn = null;
 }
 
@@ -159,7 +159,7 @@ function gaphic(TYPE) {
   var bestMileage = localStorage.getItem('bestMileage') || 0;
   var stopCount = ruleObj.stopCount;
   var boss = ruleObj.boss || [];
-  script(renCount, ruleObj);
+  script(renCount, ruleObj, nextPolling);
   if (TYPE === 'OBJ_MOVE') {
     var createObj = false;
     var item = ruleObj.item;
@@ -180,6 +180,10 @@ function gaphic(TYPE) {
       if (ruleObj.enemyPolling) {
         nextPolling = renCount + Math.floor(Math.random() * ruleObj.enemyPolling[1] + ruleObj.enemyPolling[0]);
       }
+    }
+    
+    if(nextPolling < renCount && ruleObj.enemyPolling){
+      nextPolling = renCount + Math.floor(Math.random() * ruleObj.enemyPolling[1] + ruleObj.enemyPolling[0]);
     }
 
     // boss push

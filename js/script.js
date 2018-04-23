@@ -199,13 +199,13 @@ var script = {
 
 };
 
-export default function (renCount, ruleObj) {
+export default function (renCount, ruleObj, nextPolling) {
   var rule = script[renCount];
   if (rule) {
     Object.keys(rule).forEach(function (key) {
       ruleObj[key] = rule[key];
     })
-    console.log('script : ',ruleObj);
+    console.log('script : ',ruleObj,'nextPolling : ',nextPolling);
   }
 };
 
