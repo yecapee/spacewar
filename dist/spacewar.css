@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 html, body {
   background-color: rgb(51, 51, 51);
   overflow: hidden;
@@ -55,3 +56,6 @@ html, body {
   font: bold;
   font-size: 5rem;
 }
+=======
+body,html{background-color:#333;overflow:hidden;height:100%;width:100%;margin:0;padding:0}#view{right:0;left:0;margin:auto;position:absolute;z-index:0;background-image:url(0be558690d0b1f803f034b043d9bd2f2.png);background-size:100% auto}#score{top:20;color:orange;font-size:8px;z-index:1;padding-left:5px;-webkit-user-select:none;-moz-user-select:none;user-select:none}#debug,#score{display:block;position:fixed;left:0}#debug{bottom:0;color:#fff}#life{position:absolute;bottom:0;background-color:orange;height:10px;width:100%;z-index:2}.score{font:700;font-size:5rem}
+>>>>>>> 888c32c54bd5a8c089c7f38fb8397f4b39094ac3

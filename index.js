@@ -128,6 +128,7 @@ function bulletPosition(shipPs) {
   for (var key in enemyBulleArr) {
     enemyBulleArr[key].data = enemyBulleArr[key].fn(shipPs);
     if (enemyBulleArr[key].data.clear) {
+      enemyBulleArr[key].fn(shipPs,true);
       enemyBulleArr.splice(key, 1);
     };
   }
@@ -294,14 +295,34 @@ function touchAction(event) {
 document.getElementById('view').height = vheight;
 document.getElementById('view').width = vwidth;
 
-setInterval(function () {
-  render('OBJ_MOVE');
-  //
-  render('CONTROL_MOVE');
-  !atc.isMobile() && actionMove(ship);
-  //
-  render('BULLET_MOVE');
-}, renderTime);
+// setInterval(function () {
+//   render('OBJ_MOVE');
+//   //
+//   render('CONTROL_MOVE');
+//   !atc.isMobile() && actionMove(ship);
+//   //
+//   render('BULLET_MOVE');
+// }, renderTime);
+
+var preTimetamp = null;
+function step(timestamp) {
+  var progress;
+  if (preTimetamp === null) preTimetamp = timestamp;
+  progress = timestamp - preTimetamp;
+
+  if (progress >= renderTime) {
+    preTimetamp = timestamp;
+    //animation
+    render('OBJ_MOVE');
+    render('CONTROL_MOVE');
+    !atc.isMobile() && actionMove(ship);
+    render('BULLET_MOVE');
+    //
+  }
+  requestAnimationFrame(step);
+}
+
+requestAnimationFrame(step);
 
 
 // setInterval(function () {

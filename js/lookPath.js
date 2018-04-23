@@ -83,6 +83,7 @@ export default {
     if (ps % w !== 0) {
       rs = [...rs, xy(-1, -1), xy(-1, -2), xy(-1, 1)];
     }
+    xy(0, 0, true);
     return rs;
   },
   'crystal-plus': function (ps, type) {
@@ -105,6 +106,7 @@ export default {
         { ps: xy(-2, 1), brickType: 'crystal5' },{ ps: xy(-1, 1), brickType: 'crystal5' }, { ps: xy(0, 1), brickType: 'crystal4' }, { ps: xy(1, 1), brickType: 'crystal3' }, { ps: xy(2, 1), brickType: 'crystal3' },
       ];
     }
+    xy(0, 0, true);
     return rs;
   },
   'MK-1': function (ps) {
@@ -141,6 +143,7 @@ export default {
         { ps: xy(-1, 1), brickType: 'crystal5' }, { ps: xy(0, 1), brickType: 'crystal4' }, { ps: xy(1, 1), brickType: 'crystal3' },
       ];
     }
+    xy(0, 0, true);
     return rs;
   },
   'MK-2.LIGHT': function (ps) {
@@ -152,6 +155,7 @@ export default {
     if (ps % w !== 0) {
       rs.push(xy(-1, 2));
     }
+    xy(0, 0, true);
     return rs;
   },
   'MK-3': function (ps) {

@@ -100,6 +100,7 @@ export default function (obj) {
         viewDom.drawImage(explosion, deadPs.x - (50 - renCount) / 2, deadPs.y, 120 - renCount, 120 - renCount);
       })
     );
+    obj = null;
     deadCb();
   }
 

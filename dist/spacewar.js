@@ -215,8 +215,11 @@ exports.sXsYToPosition = function (sx, sy) {
 
 exports.ezPosition = function (position) {
   var ps = position;
-  return function (x, y) {
+  return function (x, y, clear) {
     var rs = ps + y * _config.w + x;
+    if (clear) {
+      ps = null;
+    }
     return rs;
   };
 };
@@ -224,10 +227,15 @@ exports.ezPosition = function (position) {
 exports.ezPositionWithCheckScope = function (position) {
   var ps = position;
   var psXy = positionTosXsY(ps);
-  return function (x, y) {
+  return function (x, y, clear) {
     var _x = psXy.x + x;
     var _y = psXy.y + y;
     var rs = ps + y * _config.w + x;
+    if (clear) {
+      ps = null;
+      psXy = null;
+      return;
+    }
     return _x < 0 || _x > _config.w - 1 || _y < 0 || _y > _config.h - 1 ? undefined : rs;
   };
 };
@@ -336,6 +344,7 @@ exports.default = {
     if (ps % _config.w !== 0) {
       rs = [].concat(_toConsumableArray(rs), [xy(-1, -1), xy(-1, -2), xy(-1, 1)]);
     }
+    xy(0, 0, true);
     return rs;
   },
   'crystal-plus': function crystalPlus(ps, type) {
@@ -350,6 +359,7 @@ exports.default = {
     if (!open) {
       rs = [{ ps: xy(0, -1), brickType: 'crystal1' }, { ps: xy(-2, 0), brickType: 'd0' }, { ps: xy(-1, 0), brickType: 'd0' }, { ps: xy(0, 0), brickType: '0' }, { ps: xy(1, 0), brickType: 'b0' }, { ps: xy(2, 0), brickType: 'b0' }, { ps: xy(-2, 1), brickType: 'crystal5' }, { ps: xy(-1, 1), brickType: 'crystal5' }, { ps: xy(0, 1), brickType: 'crystal4' }, { ps: xy(1, 1), brickType: 'crystal3' }, { ps: xy(2, 1), brickType: 'crystal3' }];
     }
+    xy(0, 0, true);
     return rs;
   },
   'MK-1': function MK1(ps) {
@@ -378,6 +388,7 @@ exports.default = {
     if (!open) {
       rs = [{ ps: xy(0, -1), brickType: 'crystal1' }, { ps: xy(-1, 0), brickType: 'd0' }, { ps: xy(0, 0), brickType: '0' }, { ps: xy(1, 0), brickType: 'b0' }, { ps: xy(-1, 1), brickType: 'crystal5' }, { ps: xy(0, 1), brickType: 'crystal4' }, { ps: xy(1, 1), brickType: 'crystal3' }];
     }
+    xy(0, 0, true);
     return rs;
   },
   'MK-2.LIGHT': function MK2LIGHT(ps) {
@@ -389,6 +400,7 @@ exports.default = {
     if (ps % _config.w !== 0) {
       rs.push(xy(-1, 2));
     }
+    xy(0, 0, true);
     return rs;
   },
   'MK-3': function MK3(ps) {
@@ -561,7 +573,7 @@ exports.default = {
     var time = 45;
     var prePs = bulletPs;
     var count = time;
-    return function (taPs) {
+    return function (taPs, clear) {
       count--;
       var p0 = (0, _positionMethod.positionTosXsY)(prePs);
       var p1 = (0, _positionMethod.positionTosXsY)(prePs + _config.w * _config.h);
@@ -576,6 +588,11 @@ exports.default = {
       var realX = _p0.x + (_p1.x - _p0.x) * t;
       var realY = _p0.y + (_p1.y - _p0.y) * t;
 
+      if (clear) {
+        time = null;
+        prePs = null;
+        count = null;
+      }
       return {
         position: (0, _positionMethod.sXsYToPosition)(x, y),
         x: realX,
@@ -587,7 +604,7 @@ exports.default = {
       };
     };
   },
-  track: function track(bulletPs) {
+  track: function track(bulletPs, clear) {
     var prePs = bulletPs;
     var time;
     var count;
@@ -612,6 +629,14 @@ exports.default = {
       var realX = _p0.x + marginX + (_p1.x - _p0.x + marginX) * t;
       var realY = _p0.y + marginY + (_p1.y - _p0.y + marginY) * t;
       count--;
+
+      if (clear) {
+        time = null;
+        prePs = null;
+        count = null;
+        p1 = null;
+        _p1 = null;
+      }
 
       return {
         position: (0, _positionMethod.sXsYToPosition)(x, y),
@@ -704,6 +729,7 @@ exports.default = function (obj) {
     _config.renderData.aniEffect.push((0, _aniEffectMethod.animation)(50, function (renCount, viewDom) {
       viewDom.drawImage(explosion, deadPs.x - (50 - renCount) / 2, deadPs.y, 120 - renCount, 120 - renCount);
     }));
+    obj = null;
     deadCb();
   };
 };
@@ -751,13 +777,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-exports.default = function (renCount, ruleObj) {
+exports.default = function (renCount, ruleObj, nextPolling) {
   var rule = script[renCount];
   if (rule) {
     Object.keys(rule).forEach(function (key) {
       ruleObj[key] = rule[key];
     });
-    console.log('script : ', ruleObj);
+    console.log('script : ', ruleObj, 'nextPolling : ', nextPolling);
   }
 };
 
@@ -1720,6 +1746,7 @@ function bulletPosition(shipPs) {
   for (var key in enemyBulleArr) {
     enemyBulleArr[key].data = enemyBulleArr[key].fn(shipPs);
     if (enemyBulleArr[key].data.clear) {
+      enemyBulleArr[key].fn(shipPs, true);
       enemyBulleArr.splice(key, 1);
     };
   }
@@ -1751,7 +1778,7 @@ function gaphic(TYPE) {
   var bestMileage = localStorage.getItem('bestMileage') || 0;
   var stopCount = ruleObj.stopCount;
   var boss = ruleObj.boss || [];
-  (0, _script2.default)(renCount, ruleObj);
+  (0, _script2.default)(renCount, ruleObj, nextPolling);
   if (TYPE === 'OBJ_MOVE') {
     var createObj = false;
     var item = ruleObj.item;
@@ -1772,6 +1799,10 @@ function gaphic(TYPE) {
       if (ruleObj.enemyPolling) {
         nextPolling = renCount + Math.floor(Math.random() * ruleObj.enemyPolling[1] + ruleObj.enemyPolling[0]);
       }
+    }
+
+    if (nextPolling < renCount && ruleObj.enemyPolling) {
+      nextPolling = renCount + Math.floor(Math.random() * ruleObj.enemyPolling[1] + ruleObj.enemyPolling[0]);
     }
 
     // boss push
@@ -1877,14 +1908,34 @@ function touchAction(event) {
 document.getElementById('view').height = _config.vheight;
 document.getElementById('view').width = _config.vwidth;
 
-setInterval(function () {
-  render('OBJ_MOVE');
-  //
-  render('CONTROL_MOVE');
-  !_config.atc.isMobile() && actionMove(ship);
-  //
-  render('BULLET_MOVE');
-}, _config.renderTime);
+// setInterval(function () {
+//   render('OBJ_MOVE');
+//   //
+//   render('CONTROL_MOVE');
+//   !atc.isMobile() && actionMove(ship);
+//   //
+//   render('BULLET_MOVE');
+// }, renderTime);
+
+var preTimetamp = null;
+function step(timestamp) {
+  var progress;
+  if (preTimetamp === null) preTimetamp = timestamp;
+  progress = timestamp - preTimetamp;
+
+  if (progress >= _config.renderTime) {
+    preTimetamp = timestamp;
+    //animation
+    render('OBJ_MOVE');
+    render('CONTROL_MOVE');
+    !_config.atc.isMobile() && actionMove(ship);
+    render('BULLET_MOVE');
+    //
+  }
+  requestAnimationFrame(step);
+}
+
+requestAnimationFrame(step);
 
 // setInterval(function () {
 //   render('CONTROL_MOVE');
