@@ -3,6 +3,8 @@ import movePathList from './movePathList';
 import { animation } from './aniEffectMethod';
 import { positionToXY } from './positionMethod';
 import bulletTypeMap from './enemyBulletType';
+import bricks from './bricks';
+import {explosionSound} from './sound';
 import {
   w,
   h,
@@ -47,7 +49,8 @@ export default function (obj) {
   };
   this.wasHit = function (bulletPs, viewDom, cb) {
     var me = this;
-    if (lookPath[this.look](this.position,'GETMAP').includes(bulletPs)) {
+    var path = lookPath[this.look](this.position).map(el => el.ps);
+    if (path.includes(bulletPs)) {
       hit = true;
       this.life--;
       if (this.life < 1) {
@@ -68,11 +71,7 @@ export default function (obj) {
   this.grapic = function (viewDom) {
     var color = hit ? 'red' : 'white';
     lookPath[this.look](this.position).forEach(function (ps, index) {
-      var psObj = positionToXY(ps);
-      viewDom.beginPath();
-      viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth);
-      viewDom.fillStyle = color;
-      viewDom.fill();
+      bricks(ps, viewDom, color);
     });
   };
 
@@ -101,6 +100,7 @@ export default function (obj) {
       })
     );
     obj = null;
+    explosionSound();
     deadCb();
   }
 

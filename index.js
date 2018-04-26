@@ -5,6 +5,7 @@ import script from './js/script';
 import createEnemy from './js/createEnemy';
 import createShip from './js/createShip';
 import createItem from './js/createItem';
+import music from './js/bgmusic';
 import { animation } from './js/aniEffectMethod';
 import { positionToXY } from './js/positionMethod';
 import {
@@ -316,6 +317,9 @@ function step(timestamp) {
 
 requestAnimationFrame(step);
 
+//music
+music();
+
 
 //todo *做了 -不做了
 
@@ -325,7 +329,7 @@ requestAnimationFrame(step);
 //*敵機子彈種類多元
 
 //*主角機有血量
-//-主角機階段進化
+//-主角機階段進化l
 //*主角機物件化？
 
 //*子彈發射時間間隔可調整
@@ -339,5 +343,12 @@ requestAnimationFrame(step);
 //*出彈頻率應該綁在SHIP物件
 // 來一點速度感的特效
 
-// BOSS設計
+//*BOSS設計
 //*關卡設計
+
+// 加一點音效跟背景音樂吧
+//*把敵人也改成可以用其他磚塊拼
+// 存一點錢
+
+// 加入盾牌道具
+// 加入近戰道具

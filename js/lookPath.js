@@ -30,7 +30,7 @@ function circleMap() {
     var rs = [];
     for (var i = 0; i <= pointLength; i++) {
       var psData = circle(p0.x, p0.y, 5, pointLength, i, Math.round(renCount / 20));
-      !psData.outScope && rs.push(psData.position);
+      !psData.outScope && rs.push({ ps: psData.position, brickType: '0' });
     }
     if (!getmap) renCount++;
     return rs;
@@ -39,25 +39,27 @@ function circleMap() {
 
 export default {
   'zark': function (ps) {
-    var rs = [ps];
+    var xy = ezPositionWithCheckScope(ps);
+    var rs = [{ ps: xy(0, 0), brickType: '0' }];
     if (ps % w !== w - 1) {
-      rs.push(ps - w + 1);
+      rs.push({ ps: xy(1, -1), brickType: '0' });
     }
     if (ps % w !== 0 || ps == 0) {
-      rs.push(ps - w - 1);
+      rs.push({ ps: xy(-1, -1), brickType: '0' });
     }
     return rs;
   },
   'fort': function (ps) {
-    var rs = [ps];
+    var xy = ezPositionWithCheckScope(ps);
+    var rs = [{ ps: xy(0, 0), brickType: '0' }];
     if (ps % w !== w - 1) {
-      rs.push(ps - w + 1);
+      rs.push({ ps: xy(1, -1), brickType: '0' });
     }
     if (ps % w !== 0 || ps == 0) {
-      rs.push(ps - w - 1);
+      rs.push({ ps: xy(-1, -1), brickType: '0' });
     }
     if (ps - 2 * w > 0) {
-      rs.push(ps - 2 * w);
+      rs.push({ ps: xy(0, -2), brickType: '0' });
     }
     return rs;
   },
@@ -103,24 +105,10 @@ export default {
       rs = [
         { ps: xy(0, -1), brickType: 'crystal1' },
         { ps: xy(-2, 0), brickType: 'd0' }, { ps: xy(-1, 0), brickType: 'd0' }, { ps: xy(0, 0), brickType: '0' }, { ps: xy(1, 0), brickType: 'b0' }, { ps: xy(2, 0), brickType: 'b0' },
-        { ps: xy(-2, 1), brickType: 'crystal5' },{ ps: xy(-1, 1), brickType: 'crystal5' }, { ps: xy(0, 1), brickType: 'crystal4' }, { ps: xy(1, 1), brickType: 'crystal3' }, { ps: xy(2, 1), brickType: 'crystal3' },
+        { ps: xy(-2, 1), brickType: 'crystal5' }, { ps: xy(-1, 1), brickType: 'crystal5' }, { ps: xy(0, 1), brickType: 'crystal4' }, { ps: xy(1, 1), brickType: 'crystal3' }, { ps: xy(2, 1), brickType: 'crystal3' },
       ];
     }
     xy(0, 0, true);
-    return rs;
-  },
-  'MK-1': function (ps) {
-    var rs = [ps, ps + w, ps + 3 * w];
-    if (ps % w !== w - 1) {
-      rs.push(ps + 2 * w + 1);
-      rs.push(ps + 3 * w + 2);
-      rs.push(ps + 4 * w + 1);
-    }
-    if (ps % w !== 0) {
-      rs.push(ps + 2 * w - 1);
-      rs.push(ps + 3 * w - 2);
-      rs.push(ps + 4 * w - 1);
-    }
     return rs;
   },
   'crystal': function (ps, type) {
@@ -133,7 +121,7 @@ export default {
       rs = [
         { ps: xy(-1, -1), brickType: 'd0' }, { ps: xy(1, -1), brickType: 'b0' },
         { ps: xy(-1, 0), brickType: 'd1' }, { ps: xy(0, 0), brickType: '7' }, { ps: xy(1, 0), brickType: 'b1' },
-        { ps: xy(-1, 1), brickType: '2' }, { ps: xy(0, 1), brickType: '5' }, { ps: xy(1, 1), brickType: '3' }, 
+        { ps: xy(-1, 1), brickType: '2' }, { ps: xy(0, 1), brickType: '5' }, { ps: xy(1, 1), brickType: '3' },
       ];
     }
     if (!open) {
@@ -144,30 +132,6 @@ export default {
       ];
     }
     xy(0, 0, true);
-    return rs;
-  },
-  'MK-2.LIGHT': function (ps) {
-    var xy = ezPosition(ps);
-    var rs = [xy(0, 0), xy(0, 3)];
-    if (ps % w !== w - 1) {
-      rs.push(xy(1, 2));
-    }
-    if (ps % w !== 0) {
-      rs.push(xy(-1, 2));
-    }
-    xy(0, 0, true);
-    return rs;
-  },
-  'MK-3': function (ps) {
-    var rs = [ps, ps + w, ps + 2 * w, ps + 4 * w,];
-    if (ps % w !== w - 1) {
-      rs.push(ps + 2 * w + 1);
-      rs.push(ps + 3 * w + 1);
-    }
-    if (ps % w !== 0) {
-      rs.push(ps + 2 * w - 1);
-      rs.push(ps + 3 * w - 1);
-    }
     return rs;
   },
   'CIRCLE': circleMap()

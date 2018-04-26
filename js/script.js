@@ -137,6 +137,8 @@ var TrebleBullet = {
   },
 }
 
+
+//script
 var script = {
   0: {
     enemy: [Zark0],
@@ -199,6 +201,8 @@ var script = {
 
 };
 
+
+//export 
 export default function (renCount, ruleObj, nextPolling) {
   var rule = script[renCount];
   if (rule) {

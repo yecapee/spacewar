@@ -3,6 +3,7 @@ import movePathList from './movePathList';
 import shipBulletType from './shipBulletType';
 import { animation } from './aniEffectMethod';
 import bricks from './bricks';
+import {deadSound} from './sound';
 
 import {
   positionToXY,
@@ -87,7 +88,9 @@ export default function (obj) {
       pathObj
     } = data;
 
+    
     if (shipPath.includes(bulletPs) || shipPath.includes(bulletPs + w)) {
+      deadSound();
       this.life--;
       renderData.aniEffect.push(
         animation(10, function (renCount, viewDom) {
@@ -175,11 +178,10 @@ export default function (obj) {
 
       // touchEnemy
       var enemyMap = renderData.enemy.reduce(function (total, el) {
-        return [...total, ...lookPath[el.look](el.position)]
+        return [...total, ...lookPath[el.look](el.position).map(el => el.ps)]
       }, []);
       var touchEnemy = path.reduce(function (total, el) {
-        //console.log('arr',enemyMap, el);
-        return total || enemyMap.includes(el);
+        return el === undefined ? false : total || enemyMap.includes(el);
       }, false);
 
       _touch({
