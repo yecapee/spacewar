@@ -23,7 +23,6 @@ var autoFilter = new Tone.AutoFilter({
 
 noise.connect(autoFilter);
 
-
 export function explosionSound() {
   // synth.triggerAttackRelease('C#2', .05, '+0')
   // synth.triggerAttackRelease('C#2', .05, '+1')
