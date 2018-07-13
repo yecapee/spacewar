@@ -315,7 +315,6 @@ function step(timestamp) {
 
 
 //music
-//music();
 
 document.getElementById('ready').onclick = start;
 
