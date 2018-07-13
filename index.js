@@ -5,7 +5,7 @@ import script from './js/script';
 import createEnemy from './js/createEnemy';
 import createShip from './js/createShip';
 import createItem from './js/createItem';
-import music from './js/bgmusic';
+// import music from './js/bgmusic';
 import { animation } from './js/aniEffectMethod';
 import { positionToXY } from './js/positionMethod';
 import {
@@ -265,10 +265,6 @@ function gaphic(TYPE) {
 
 }
 
-function render(TYPE) {
-  gaphic(TYPE);
-}
-
 document.addEventListener('keydown', function (e) {
   keyCodeMap(e.keyCode, 'keydown');
 }, false);
@@ -306,10 +302,10 @@ function step(timestamp) {
   if (progress >= renderTime) {
     preTimetamp = timestamp;
     //animation
-    render('OBJ_MOVE');
-    render('CONTROL_MOVE');
+    gaphic('OBJ_MOVE');
+    gaphic('CONTROL_MOVE');
     !atc.isMobile() && actionMove(ship);
-    render('BULLET_MOVE');
+    gaphic('BULLET_MOVE');
     //
   }
   requestAnimationFrame(step);
@@ -318,7 +314,7 @@ function step(timestamp) {
 requestAnimationFrame(step);
 
 //music
-music();
+//music();
 
 
 //todo *做了 -不做了

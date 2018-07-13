@@ -47,6 +47,7 @@ export default function (obj) {
   this.getST = function () {
     return survivalTime;
   };
+  
   this.wasHit = function (bulletPs, viewDom, cb) {
     var me = this;
     var path = lookPath[this.look](this.position).map(el => el.ps);

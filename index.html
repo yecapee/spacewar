@@ -22,6 +22,7 @@
 <title>SPACEWAR</title>
 
 <body>
+  <audio id="bgmusic" src="http://grayscale.scene.pl/msx/zizibum.mp3" autoplay loop></audio>
   <div id="debug"></div>
   <div id="score" unselectable="on"></div>
   <div id="life"></div>
@@ -36,5 +37,8 @@
   
 </body>
 <script type="text/javascript" src="index.js"></script>
+<script>
+  bgmusic.volume = 0.05;
+</script> 
 
 </html>
