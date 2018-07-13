@@ -40,12 +40,11 @@
 </body>
 <script type="text/javascript" src="index.js"></script>
 <script>
- 
+ bgmusic.volume = 0.05;
  document.body.onclick = function(){
   _music();
  }
 function _music() {
-  bgmusic.volume = 0.05;
   bgmusic.play();
   _music = function(){};
 }
