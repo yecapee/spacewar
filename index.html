@@ -2,6 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-110926326-1"></script>
+<link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag() { dataLayer.push(arguments); }
@@ -25,6 +26,12 @@
   <audio id="bgmusic" autoplay loop>
     <source src="http://grayscale.scene.pl/msx/zizibum.mp3" >
   </audio>
+  <div class="ready" id="ready">
+    <div class="title">
+        <h1>OUTSPACE IS NO END.</h1>
+        <p>press space or click me</p>
+    </div>
+  </div>
   <div id="debug"></div>
   <div id="score" unselectable="on"></div>
   <div id="life"></div>
@@ -40,15 +47,10 @@
 </body>
 <script type="text/javascript" src="index.js"></script>
 <script>
- bgmusic.volume = 0.1;
- document.body.onmousemove = function(){
-  _music();
- }
-function _music() {
-  bgmusic.play();
-  _music = function(){};
-}
-
+  bgmusic.volume = 0.1;
+  function _music() {
+    bgmusic.play();
+  }
 </script> 
 
 </html>

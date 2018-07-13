@@ -266,7 +266,7 @@ function gaphic(TYPE) {
 }
 
 document.addEventListener('keydown', function (e) {
-  _music();
+  start();
   keyCodeMap(e.keyCode, 'keydown');
 }, false);
 document.addEventListener('keyup', function (e) {
@@ -312,11 +312,19 @@ function step(timestamp) {
   requestAnimationFrame(step);
 }
 
-requestAnimationFrame(step);
+
 
 //music
 //music();
 
+document.getElementById('ready').onclick = start;
+
+function start(){
+  document.getElementById('ready').style.zIndex = -1;
+  requestAnimationFrame(step);
+  _music();
+  start = function(){};
+}
 
 //todo *做了 -不做了
 
