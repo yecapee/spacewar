@@ -266,6 +266,7 @@ function gaphic(TYPE) {
 }
 
 document.addEventListener('keydown', function (e) {
+  _music();
   keyCodeMap(e.keyCode, 'keydown');
 }, false);
 document.addEventListener('keyup', function (e) {
@@ -278,7 +279,7 @@ document.addEventListener('touchend', closeShot, false);
 
 function touchAction(event) {
   var event = event || window.event;
-  event.preventDefault();
+  //event.preventDefault();
   if (event.touches[0]) {
     var x = Math.floor(event.touches[0].pageX / pixelWeigth);
     var y = Math.floor(event.touches[0].pageY / pixelWeigth);
