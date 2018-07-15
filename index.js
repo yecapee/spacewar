@@ -201,7 +201,6 @@ function gaphic(TYPE) {
         renderData.enemy.push(new createEnemy(enemyObj));
       });
       ruleObj.boss = [];
-      renCount++;
     }
     //
 

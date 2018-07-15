@@ -52,7 +52,7 @@ var Fort0 = {
 }
 
 var circleKiller = {
-  name: 'test',
+  name: 'circleKiller',
   life: 20,
   // position: Math.floor(Math.random() * w),
   shot: true,
@@ -93,7 +93,7 @@ var GreenPoint = {
 }
 
 var hp_1 = {
-  name: 'greenPoint',
+  name: 'hp_1',
   movePath: 'pingpong',
   moveTime: 10,
   restoreLife: ['liftRestore-1',],
@@ -115,7 +115,7 @@ var hp_1 = {
 }
 
 var TrebleBullet = {
-  name: 'greenPoint',
+  name: 'TrebleBullet',
   movePath: 'pingpong',
   moveTime: 10,
   changeBullet: 'treble',
@@ -167,10 +167,11 @@ var script = {
   },
   1805: {
     boss: [circleKiller],
-    stopCount: true,
   },
   1806: {
     boss: [circleKiller2],
+  },
+  1807:{
     stopCount: true,
   },
   1809: {
