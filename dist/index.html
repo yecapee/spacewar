@@ -1,1 +1,58 @@
-<html> <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">  <script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-110926326-1"></script> <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">    <noscript> <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5NN74MQ" height="0" width="0" style="display:none;visibility:hidden"></iframe> </noscript>  <meta property="og:title" content="Spacewar"> <meta property="og:url" content="https://yecapee.github.io/spacewar/dist/"> <meta property="og:image" content="https://yecapee.github.io/spacewar/game.png"> <meta property="og:description" content="A ptt style of space game"> <title>SPACEWAR</title> <link rel="stylesheet" href="spacewar.css"><body> <audio id="bgmusic" autoplay="" loop=""> <source src="http://grayscale.scene.pl/msx/zizibum.mp3"> </audio> <div class="ready" id="ready"> <div class="title"> <h1>OUTERSPACE IS NO END.</h1> <p>Develop by yecapee</p> <p>press space or click me </p> </div> </div> <div id="debug"></div> <div id="score" unselectable="on"></div> <div id="life"></div> <canvas id="view"></canvas> <img id="shipImg" src="94a3dabacd071becc023dc058a04c21e.png" style="display:none"> <img id="shipBulletNormal" src="a6ab041c32bcd4a05aabc0f566f1f0ef.png" style="display:none"> <img id="bulletBall" src="8c3e600c4c713c6464b840aa9c391b1c.png" style="display:none"> <img id="laser" src="fd6cd5e092bf3a75c91e2dc711aaa1ff.png" style="display:none"> <img id="zarkImg" src="3b45465786790b8cb4a6f4b50c107f97.png" style="display:none"> <img id="explosion" src="a62328c672cc4c793dc06afc6344ee2f.png" style="display:none"> </body> <script src="spacewar.js"></script> <script>function gtag(){dataLayer.push(arguments)}function _music(){bgmusic.play()}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","UA-110926326-1"),bgmusic.volume=.1;</script> </html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-110926326-1"></script>
+<link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'UA-110926326-1');
+</script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/0.12.54/Tone.min.js"></script> -->
+<!-- Google Tag Manager (noscript) -->
+<noscript>
+  <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5NN74MQ" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<meta property="og:title" content="Spacewar">
+<meta property="og:url" content="https://yecapee.github.io/spacewar/dist/">
+<meta property="og:image" content="https://yecapee.github.io/spacewar/game.png">
+<meta property="og:image" content="https://yecapee.github.io/spacewar/gozilla.png">
+<meta property="og:description" content="A ptt style of space game">
+<title>SPACEWAR</title>
+
+<link rel="stylesheet" href="/dist/spacewar.css"><body>
+  <audio id="bgmusic" autoplay="" loop="">
+    <source src="http://grayscale.scene.pl/msx/zizibum.mp3">
+  </audio>
+  <div class="ready" id="ready">
+    <div class="title">
+        <h1>OUTERSPACE IS NO END.</h1>
+        <p>Develop by yecapee</p>
+        <p>press space or click me </p>
+    </div>
+  </div>
+  <div id="debug"></div>
+  <div id="score" unselectable="on"></div>
+  <div id="life"></div>
+  <canvas id="view"></canvas>
+
+  <img id="shipImg" src="/dist/94a3dabacd071becc023dc058a04c21e.png" style="display:none">
+  <img id="shipBulletNormal" src="/dist/a6ab041c32bcd4a05aabc0f566f1f0ef.png" style="display:none">
+  <img id="bulletBall" src="/dist/8c3e600c4c713c6464b840aa9c391b1c.png" style="display:none">
+  <img id="laser" src="/dist/fd6cd5e092bf3a75c91e2dc711aaa1ff.png" style="display:none">
+  <img id="zarkImg" src="/dist/3b45465786790b8cb4a6f4b50c107f97.png" style="display:none">
+  <img id="explosion" src="/dist/a62328c672cc4c793dc06afc6344ee2f.png" style="display:none">
+  
+</body>
+<script type="text/javascript" src="/dist/spacewar.js"></script>
+<script>
+  bgmusic.volume = 0.1;
+  function _music() {
+    bgmusic.play();
+  }
+</script> 
+
+</html>
