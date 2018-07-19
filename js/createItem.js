@@ -8,6 +8,7 @@ import {
   pixelWeigth,
   renderData,
 } from './config';
+import bricks from './bricks';
 
 function restoreLifeAction(type, value, ship) {
   //'liftReset','liftMax-6','liftRestore-6'
@@ -57,11 +58,7 @@ export default function (obj) {
   this.grapic = function (viewDom) {
     var color = this.color;
     lookPath[this.look](this.position).forEach(function (ps, index) {
-      var psObj = positionToXY(ps);
-      viewDom.beginPath();
-      viewDom.rect(psObj.x - pixelWeigth / 2, psObj.y, pixelWeigth, pixelWeigth);
-      viewDom.fillStyle = color;
-      viewDom.fill();
+      bricks(ps, viewDom, color);
     });
   };
 

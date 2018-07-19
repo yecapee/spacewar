@@ -1,0 +1,128 @@
+<html>
+<header>
+  <style>
+    body,
+    html {
+      padding: 0;
+      margin: 0;
+      min-height: 100%;
+      padding: 5px;
+      text-align: center
+    }
+
+    textarea {
+      width: 99%;
+      border-color: rgba(0, 0, 0, .08);
+    }
+
+    #brickBlock {
+      /* width: 500px;
+      height: 500px; */
+      /* width: 100%; */
+      padding: 0;
+      border-collapse: collapse;
+      display: inline-block;
+    }
+
+    #brickBlock td {
+      padding: 0;
+      width: 20px;
+      height: 20px;
+      border: 1px solid black;
+      position: relative;
+    }
+
+    .black {
+      background-color: black;
+    }
+
+    .center:after {
+      content: '';
+      position: absolute;
+      background: rgb(76, 75, 78);
+      width: 10px;
+      height: 10px;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 50%;
+      margin: auto;
+    }
+
+    .center.black:after {
+      background: white;
+    }
+  </style>
+</header>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+  crossorigin="anonymous">
+  </script>
+
+<body>
+  <table id="brickBlock"></table>
+  <textarea name="" id="data" cols="30" rows="10"></textarea>
+
+</body>
+<script>
+  var size = [20, 20]; //[w,h]
+  var rPoint = [10, 10];
+  var blockDom = $('#brickBlock');
+  var resultDom = $('#data');
+  var result = [];
+
+  var onclickBrick = function (x, y) {
+    var $this = $('#' + x + '_' + y);
+    var isCurrent = $this.hasClass('black');
+    if (isCurrent) {
+      $this.removeClass('black');
+      result = result.filter(function (el) {
+        return el[0] !== x || el[1] !== y
+      })
+    } else {
+      $this.addClass('black');
+      result.push([x, y]);
+    }
+
+    resultDom.val(
+      JSON.stringify(result)
+    )
+  };
+
+  resultDom.change(function () {
+    try {
+      var _result = JSON.parse($(this).val());
+      render(_result);
+      result = _result;
+    } catch (e) {
+      render(result)
+    }
+  });
+
+  function render(data) {
+    var blockHtml = '';
+    for (var h = 0; h < size[0]; h++) {
+      blockHtml += '<tr>';
+      for (var w = 0; w < size[1]; w++) {
+        var x = w - rPoint[0];
+        var y = h - rPoint[1];
+        var brickId = x + '_' + y;
+        var className = '';
+        var isCurrent = data.some(function (el) {
+          return el[0] == x && el[1] == y;
+        });
+        if (w == rPoint[0] && h == rPoint[1]) className = "center";
+        if (isCurrent) className += " black";
+        blockHtml += '<td id="' + brickId + '" class="' + className + '"  onclick="onclickBrick(' + x + ',' + y + ')"></td>';
+      }
+      blockHtml += '</tr>';
+    }
+    blockDom.html(blockHtml);
+  }
+
+  render([]);
+
+</script>
+
+</html>

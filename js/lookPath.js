@@ -37,63 +37,37 @@ function circleMap() {
   }
 }
 
+function createMapfn(pathArr) {
+  return function (ps) {
+    var xy = ezPositionWithCheckScope(ps);
+    var path = pathArr;
+    var rs = [
+      ...path.map(function (_xy) {
+        return { ps: xy(_xy[0], _xy[1]), brickType: '0' };
+      })
+    ];
+    return rs.filter(function (obj) {
+      return obj.ps;
+    });
+  }
+}
+
 export default {
-  'zark': function (ps) {
-    var xy = ezPositionWithCheckScope(ps);
-    var rs = [{ ps: xy(0, 0), brickType: '0' }];
-    if (ps % w !== w - 1) {
-      rs.push({ ps: xy(1, -1), brickType: '0' });
-    }
-    if (ps % w !== 0 || ps == 0) {
-      rs.push({ ps: xy(-1, -1), brickType: '0' });
-    }
-    return rs;
-  },
-  'fort': function (ps) {
-    var xy = ezPositionWithCheckScope(ps);
-    var rs = [{ ps: xy(0, 0), brickType: '0' }];
-    if (ps % w !== w - 1) {
-      rs.push({ ps: xy(1, -1), brickType: '0' });
-    }
-    if (ps % w !== 0 || ps == 0) {
-      rs.push({ ps: xy(-1, -1), brickType: '0' });
-    }
-    if (ps - 2 * w > 0) {
-      rs.push({ ps: xy(0, -2), brickType: '0' });
-    }
-    return rs;
-  },
-  'point': function (ps) {
-    return [ps];
-  },
-  'hp+': function (ps) {
-    var rs = [];
-    if (ps % w - 1 > 0) {
-      rs = [...rs, (ps - w) - 1, (ps + w) - 1];
-    }
-    if (ps % w + 1 < w) {
-      rs = [...rs, (ps - w) + 1, (ps + w) + 1];
-    }
-    return rs;
-  },
-  'SPIDER': function (ps) {
-    var xy = ezPosition(ps);
-    var rs = [xy(0, 0)];
-    if (ps % w !== w - 1) {
-      rs = [...rs, xy(1, -1), xy(1, -2), xy(1, 1)];
-    }
-    if (ps % w !== 0) {
-      rs = [...rs, xy(-1, -1), xy(-1, -2), xy(-1, 1)];
-    }
-    xy(0, 0, true);
-    return rs;
-  },
+  'zark': createMapfn([[0, 0], [1, -1], [-1, -1]]),
+  'fort': createMapfn([[0, 0], [1, -1], [-1, -1], [0, -2]]),
+  'point': createMapfn([[0, 0]]),
+  'porweUp': createMapfn([[-1,-1],[1,-1],[1,1],[-1,1]]),
+  'hp+': createMapfn([[-1,-1],[1,-1],[1,1],[-1,1]]),
+  'MONSTER0': createMapfn([[-1, -1], [-1, 0], [-1, 1], [-1, 2], [0, 2], [1, 2], [2, 2], [2, 1], [2, 0], [2, -1], [1, -1], [0, -1], [0, -2], [1, -2], [3, -2], [3, -1], [3, 0], [3, 1], [3, 2], [2, 3], [1, 3], [0, 3], [-1, 3], [-2, 2], [-2, 0], [-2, 1], [-2, -1], [-2, -2], [-1, -3], [0, -3], [1, -3], [2, -3], [2, -4], [-1, -4]]),
+  'MONSTER1': createMapfn([[-1, 0], [-2, 0], [-3, 0], [-4, 0], [-3, 1], [-4, 1], [-5, 0], [-3, 2], [-3, 3], [-2, 4], [-5, 2], [-5, 3], [-5, 4], [-4, 4], [-4, 5], [-6, 5], [-6, 6], [-5, 6], [-4, 6], [-3, 6], [-1, 5], [0, 5], [1, 5], [-1, 6], [-2, 6], [1, 6], [2, 6], [3, 5], [2, 4], [3, 6], [5, 5], [7, 5], [7, 6], [6, 6], [5, 6], [4, 6], [6, 4], [5, 3], [5, 2], [4, 1], [4, 0], [2, 1], [1, 2], [1, 3], [3, 3], [5, -1], [5, -2], [5, -3], [4, -4], [4, -5], [3, -6], [2, -7], [1, -7], [0, -7], [-1, -7], [-2, -7], [-3, -6], [-3, -5], [-4, -5], [-5, -4], [-6, -4], [-7, -3], [-7, -2], [-6, -2], [-5, -2], [-6, -1], [-4, -2], [-1, -5], [0, -5], [0, -4], [1, -4], [1, -3], [0, -3], [-1, -3]]),
+  'MONSTER1_openmouth':createMapfn([[-3,2],[-3,3],[-2,4],[-5,3],[-5,4],[-4,4],[-4,5],[-6,5],[-6,6],[-5,6],[-4,6],[-3,6],[-1,5],[0,5],[1,5],[-1,6],[-2,6],[1,6],[2,6],[3,5],[2,4],[3,6],[5,5],[7,5],[7,6],[6,6],[5,6],[4,6],[6,4],[5,3],[5,2],[4,1],[4,0],[2,1],[1,2],[1,3],[3,3],[5,-1],[5,-2],[5,-3],[4,-4],[4,-5],[3,-6],[2,-7],[0,-8],[1,-8],[-1,-8],[-4,2],[-6,3],[0,-4],[0,-5],[1,-5],[1,-4],[0,-6],[-1,-4],[-1,-6],[-3,-8],[-2,-8],[-7,-6],[-7,3],[-7,2],[-7,-5],[-6,-5],[-5,-4],[-5,0],[-5,1],[-6,1],[-7,1],[-4,0],[-2,1],[-4,-1],[-5,-5],[-4,-4],[-4,-3],[-3,-2],[-3,-1],[-5,-7],[-6,-7],[-4,-7],[-7,-4],[-6,-3],[-6,-2],[-6,-1],[-7,0]]),
+  'SPIDER': createMapfn([[0, 0], [1, -1], [1, -2], [1, 1], [1, 2], [-1, 2], [-1, 1], [-1, -1], [-1, -2]]),
+  'CIRCLE': circleMap(),
   'crystal-plus': function (ps, type) {
     var xy = ezPositionWithCheckScope(ps);
     var rs = [];
     var open = type === 'OPEN';
     //var open = false;
-
     if (open) {
       rs = [
         { ps: xy(-1, -1), brickType: 'd0' }, { ps: xy(1, -1), brickType: 'b0' },
@@ -134,5 +108,6 @@ export default {
     xy(0, 0, true);
     return rs;
   },
-  'CIRCLE': circleMap()
 };
+
+

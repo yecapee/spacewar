@@ -23,6 +23,7 @@ import {
   shipLife,
 } from './js/config';
 
+
 var renCount = 0;
 var nextPolling = 1;
 var killCount = 0;
@@ -137,9 +138,13 @@ function bulletPosition(shipPs) {
 
 function clearRenderData() {
   renderData.enemy = [];
+  renderData.boss = [];
   // renderData.enemyBullet = [];
   // renderData.aniEffect = [];
   renderData.item = [];
+  renderData.skills = [];
+
+  //console.log(renderData);
 }
 
 var ship = new createShip({
@@ -189,7 +194,7 @@ function gaphic(TYPE) {
     }
 
     // boss push
-    if (boss.length) {
+    if (boss.length > 0) {
       var defPosition = Math.floor(Math.random() * w);
       boss.forEach(function (enemyObj, index) {
         // console.log(enemyObj.position);
@@ -230,7 +235,7 @@ function gaphic(TYPE) {
 
   //enmyBullet
   renderData.enemyBullet.map(function (bullt) {
-    var bulletObj = positionToXY(bullt.data.position);
+    //var bulletObj = positionToXY(bullt.data.position);
     //viewDom.drawImage(enemyImg, bulletObj.x - 15 / 2, bulletObj.y - 5, 15, 15);
     var enemyImg = document.getElementById(bullt.data.look);
     viewDom.drawImage(enemyImg, bullt.data.x - 15 / 2, bullt.data.y - 5, bullt.data.w, bullt.data.h);
@@ -238,7 +243,12 @@ function gaphic(TYPE) {
 
   // enmy
   renderData.enemy.forEach(function (obj) {
-    obj.action(TYPE, viewDom, ship.position);
+    obj.action(TYPE, viewDom, ship);
+  })
+
+  // skill
+  renderData.skills.forEach(function (skill,index) {
+    skill(ship, viewDom) && renderData.skills.splice(index, 1);
   })
 
   // item

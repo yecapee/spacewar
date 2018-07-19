@@ -75,6 +75,9 @@ export default function (obj) {
   this.isDead = false;
   this.shotFps = 8;
   this.maxLife = obj.life;
+  this.path = lookPath[this.look](this.position,this.lookType).map(el => el.ps);
+  this.pathObj = lookPath[this.look](this.position,this.lookType);
+  this.invincible = false;
 
   var deadCb = obj.deadCb || function () { };
   var hit = false;
@@ -85,27 +88,34 @@ export default function (obj) {
       bulletIndex,
       viewDom,
       shipPath,
-      pathObj
     } = data;
 
-    
     if (shipPath.includes(bulletPs) || shipPath.includes(bulletPs + w)) {
-      deadSound();
-      this.life--;
-      renderData.aniEffect.push(
-        animation(10, function (renCount, viewDom) {
-          pathObj.forEach(function (ps, index) {
-            bricks(ps, viewDom,'rgba(255,0,0,.8)');
-          });
-        }.bind(this))
-      );
+      this.injured();
       renderData.enemyBullet.splice(bulletIndex, 1);
-      if (this.life < 1) {
-        this.life = 0;
-        this.isDead = true;
-        this.dead();
-      }
     }
+  };
+
+  this.injured = function(){
+    if(this.invincible) return;
+    this.invincible = true;
+    deadSound();
+    this.life--;
+    renderData.aniEffect.push(
+      animation(10, function (renCount, viewDom) {
+        this.pathObj.forEach(function (ps, index) {
+          bricks(ps, viewDom,'rgba(255,0,0,.8)');
+        });
+      }.bind(this))
+    );
+    if (this.life < 1) {
+      this.life = 0;
+      this.isDead = true;
+      this.dead();
+    }
+    setTimeout(function(){
+      this.invincible = false;
+    }.bind(this),200);
   };
 
   this.touch = function (data) {
@@ -116,19 +126,7 @@ export default function (obj) {
     } = data;
 
     if (touchEnemy) {
-      this.life--;
-      renderData.aniEffect.push(
-        animation(10, function (renCount, viewDom) {
-          pathObj.forEach(function (ps, index) {
-            bricks(ps, viewDom,'rgba(255,0,0,.8)');
-          });
-        }.bind(this))
-      );
-      if (this.life < 1) {
-        this.life = 0;
-        this.isDead = true;
-        this.dead();
-      }
+      this.injured();
     }
   };
 
@@ -168,6 +166,9 @@ export default function (obj) {
     var isDead = this.isDead;
     var path = lookPath[this.look](this.position,this.lookType).map(el => el.ps);
     var pathObj = lookPath[this.look](this.position,this.lookType);
+    
+    this.path = path;
+    this.pathObj = pathObj;
     bulletPosition.call(this);
     grapicBullet.call(this, viewDom);
 
@@ -197,17 +198,17 @@ export default function (obj) {
           bulletIndex: index,
           viewDom: viewDom,
           shipPath: path,
-          pathObj,
         });
       })
 
       // touch item
       renderData.item.forEach(function(item, index){
-        var itemMap = lookPath[item.look](item.position);
+        var itemMap = lookPath[item.look](item.position).map(function(el){return el.ps});
         var touchItem = path.reduce(function (total, el) {
           return total || itemMap.includes(el);
         }, false);  
         if(touchItem){
+          //console.log(JSON.stringify(itemMap),JSON.stringify(path));
           item.wasPickUp(_);
         }
       })      

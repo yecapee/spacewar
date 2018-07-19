@@ -32,4 +32,5 @@ exports.renderData = {
   enemyBullet: [],
   aniEffect:[],
   item:[],
+  skills:[],
 };
