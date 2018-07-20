@@ -23,6 +23,8 @@ function circle(x, y, r, all, now, margin) {
   return {
     position: sXsYToPosition(_x, _y),
     outScope: _x < 0 || _x > w - 1 || _y < 0 || _y > h - 1,
+    x: _x,
+    y: _y
   }
 }
 
@@ -49,26 +51,42 @@ var GOZILLA = {
   movePath: 'pingpong',
   moveTime: 3,
   look: 'MONSTER1',
-  shotLook:'MONSTER1_openmouth',
-  skillLook: 'MONSTER1_openmouth',
+  shotLook: 'MONSTER1_openmouth',
   position: Math.round(w / 3) - 5,
   bulletType: 'track',
-  skills:[{
-    //type:'claw',
-    type:'atomicExplosion',
-    launchTime: [250, 150, 15],
-  }],
-  skillPoint: function (ps) {
-    var xy = ezPositionWithCheckScope(ps);
-    var point = [[-5,-2]];
-    var rs = point.map(function (_xy) {
-      return xy(_xy[0], _xy[1]);
-    });
-    return rs;
-  },
+  skills: [
+    {
+      //type:'claw',
+      type: 'atomicExplosion',
+      launchTime: [250, 120, 6],
+      skillLook: 'MONSTER1_openmouth',
+      skillPoint: function (ps) {
+        var xy = ezPositionWithCheckScope(ps);
+        var point = [[-5, -2]];
+        var rs = point.map(function (_xy) {
+          return xy(_xy[0], _xy[1]);
+        });
+        return rs;
+      },
+    },
+    // {
+    //   type: 'claw',
+    //   //type:'atomicExplosion',
+    //   launchTime: [250, 150, 150],
+    //   skillLook: 'MONSTER1_openmouth',
+    //   skillPoint: function (ps) {
+    //     var xy = ezPositionWithCheckScope(ps);
+    //     var point = [[-5, -2]];
+    //     var rs = point.map(function (_xy) {
+    //       return xy(_xy[0], _xy[1]);
+    //     });
+    //     return rs;
+    //   },
+    // }
+  ],
   shotPoint: function (ps) {
     var xy = ezPositionWithCheckScope(ps);
-    var point = [[-7,-4],[-6,-3],[-6,-1],[-7,0],[-9,-2],[-8,-3],[-5,-2],[-8,-1],[-8,-2],[-7,-2],[-7,-3],[-7,-1],[-6,-2]];
+    var point = [[-7, -4], [-6, -3], [-6, -1], [-7, 0], [-9, -2], [-8, -3], [-5, -2], [-8, -1], [-8, -2], [-7, -2], [-7, -3], [-7, -1], [-6, -2]];
     var rs = point.map(function (_xy) {
       return xy(_xy[0], _xy[1]);
     });
@@ -198,15 +216,15 @@ var script = {
   // 1: {
   //   // enemy: [Zark1, Fort0],
   //   // enemyPolling: [15, 55],
-  //   item: [GreenPoint,GreenPoint,GreenPoint,TrebleBullet],
+  //   item: [GreenPoint, GreenPoint, GreenPoint, TrebleBullet],
   // },
-  // 100:{
+  // 100: {
   //   boss: [GOZILLA],
   // },
-  // 103:{
+  // 103: {
   //   stopCount: stop,
   // },
-  // 104:{
+  // 104: {
   //   stopCount: true,
   // },
   // 1:{
@@ -238,7 +256,7 @@ var script = {
   1806: {
     boss: [circleKiller2],
   },
-  1807:{
+  1807: {
     stopCount: true,
   },
   1809: {
@@ -257,15 +275,15 @@ var script = {
   2120: {
     item: [GreenPoint],
   },
-  2200:{
+  2200: {
     boss: [GOZILLA],
   },
-  2201:{
-    stopCount: true,
+  2201: {
+    //stopCount: true,
   },
-  2202:{
+  2202: {
     item: [GreenPoint],
-    stopCount: false,
+    //stopCount: false,
   },
   3400: {
     item: [hp_1],

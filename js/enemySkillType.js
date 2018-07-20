@@ -2,6 +2,7 @@ import { w, h, pixelWeigth } from './config';
 import {
   positionToXY,
   positionTosXsY,
+  // xyToPosition,
   sXsYToPosition,
 } from './positionMethod';
 import skillPath from './skillPath';
@@ -9,16 +10,35 @@ import bricks from './bricks';
 import { renderData } from './config';
 import { animation } from './aniEffectMethod';
 
+function xyToPosition(x, y) {
+  var _x = Math.round(x / pixelWeigth);
+  var _y = Math.round(y / pixelWeigth);
+  //console.log(_x,_y);
+  //var _x = (x - pixelWeigth / 2) / pixelWeigth;
+  //var rs = (y - pixelWeigth / 2) / pixelWeigth * w + _x;
+  return _y * w + _x;
+}
+
 function circle(x, y, r, all, now, margin) {
   var ang = Math.PI * 2 / all;
   var _margin = 2 * Math.PI / 360 * (margin || 0);
   var _x = Math.round(x + r * Math.cos(ang * now + _margin));
   var _y = Math.round(y + r * Math.sin(ang * now + _margin));
+
+  // console.log(
+  //   'x',Math.round((_x - pixelWeigth / 2 )/pixelWeigth),
+  //   'y',Math.round(_y / window.innerHeight)
+  // );
   return {
+    position_big: xyToPosition(_x, _y),
     position: sXsYToPosition(_x, _y),
-    outScope: _x < 0 || _x > w - 1 || _y < 0 || _y > h - 1,
+    //outScope: _x < 0 || _x > w - 1 || _y < 0 || _y > h - 1,
+    outScope: Math.round(_x / pixelWeigth) < 0 || Math.round(_x / pixelWeigth) > w - 1 || Math.round(_y / pixelWeigth) < 0 || Math.round(_y / pixelWeigth) > h - 1,
+    x: _x,
+    y: _y,
   }
 }
+
 
 export default {
   claw: function (position, ship) {
@@ -72,7 +92,7 @@ export default {
     }
   },
   atomicExplosion: function (position, ship) {
-    var time = 120;
+    var time = 300;
     var prePs = position;
     var count = time;
     var _taPs = ship.position;
@@ -80,23 +100,26 @@ export default {
       count--;
       var t = 1 / time * (time - count);
       var isHurt = false;
-
-      var p0 = positionTosXsY(prePs);
-      var pointLength = 25;
+      var p0 = positionToXY(prePs);
+      var pointLength = 20;
       var skillPath = [];
       for (var i = 0; i <= pointLength; i++) {
-        var psData = circle(p0.x, p0.y, t * 30, pointLength, i, Math.round(t / 20));
-        !psData.outScope && skillPath.push({ ps: psData.position, brickType: '0' });
+        var psData = circle(p0.x, p0.y, (time - count) * 1, pointLength, i, (time - count));
+        !psData.outScope && skillPath.push({ ps: psData.position_big, brickType: '0', x: psData.x, y: psData.y });
       }
 
       skillPath.forEach(function (ps) {
         //var color = count % 2 ? 'rgba(255,0,0,.5)' : 'rgba(255,0,0,1)';
-        var color = 'rgba(' + (255 - 200 / time * (time - count)) + ',80,' + (50 + 205 / time * (time - count)) + ',1)'
-        bricks(ps, viewDom, color);
-        isHurt = isHurt || ship.path.includes(ps.ps);
+        var color = 'rgba(' + (255 - 200 / time * (time - count)) + ',80,' + (50 + 205 / time * (time - count)) + ',' + (count / time * .5 + .5 )+ ')'
+        //bricks(ps, viewDom, 'blue');
+        if (ps.ps) {
+          viewDom.fillStyle = color;
+          viewDom.fillRect(ps.x, ps.y, 15, 15);
+          isHurt = isHurt || ship.path.includes(ps.ps);
+        }
       });
 
-      if (isHurt) ship.injured();
+      isHurt && ship.injured();
 
       return count < -1;
     }

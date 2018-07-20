@@ -115,7 +115,7 @@ export default function (obj) {
     }
     setTimeout(function(){
       this.invincible = false;
-    }.bind(this),200);
+    }.bind(this),300);
   };
 
   this.touch = function (data) {

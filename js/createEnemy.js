@@ -5,7 +5,7 @@ import { positionToXY } from './positionMethod';
 import bulletTypeMap from './enemyBulletType';
 import skillTypeMap from './enemySkillType';
 import bricks from './bricks';
-import {explosionSound} from './sound';
+import { explosionSound } from './sound';
 import {
   w,
   h,
@@ -21,7 +21,7 @@ function enemyMove() {
 function shotByEnemy(position, bulletType, ship) {
   var bulletArr = renderData.enemyBullet;
   var dataFn = bulletTypeMap[bulletType](position);
-  if ( !bulletArr.reduce(function (rs, el) { return rs || (el.data.position === position) }, false) ) {
+  if (!bulletArr.reduce(function (rs, el) { return rs || (el.data.position === position) }, false)) {
     bulletArr.push({
       data: dataFn(ship.position),
       fn: dataFn,
@@ -32,7 +32,7 @@ function shotByEnemy(position, bulletType, ship) {
 function launchSkillsByEnemy(position, Type, ship) {
   //console.log(position, Type, shipPs); 
   var skillArr = renderData.skills.push(
-    skillTypeMap[Type](position,ship)
+    skillTypeMap[Type](position, ship)
   );
 
   // var dataFn = bulletTypeMap[bulletType](position);
@@ -51,13 +51,12 @@ export default function (obj) {
   this.position = obj.position; //位置
   this.shot = obj.shot; //會不會發射子彈
   this.shotTime = obj.shotTime; //連發數
-  this.shotPoint = obj.shotPoint || function(position){return [position]}; //發射點
-  this.skillPoint = obj.skillPoint || function(position){return [position]}; //技能發射點
+  this.shotPoint = obj.shotPoint || function (position) { return [position] }; //發射點
+  this.skillPoint = obj.skillPoint || function (position) { return [position] }; //技能發射點
   this.movePath = obj.movePath; //移動的路徑類型
   this.moveTime = obj.moveTime || 1; // 移動間隔
   this.look = obj.look;
   this.shotLook = obj.shotLook || obj.look;
-  this.skillLook = obj.skillLook || obj.look;
   this.bulletType = obj.bulletType || 'normal';
   this.skills = obj.skills || [];
 
@@ -70,7 +69,7 @@ export default function (obj) {
   this.getST = function () {
     return survivalTime;
   };
-  
+
   this.wasHit = function (bulletPs, viewDom, cb) {
     var me = this;
     var path = lookPath[this.look](this.position).map(el => el.ps);
@@ -86,30 +85,20 @@ export default function (obj) {
         })
         this.dead();
       } else {
-        this.grapic.call(this, viewDom);
+        this.grapic.call(this, viewDom, _look);
         if (cb) cb();
       };
     }
   };
 
-  this.grapic = function (viewDom,lootype) {
+  this.grapic = function (viewDom, lootype) {
     var color = hit ? 'red' : 'white';
-    switch (lootype) {
-      case 'skill':
-        this.look = this.skillLook;
-        break;
-      case 'shot':
-        this.look = this.shotLook;
-        break;  
-      default:
-        break;
-    }
-
-    if(lootype != 'normal'){
+    if (lootype != _look) {
+      this.look = lootype;
       setLook && clearTimeout(setLook);
-      setLook = setTimeout(function(){
+      setLook = setTimeout(function () {
         this.look = _look;
-      }.bind(this),200);
+      }.bind(this), 200);
     }
 
     lookPath[this.look](this.position).forEach(function (ps, index) {
@@ -118,45 +107,39 @@ export default function (obj) {
   };
 
   this.action = function (renderType, viewDom, ship) {
-    var isShot = false;
     var isLaunchSkill = false;
-    var lookType = 'normal';
+    var lookType = _look;
     if (renderType === 'OBJ_MOVE') {
       enemyMove.call(this);
-
-      this.skills.forEach(function(skill){
+      this.skills.forEach(function (skill) {
         if (survivalTime % skill.launchTime[0] < skill.launchTime[1]) {
-          var shotCount = survivalTime % skill.launchTime[0];
-          if (shotCount % skill.launchTime[2] == 0) {
-            this.skillPoint(this.position).forEach(function(position){
+          var launchCount = survivalTime % skill.launchTime[0];
+          if (launchCount % skill.launchTime[2] == 0) {
+            skill.skillPoint(this.position).forEach(function (position) {
               launchSkillsByEnemy(position, skill.type, ship);
               isLaunchSkill = true;
-              lookType = 'skill';
+              lookType = skill.skillLook;
             })
           }
-        };
+        }
       }.bind(this));
 
-      
       if (survivalTime % this.shotTime[0] < this.shotTime[1] && !isLaunchSkill) {
         var shotCount = survivalTime % this.shotTime[0];
         if (shotCount % this.shotTime[2] == 0) {
-          this.shotPoint(this.position).forEach(function(position){
-            if(this.shot){
+          this.shotPoint(this.position).forEach(function (position) {
+            if (this.shot) {
               shotByEnemy(position, this.bulletType, ship);
-              isShot = true;
-              lookType = 'shot';
+              lookType = this.shotLook;
             }
           }.bind(this));
         }
       };
 
-
-
       survivalTime++;
       hit = false;
     }
-    this.grapic(viewDom,lookType);
+    this.grapic(viewDom, lookType);
   };
 
   this.dead = function () {
