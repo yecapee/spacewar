@@ -212,6 +212,7 @@ var script = {
     enemyPolling: [20, 100],
     enemyQuantity: 1,
     stopCount: false,
+    stopEnemyPush: false,
   },
   // 1: {
   //   // enemy: [Zark1, Fort0],
@@ -258,9 +259,11 @@ var script = {
   },
   1807: {
     stopCount: true,
+    stopEnemyPush: true,
   },
   1809: {
     stopCount: false,
+    stopEnemyPush: false,
   },
   1820: {
     enemy: [Zark1, Fort0],
@@ -279,11 +282,12 @@ var script = {
     boss: [GOZILLA],
   },
   2201: {
-    //stopCount: true,
+    stopEnemyPush: false,
+    stopCount: true,
   },
   2202: {
     item: [GreenPoint],
-    //stopCount: false,
+    stopCount: false,
   },
   3400: {
     item: [hp_1],

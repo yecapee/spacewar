@@ -23,13 +23,13 @@ import {
   shipLife,
 } from './js/config';
 
-
 var renCount = 0;
 var nextPolling = 1;
 var killCount = 0;
 var bgCount = 0;
 var shotFn;
 var ruleObj = {};
+var scriptMileage = renCount;
 
 var keyType = {
   UP: false,
@@ -130,7 +130,7 @@ function bulletPosition(shipPs) {
   for (var key in enemyBulleArr) {
     enemyBulleArr[key].data = enemyBulleArr[key].fn(shipPs);
     if (enemyBulleArr[key].data.clear) {
-      enemyBulleArr[key].fn(shipPs,true);
+      enemyBulleArr[key].fn(shipPs, true);
       enemyBulleArr.splice(key, 1);
     };
   }
@@ -156,6 +156,7 @@ var ship = new createShip({
   deadCb: function (ship) {
     killCount = 0;
     renCount = 0;
+    scriptMileage = 0;
     nextPolling = 100;
     clearRenderData();
   }
@@ -164,15 +165,15 @@ var ship = new createShip({
 function gaphic(TYPE) {
   var bestScore = localStorage.getItem('bestScore') || 0;
   var bestMileage = localStorage.getItem('bestMileage') || 0;
-  var stopCount = ruleObj.stopCount;
+  var { stopCount, stopEnemyPush } = ruleObj;
   var boss = ruleObj.boss || [];
-  script(renCount, ruleObj, nextPolling);
+  script(scriptMileage, ruleObj, nextPolling);
   if (TYPE === 'OBJ_MOVE') {
     var createObj = false;
     var item = ruleObj.item;
 
     // enemy push
-    if (renCount == nextPolling && !stopCount) {
+    if (renCount == nextPolling && !stopEnemyPush) {
       for (var x = 0; x < ruleObj.enemyQuantity; x++) {
         var enemyObj = ruleObj.enemy[(renCount % ruleObj.enemy.length)];
         if (enemyObj) {
@@ -188,8 +189,8 @@ function gaphic(TYPE) {
         nextPolling = renCount + Math.floor(Math.random() * ruleObj.enemyPolling[1] + ruleObj.enemyPolling[0]);
       }
     }
-    
-    if(nextPolling < renCount && ruleObj.enemyPolling){
+
+    if (nextPolling < renCount && ruleObj.enemyPolling) {
       nextPolling = renCount + Math.floor(Math.random() * ruleObj.enemyPolling[1] + ruleObj.enemyPolling[0]);
     }
 
@@ -201,7 +202,7 @@ function gaphic(TYPE) {
         enemyObj.deadCb = function () {
           killCount++;
           if (bestScore < killCount) localStorage.setItem('bestScore', killCount);
-          renCount++;
+          scriptMileage++;
         };
         renderData.enemy.push(new createEnemy(enemyObj));
       });
@@ -218,8 +219,11 @@ function gaphic(TYPE) {
     }
 
     bgCount++;
-    !stopCount && renCount++;
-    if (bestMileage < renCount) localStorage.setItem('bestMileage', renCount);
+
+    renCount++;
+    !stopCount && scriptMileage++;
+
+    if (bestMileage < scriptMileage) localStorage.setItem('bestMileage', scriptMileage);
   }
 
   if (TYPE === 'BULLET_MOVE') {
@@ -235,8 +239,6 @@ function gaphic(TYPE) {
 
   //enmyBullet
   renderData.enemyBullet.map(function (bullt) {
-    //var bulletObj = positionToXY(bullt.data.position);
-    //viewDom.drawImage(enemyImg, bulletObj.x - 15 / 2, bulletObj.y - 5, 15, 15);
     var enemyImg = document.getElementById(bullt.data.look);
     viewDom.drawImage(enemyImg, bullt.data.x - 15 / 2, bullt.data.y - 5, bullt.data.w, bullt.data.h);
   })
@@ -247,7 +249,7 @@ function gaphic(TYPE) {
   })
 
   // skill
-  renderData.skills.forEach(function (skill,index) {
+  renderData.skills.forEach(function (skill, index) {
     skill(ship, viewDom) && renderData.skills.splice(index, 1);
   })
 
@@ -265,7 +267,7 @@ function gaphic(TYPE) {
   document.getElementById('view').style.backgroundPositionY = bgCount + 'px';
 
   document.getElementById('score').innerHTML = 'Score: <div class="score">' + killCount +
-    '</div><br/> Mileage: ' + renCount +
+    '</div><br/> Mileage: ' + scriptMileage +
     '<br/>Best score: ' + (localStorage.getItem('bestScore') || 0) +
     '<br/> Best Mileage: ' + bestMileage +
     '<br/> Life: ' + ship.life + '/' + ship.maxLife;
@@ -295,7 +297,6 @@ function touchAction(event) {
     var _ps = (w * y + x);
     ship.position = _ps;
     shotDriver();
-    //document.getElementById("debug").innerHTML = "Touch moved (" + x + "," + y + "), " + (w * y + x);
   }
 }
 
@@ -321,47 +322,21 @@ function step(timestamp) {
   requestAnimationFrame(step);
 }
 
-
-
 //music
-
 document.getElementById('ready').onclick = start;
 
-function start(){
+function start() {
   document.getElementById('ready').style.zIndex = -1;
   requestAnimationFrame(step);
   _music();
-  start = function(){};
+  start = function () { };
 }
 
-//todo *做了 -不做了
+//todo
 
-//*敵機死亡效果
-//-分開敵人及主角機的lookPath
-//-組成像素可縮小
-//*敵機子彈種類多元
-
-//*主角機有血量
-//-主角機階段進化l
-//*主角機物件化？
-
-//*子彈發射時間間隔可調整
-//*子彈發射時間pc與mobile驅動方式一致
-
-//*加入背景
-
-//*射擊效果
-//*增強道具
-//*主角機可切換子彈
-//*出彈頻率應該綁在SHIP物件
 // 來一點速度感的特效
-
-//*BOSS設計
-//*關卡設計
-
-// 加一點音效跟背景音樂吧
 //*把敵人也改成可以用其他磚塊拼
-// 存一點錢
 
 // 加入盾牌道具
 // 加入近戰道具
+// 玩家特殊技

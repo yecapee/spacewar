@@ -92,7 +92,7 @@ export default {
     }
   },
   atomicExplosion: function (position, ship) {
-    var time = 300;
+    var time = 300-(40-w)*20;
     var prePs = position;
     var count = time;
     var _taPs = ship.position;
@@ -110,7 +110,7 @@ export default {
 
       skillPath.forEach(function (ps) {
         //var color = count % 2 ? 'rgba(255,0,0,.5)' : 'rgba(255,0,0,1)';
-        var color = 'rgba(' + (255 - 200 / time * (time - count)) + ',80,' + (50 + 205 / time * (time - count)) + ',' + (count / time * .5 + .5 )+ ')'
+        var color = 'rgba(' + Math.round(255 - 200 / time * (time - count)) + ',80,' + Math.round(50 + 205 / time * (time - count)) + ',' + (count / time * .5 + .5 ).toFixed(1) + ')'
         //bricks(ps, viewDom, 'blue');
         if (ps.ps) {
           viewDom.fillStyle = color;
