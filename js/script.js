@@ -44,6 +44,11 @@ var Zark0 = {
 
 var GOZILLA = {
   name: 'GOZILLA',
+  showLife:true,
+  lifeBarPosition:function(ps){
+    var xy = ezPositionWithCheckScope(ps);
+    return xy(0,-9);
+  },
   life: 800,
   // position: Math.floor(Math.random() * w),
   shot: false,
@@ -120,6 +125,11 @@ var Fort0 = {
 
 var circleKiller = {
   name: 'circleKiller',
+  showLife:true,
+  lifeBarPosition:function(ps){
+    var xy = ezPositionWithCheckScope(ps);
+    return xy(0,-6);
+  },
   life: 20,
   // position: Math.floor(Math.random() * w),
   shot: true,

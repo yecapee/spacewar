@@ -47,7 +47,10 @@ function launchSkillsByEnemy(position, Type, ship) {
 export default function (obj) {
   this.name = obj.name; //名字
   this.life = obj.life; //生命值
+  this.maxlife = obj.life;
+  this.showLife = obj.showLife || false; //顯示生命條
   this.mainX = obj.position;
+  this.lifeBarPosition = obj.lifeBarPosition || function (position) { return position };
   this.position = obj.position; //位置
   this.shot = obj.shot; //會不會發射子彈
   this.shotTime = obj.shotTime; //連發數
@@ -104,6 +107,16 @@ export default function (obj) {
     lookPath[this.look](this.position).forEach(function (ps, index) {
       bricks(ps, viewDom, color);
     });
+
+    if(this.showLife){
+      var ps = positionToXY(
+        this.lifeBarPosition(this.position)
+      );
+      viewDom.fillStyle = 'rgba(255,255,255,.3)';
+      viewDom.fillRect(ps.x-50, ps.y, 100, 5);
+      viewDom.fillStyle = 'orange';
+      viewDom.fillRect(ps.x-50, ps.y, Math.round(100*this.life/this.maxlife), 5);
+    }
   };
 
   this.action = function (renderType, viewDom, ship) {

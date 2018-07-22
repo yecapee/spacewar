@@ -24,7 +24,7 @@
 <title>SPACEWAR</title>
 
 <body>
-  <audio id="bgmusic" autoplay loop>
+  <audio id="bgmusic" loop>
     <source src="http://grayscale.scene.pl/msx/zizibum.mp3" >
   </audio>
   <div class="ready" id="ready">
@@ -51,6 +51,7 @@
 <script>
   bgmusic.volume = 0.1;
   function _music() {
+    // bgmusic.autoplay = true;
     bgmusic.play();
   }
 </script> 
