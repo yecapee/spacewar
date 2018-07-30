@@ -28,6 +28,18 @@ function circle(x, y, r, all, now, margin) {
   }
 }
 
+// test enemy
+var turret = {
+  name: 'turret',
+  life: 1,
+  // position: Math.floor(Math.random() * w),
+  shot: true,
+  shotTime: [200, 54, 18],
+  movePath: 'goToOut',
+  moveTime: 5,
+  look: 'turret',
+  bulletType: 'diffusionTrack',
+}
 
 // enemy
 var Zark0 = {
@@ -61,7 +73,6 @@ var GOZILLA = {
   bulletType: 'track',
   skills: [
     {
-      //type:'claw',
       type: 'atomicExplosion',
       launchTime: [250, 120, 6],
       skillLook: 'MONSTER1_openmouth',
@@ -74,20 +85,6 @@ var GOZILLA = {
         return rs;
       },
     },
-    // {
-    //   type: 'claw',
-    //   //type:'atomicExplosion',
-    //   launchTime: [250, 150, 150],
-    //   skillLook: 'MONSTER1_openmouth',
-    //   skillPoint: function (ps) {
-    //     var xy = ezPositionWithCheckScope(ps);
-    //     var point = [[-5, -2]];
-    //     var rs = point.map(function (_xy) {
-    //       return xy(_xy[0], _xy[1]);
-    //     });
-    //     return rs;
-    //   },
-    // }
   ],
   shotPoint: function (ps) {
     var xy = ezPositionWithCheckScope(ps);
@@ -219,6 +216,7 @@ var TrebleBullet = {
 var script = {
   0: {
     enemy: [Zark0],
+    //enemy: [turret],
     enemyPolling: [20, 100],
     enemyQuantity: 1,
     stopCount: false,

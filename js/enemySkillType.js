@@ -2,7 +2,7 @@ import { w, h, pixelWeigth } from './config';
 import {
   positionToXY,
   positionTosXsY,
-  // xyToPosition,
+  xyToPosition,
   sXsYToPosition,
 } from './positionMethod';
 import skillPath from './skillPath';
@@ -10,14 +10,7 @@ import bricks from './bricks';
 import { renderData } from './config';
 import { animation } from './aniEffectMethod';
 
-function xyToPosition(x, y) {
-  var _x = Math.round(x / pixelWeigth);
-  var _y = Math.round(y / pixelWeigth);
-  //console.log(_x,_y);
-  //var _x = (x - pixelWeigth / 2) / pixelWeigth;
-  //var rs = (y - pixelWeigth / 2) / pixelWeigth * w + _x;
-  return _y * w + _x;
-}
+
 
 function circle(x, y, r, all, now, margin) {
   var ang = Math.PI * 2 / all;
@@ -25,14 +18,9 @@ function circle(x, y, r, all, now, margin) {
   var _x = Math.round(x + r * Math.cos(ang * now + _margin));
   var _y = Math.round(y + r * Math.sin(ang * now + _margin));
 
-  // console.log(
-  //   'x',Math.round((_x - pixelWeigth / 2 )/pixelWeigth),
-  //   'y',Math.round(_y / window.innerHeight)
-  // );
   return {
     position_big: xyToPosition(_x, _y),
     position: sXsYToPosition(_x, _y),
-    //outScope: _x < 0 || _x > w - 1 || _y < 0 || _y > h - 1,
     outScope: Math.round(_x / pixelWeigth) < 0 || Math.round(_x / pixelWeigth) > w - 1 || Math.round(_y / pixelWeigth) < 0 || Math.round(_y / pixelWeigth) > h - 1,
     x: _x,
     y: _y,

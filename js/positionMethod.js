@@ -26,10 +26,16 @@ exports.positionToXY = function (ps) {
   };
 }
 
+// exports.xyToPosition = function (x, y) {
+//   var _x = (x - pixelWeigth / 2) / pixelWeigth;
+//   var rs = y / pixelWeigth * w + _x;
+//   return rs;
+// }
+
 exports.xyToPosition = function (x, y) {
-  var _x = (x - pixelWeigth / 2) / pixelWeigth;
-  var rs = y / pixelWeigth * w + _x;
-  return rs;
+  var _x = Math.round(x / pixelWeigth);
+  var _y = Math.round(y / pixelWeigth);
+  return _y * w + _x;
 }
 
 exports.positionTosXsY = positionTosXsY;

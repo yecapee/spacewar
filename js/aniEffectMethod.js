@@ -11,10 +11,10 @@ exports.animation = function (totalRenCount, aniFn) {
   return fn;
 };
 
-exports.circle = function (x, y, r, all, now) {
-  var ang = Math.PI *2/all;
+exports.circle = function (x, y, r, all, now, margin) {
+  var ang = Math.PI * 2 / all;
   return {
-    x: x + r * Math.cos(ang*now),
-    y: y + r * Math.sin(ang*now),
+    x: x + r * Math.cos(ang * now + (margin || 0)),
+    y: y + r * Math.sin(ang * now + (margin || 0)),
   }
 }

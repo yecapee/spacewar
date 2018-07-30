@@ -19,14 +19,15 @@ function enemyMove() {
 }
 
 function shotByEnemy(position, bulletType, ship) {
-  var bulletArr = renderData.enemyBullet;
-  var dataFn = bulletTypeMap[bulletType](position);
-  if (!bulletArr.reduce(function (rs, el) { return rs || (el.data.position === position) }, false)) {
-    bulletArr.push({
-      data: dataFn(ship.position),
-      fn: dataFn,
-    })
-  };
+  //var bulletArr = renderData.enemyBullet;
+  //var dataFn = 
+  bulletTypeMap[bulletType](position, ship);
+  // if (!bulletArr.reduce(function (rs, el) { return rs || (el.data.position === position) }, false)) {
+  //   bulletArr.push({
+  //     data: dataFn(ship.position),
+  //     fn: dataFn,
+  //   })
+  // };
 }
 
 function launchSkillsByEnemy(position, Type, ship) {

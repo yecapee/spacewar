@@ -55,6 +55,7 @@ function createMapfn(pathArr) {
 export default {
   'zark': createMapfn([[0, 0], [1, -1], [-1, -1]]),
   'fort': createMapfn([[0, 0], [1, -1], [-1, -1], [0, -2]]),
+  'turret': createMapfn([[1,1],[-1,-1],[-1,1],[1,-1],[0,0]]),
   'point': createMapfn([[0, 0]]),
   'porweUp': createMapfn([[-1,-1],[1,-1],[1,1],[-1,1]]),
   'hp+': createMapfn([[-1,-1],[1,-1],[1,1],[-1,1]]),
