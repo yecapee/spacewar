@@ -21,5 +21,8 @@
   "dependencies": {
     "lodash": "^4.17.5",
     "tone": "^0.12.80"
+  },
+  "devDependencies": {
+    "cssnano": "^4.1.10"
   }
 }
