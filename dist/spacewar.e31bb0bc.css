@@ -1,0 +1,77 @@
+html, body {
+  background-color: rgb(51, 51, 51);
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Press Start 2P', cursive;
+}
+
+#view {
+  right: 0;
+  left: 0;
+  margin: auto;
+  position: fixed;
+  z-index: 0;
+  background-image: url("/spacebg.0a173b99.png");
+  background-size: 100% auto;
+}
+
+#score {
+  display: block;
+  position: fixed;
+  top: 20;
+  left: 0;
+  color: orange;
+  font-size: 8px;
+  z-index: 1;
+  padding-left: 5px;
+  -webkit-user-select: none;
+  /* for Chrome */
+  -moz-user-select: none;
+  /* for Firefox */
+  user-select: none;
+}
+
+#debug {
+  display: block;
+  position: fixed;
+  /* top: 0; */
+  left: 0;
+  bottom: 0px;
+  color: white;
+}
+
+#life {
+  position: fixed;
+  bottom: 0;
+  background-color: orange;
+  height: 10px;
+  width: 100%;
+  z-index: 2;
+}
+
+.ready{
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  text-align: center;
+  z-index: 999;
+  background-color:rgba(0,0,0,.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: orange;
+}
+
+.ready .title p{
+  color: white;
+}
+.score {
+  margin-top: 20px;
+  font: bold;
+  font-size: 5rem;
+}
+
+/*# sourceMappingURL=/spacewar.e31bb0bc.css.map */

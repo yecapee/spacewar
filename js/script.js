@@ -103,6 +103,62 @@ var GOZILLA = {
   }
 };
 
+var GOZILLA2 = {
+  name: "GOZILLA",
+  showLife: true,
+  lifeBarPosition: function(ps) {
+    var xy = ezPositionWithCheckScope(ps);
+    return xy(0, -9);
+  },
+  life: 800,
+  // position: Math.floor(Math.random() * w),
+  shot: false,
+  shotTime: [100, 54, 9],
+  movePath: "pingpong",
+  moveTime: 3,
+  look: "MONSTER1",
+  shotLook: "MONSTER1_openmouth",
+  position: Math.round(w / 3) * 2 - 5,
+  bulletType: "track",
+  skills: [
+    {
+      type: "atomicExplosion",
+      launchTime: [250, 120, 6],
+      skillLook: "MONSTER1_openmouth",
+      skillPoint: function(ps) {
+        var xy = ezPositionWithCheckScope(ps);
+        var point = [[-5, -2]];
+        var rs = point.map(function(_xy) {
+          return xy(_xy[0], _xy[1]);
+        });
+        return rs;
+      }
+    }
+  ],
+  shotPoint: function(ps) {
+    var xy = ezPositionWithCheckScope(ps);
+    var point = [
+      [-7, -4],
+      [-6, -3],
+      [-6, -1],
+      [-7, 0],
+      [-9, -2],
+      [-8, -3],
+      [-5, -2],
+      [-8, -1],
+      [-8, -2],
+      [-7, -2],
+      [-7, -3],
+      [-7, -1],
+      [-6, -2]
+    ];
+    var rs = point.map(function(_xy) {
+      return xy(_xy[0], _xy[1]);
+    });
+    return rs;
+  }
+};
+
 var Zark1 = {
   name: "ZARK-PLUS",
   life: 1,
@@ -303,9 +359,10 @@ var script = {
   },
   2202: {
     item: [GreenPoint],
-    stopCount: false
+    stopCount: false,
+    stopEnemyPush: true
   },
-  3400: {
+  2400: {
     item: [
       hp_1,
       GreenPoint,
@@ -317,14 +374,13 @@ var script = {
       GreenPoint
     ]
   },
-  3401: {
-    boss: [GOZILLA, GOZILLA, circleKiller, circleKiller2]
+  2401: {
+    boss: [GOZILLA, GOZILLA2, circleKiller, circleKiller2]
   },
-  3402: {
-    stopEnemyPush: false,
+  2402: {
     stopCount: true
   },
-  3403: {
+  2403: {
     stopCount: false
   },
   4500: {
