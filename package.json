@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/yecapee/spacewar#readme",
   "dependencies": {
-    "lodash": "^4.17.5",
+    "lodash": "^4.17.19",
     "tone": "^0.12.80"
   },
   "devDependencies": {
