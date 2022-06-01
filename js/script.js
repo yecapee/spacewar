@@ -5,7 +5,7 @@ import {
   positionToXY,
   positionTosXsY,
   sXsYToPosition,
-  ezPositionWithCheckScope
+  ezPositionWithCheckScope,
 } from "./positionMethod";
 
 function circle(x, y, r, all, now, margin) {
@@ -17,7 +17,7 @@ function circle(x, y, r, all, now, margin) {
     position: sXsYToPosition(_x, _y),
     outScope: _x < 0 || _x > w - 1 || _y < 0 || _y > h - 1,
     x: _x,
-    y: _y
+    y: _y,
   };
 }
 
@@ -31,7 +31,7 @@ var turret = {
   movePath: "goToOut",
   moveTime: 5,
   look: "turret",
-  bulletType: "diffusionTrack"
+  bulletType: "diffusionTrack",
 };
 
 // enemy
@@ -44,13 +44,13 @@ var Zark0 = {
   movePath: "gostMove",
   moveTime: 5,
   look: "zark",
-  bulletType: "normal"
+  bulletType: "normal",
 };
 
 var GOZILLA = {
   name: "GOZILLA",
   showLife: true,
-  lifeBarPosition: function(ps) {
+  lifeBarPosition: function (ps) {
     var xy = ezPositionWithCheckScope(ps);
     return xy(0, -9);
   },
@@ -69,17 +69,17 @@ var GOZILLA = {
       type: "atomicExplosion",
       launchTime: [250, 120, 6],
       skillLook: "MONSTER1_openmouth",
-      skillPoint: function(ps) {
+      skillPoint: function (ps) {
         var xy = ezPositionWithCheckScope(ps);
         var point = [[-5, -2]];
-        var rs = point.map(function(_xy) {
+        var rs = point.map(function (_xy) {
           return xy(_xy[0], _xy[1]);
         });
         return rs;
-      }
-    }
+      },
+    },
   ],
-  shotPoint: function(ps) {
+  shotPoint: function (ps) {
     var xy = ezPositionWithCheckScope(ps);
     var point = [
       [-7, -4],
@@ -94,19 +94,19 @@ var GOZILLA = {
       [-7, -2],
       [-7, -3],
       [-7, -1],
-      [-6, -2]
+      [-6, -2],
     ];
-    var rs = point.map(function(_xy) {
+    var rs = point.map(function (_xy) {
       return xy(_xy[0], _xy[1]);
     });
     return rs;
-  }
+  },
 };
 
 var GOZILLA2 = {
   name: "GOZILLA",
   showLife: true,
-  lifeBarPosition: function(ps) {
+  lifeBarPosition: function (ps) {
     var xy = ezPositionWithCheckScope(ps);
     return xy(0, -9);
   },
@@ -125,17 +125,17 @@ var GOZILLA2 = {
       type: "atomicExplosion",
       launchTime: [250, 120, 6],
       skillLook: "MONSTER1_openmouth",
-      skillPoint: function(ps) {
+      skillPoint: function (ps) {
         var xy = ezPositionWithCheckScope(ps);
         var point = [[-5, -2]];
-        var rs = point.map(function(_xy) {
+        var rs = point.map(function (_xy) {
           return xy(_xy[0], _xy[1]);
         });
         return rs;
-      }
-    }
+      },
+    },
   ],
-  shotPoint: function(ps) {
+  shotPoint: function (ps) {
     var xy = ezPositionWithCheckScope(ps);
     var point = [
       [-7, -4],
@@ -150,13 +150,13 @@ var GOZILLA2 = {
       [-7, -2],
       [-7, -3],
       [-7, -1],
-      [-6, -2]
+      [-6, -2],
     ];
-    var rs = point.map(function(_xy) {
+    var rs = point.map(function (_xy) {
       return xy(_xy[0], _xy[1]);
     });
     return rs;
-  }
+  },
 };
 
 var Zark1 = {
@@ -168,7 +168,7 @@ var Zark1 = {
   movePath: "gostMove",
   moveTime: 3,
   look: "zark",
-  bulletType: "normal"
+  bulletType: "normal",
 };
 
 var Fort0 = {
@@ -180,13 +180,13 @@ var Fort0 = {
   movePath: "goToOut",
   moveTime: 5,
   look: "fort",
-  bulletType: "track"
+  bulletType: "track",
 };
 
 var circleKiller = {
   name: "circleKiller",
   showLife: true,
-  lifeBarPosition: function(ps) {
+  lifeBarPosition: function (ps) {
     var xy = ezPositionWithCheckScope(ps);
     return xy(0, -6);
   },
@@ -198,11 +198,11 @@ var circleKiller = {
   moveTime: 3,
   look: "CIRCLE",
   position: Math.round(w / 3) - 5,
-  bulletType: "track"
+  bulletType: "track",
 };
 
 var circleKiller2 = Object.assign({}, circleKiller, {
-  position: Math.round(w / 3) * 2 + 5
+  position: Math.round(w / 3) * 2 + 5,
 });
 
 // enhancing item
@@ -216,9 +216,9 @@ var GreenPoint = {
   restoreLife: ["liftMax-2", "liftReset"],
   look: "hp+",
   color: "rgba(0,255,0,1)",
-  effect: function(ship) {
+  effect: function (ship) {
     renderData.aniEffect.push(
-      animation(80, function(renCount, viewDom) {
+      animation(80, function (renCount, viewDom) {
         var p0 = positionToXY(ship.position);
         var all = 5;
         for (var i = 1; i <= all; i++) {
@@ -228,7 +228,7 @@ var GreenPoint = {
         }
       })
     );
-  }
+  },
 };
 
 var hp_1 = {
@@ -238,9 +238,9 @@ var hp_1 = {
   restoreLife: ["liftRestore-1"],
   look: "hp+",
   color: "rgba(255,255,0,1)",
-  effect: function(ship) {
+  effect: function (ship) {
     renderData.aniEffect.push(
-      animation(80, function(renCount, viewDom) {
+      animation(80, function (renCount, viewDom) {
         var p0 = positionToXY(ship.position);
         var all = 5;
         for (var i = 1; i <= all; i++) {
@@ -250,7 +250,7 @@ var hp_1 = {
         }
       })
     );
-  }
+  },
 };
 
 var TrebleBullet = {
@@ -260,10 +260,10 @@ var TrebleBullet = {
   changeBullet: "treble",
   look: "porweUp",
   color: "rgba(255,0,0,1)",
-  effect: function(ship) {
+  effect: function (ship) {
     ship.look = "crystal-plus";
     renderData.aniEffect.push(
-      animation(80, function(renCount, viewDom) {
+      animation(80, function (renCount, viewDom) {
         var p0 = positionToXY(ship.position);
         var all = 5;
         for (var i = 1; i <= all; i++) {
@@ -273,7 +273,7 @@ var TrebleBullet = {
         }
       })
     );
-  }
+  },
 };
 
 //script
@@ -284,7 +284,7 @@ var script = {
     enemyPolling: [20, 100],
     enemyQuantity: 1,
     stopCount: false,
-    stopEnemyPush: false
+    stopEnemyPush: false,
   },
   // 1: {
   //   // enemy: [Zark1, Fort0],
@@ -307,60 +307,60 @@ var script = {
   800: {
     enemy: [Zark0, Fort0],
     enemyPolling: [15, 80],
-    enemyQuantity: 1
+    enemyQuantity: 1,
   },
   1600: {
     enemy: [Zark1, Fort0],
     enemyPolling: [15, 75],
-    enemyQuantity: 1
+    enemyQuantity: 1,
   },
   1601: {
-    item: [GreenPoint]
+    item: [GreenPoint],
   },
   1700: {
-    enemy: []
+    enemy: [],
   },
   1800: {
-    item: [hp_1]
+    item: [hp_1],
   },
   1805: {
-    boss: [circleKiller]
+    boss: [circleKiller],
   },
   1806: {
-    boss: [circleKiller2]
+    boss: [circleKiller2],
   },
   1807: {
     stopCount: true,
-    stopEnemyPush: true
+    stopEnemyPush: true,
   },
   1809: {
     stopCount: false,
-    stopEnemyPush: false
+    stopEnemyPush: false,
   },
   1820: {
     enemy: [Zark1, Fort0],
     enemyPolling: [15, 75],
-    item: [TrebleBullet]
+    item: [TrebleBullet],
   },
   2100: {
     enemy: [Zark1, Fort0],
     enemyPolling: [15, 55],
-    item: [GreenPoint]
+    item: [GreenPoint],
   },
   2120: {
-    item: [GreenPoint]
+    item: [GreenPoint],
   },
   2200: {
-    boss: [GOZILLA]
+    boss: [GOZILLA],
   },
   2201: {
     stopEnemyPush: true,
-    stopCount: true
+    stopCount: true,
   },
   2202: {
     item: [GreenPoint],
     stopCount: false,
-    stopEnemyPush: true
+    stopEnemyPush: true,
   },
   2400: {
     item: [
@@ -371,34 +371,34 @@ var script = {
       GreenPoint,
       GreenPoint,
       GreenPoint,
-      GreenPoint
-    ]
+      GreenPoint,
+    ],
   },
   2401: {
-    boss: [GOZILLA, GOZILLA2, circleKiller, circleKiller2]
+    boss: [GOZILLA, GOZILLA2, circleKiller, circleKiller2],
   },
   2402: {
-    stopCount: true
+    stopCount: true,
   },
   2403: {
-    stopCount: false
+    stopCount: false,
   },
   4500: {
-    enemyPolling: [15, 45]
+    enemyPolling: [15, 45],
   },
   5600: {
-    item: [hp_1]
+    item: [hp_1],
   },
   5700: {
-    enemyPolling: [10, 35]
-  }
+    enemyPolling: [10, 35],
+  },
 };
 
 //export
-export default function(renCount, ruleObj, nextPolling) {
+export default function (renCount, ruleObj, nextPolling) {
   var rule = script[renCount];
   if (rule) {
-    Object.keys(rule).forEach(function(key) {
+    Object.keys(rule).forEach(function (key) {
       ruleObj[key] = rule[key];
     });
     //console.log('script : ',ruleObj,'nextPolling : ',nextPolling);
