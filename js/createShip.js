@@ -167,31 +167,6 @@ export default function (obj) {
     }
   };
 
-  // this.grapic = function (viewDom, lootype) {
-  //   var color = hit ? 'red' : 'white';
-  //   if (lootype != _look) {
-  //     this.look = lootype;
-  //     setLook && clearTimeout(setLook);
-  //     setLook = setTimeout(function () {
-  //       this.look = _look;
-  //     }.bind(this), 200);
-  //   }
-
-  //   lookPath[this.look](this.position).forEach(function (ps, index) {
-  //     bricks(ps, viewDom, color);
-  //   });
-
-  //   if(this.showLife){
-  //     var ps = positionToXY(
-  //       this.lifeBarPosition(this.position)
-  //     );
-  //     viewDom.fillStyle = 'rgba(255,255,255,.3)';
-  //     viewDom.fillRect(ps.x-50, ps.y, 100, 5);
-  //     viewDom.fillStyle = 'orange';
-  //     viewDom.fillRect(ps.x-50, ps.y, Math.round(100*this.life/this.maxlife), 5);
-  //   }
-  // };
-
   this.grapic = function (viewDom) {
     var _ = this;
     var _wasHit = this.wasHit.bind(this);

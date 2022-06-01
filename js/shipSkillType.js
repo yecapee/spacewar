@@ -116,11 +116,17 @@ export default {
           var enemyImg = document.getElementById("bulletBall");
           viewDom.drawImage(enemyImg, ps.x, ps.y, 15, 15);
 
-          renderData.enemy.forEach(function (_enemy, index) {
-            if (ps.ps === _enemy.position) {
-              _enemy.wasHit(ps.ps, viewDom);
-            }
+          renderData.enemy.forEach(function (obj) {
+            obj.wasHit(ps.ps, viewDom, function () {
+             //  thisBullet.splice(thisBullet.indexOf(el), 1);
+            })
           });
+
+          // renderData.enemy.forEach(function (_enemy, index) {
+          //   if (ps.ps === _enemy.position) {
+          //     _enemy.wasHit(ps.ps, viewDom);
+          //   }
+          // });
         }
       });
 
