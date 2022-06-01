@@ -72,13 +72,11 @@ export default {
         if (ps.ps) {
           viewDom.fillStyle = color;
           viewDom.fillRect(ps.x, ps.y, 15, 15);
-          //isHurt = isHurt || ship.path.includes(ps.ps);
-
-          // renderData.enemyBullet.forEach(function (bullet, index) {
-          //   if (ps.ps === bullet.data.position) {
-          //     renderData.enemyBullet.splice(index, 1);
-          //   }
-          // });
+          renderData.enemyBullet.forEach(function (bullet, index) {
+            if (ps.ps === bullet.data.position) {
+              renderData.enemyBullet.splice(index, 1);
+            }
+          });
         }
       });
 

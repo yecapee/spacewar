@@ -805,83 +805,7 @@ function start() {
  // 加入近戰道具
  // 玩家特殊技
 
-},{"./main.css":"iJ0iE","./js/lookPath":"zDHOl","./js/movePathList":"bWHoT","./js/script":"4pp4s","./js/createEnemy":"7V1mZ","./js/createShip":"ZNCMN","./js/createItem":"gkVl1","./js/aniEffectMethod":"k9PxR","./js/positionMethod":"gqbqK","./js/config":"4Wc5b","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"iJ0iE":[function(require,module,exports) {
-module.exports = display: none
-html, body {
-  height: 100%;
-  width: 100%;
-  background-color: #333;
-  margin: 0;
-  padding: 0;
-  font-family: "Press Start 2P", cursive;
-  overflow: hidden;
-}
-
-#view {
-  z-index: 0;
-  background-image: url("spacebg.6e533ce8.png");
-  background-size: 100%;
-  margin: auto;
-  position: fixed;
-  left: 0;
-  right: 0;
-}
-
-#score {
-  color: orange;
-  z-index: 1;
-  user-select: none;
-  padding-left: 5px;
-  font-size: 8px;
-  display: block;
-  position: fixed;
-  top: 20px;
-  left: 0;
-}
-
-#debug {
-  color: #fff;
-  display: block;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-}
-
-#life {
-  height: 10px;
-  width: 100%;
-  z-index: 2;
-  background-color: orange;
-  position: fixed;
-  bottom: 0;
-}
-
-.ready {
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  z-index: 999;
-  color: orange;
-  background-color: #0009;
-  justify-content: center;
-  align-items: center;
-  display: flex;
-  position: fixed;
-}
-
-.ready .title p {
-  color: #fff;
-}
-
-.score {
-  font: bold;
-  margin-top: 20px;
-  font-size: 5rem;
-}
-
-;
-
-},{}],"zDHOl":[function(require,module,exports) {
+},{"./main.css":"cvfZG","./js/lookPath":"zDHOl","./js/movePathList":"bWHoT","./js/script":"4pp4s","./js/createEnemy":"7V1mZ","./js/createShip":"ZNCMN","./js/createItem":"gkVl1","./js/aniEffectMethod":"k9PxR","./js/positionMethod":"gqbqK","./js/config":"4Wc5b","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"cvfZG":[function() {},{}],"zDHOl":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _config = require("./config");
@@ -25893,12 +25817,9 @@ exports.default = {
                 if (ps.ps) {
                     viewDom.fillStyle = color;
                     viewDom.fillRect(ps.x, ps.y, 15, 15);
-                //isHurt = isHurt || ship.path.includes(ps.ps);
-                // renderData.enemyBullet.forEach(function (bullet, index) {
-                //   if (ps.ps === bullet.data.position) {
-                //     renderData.enemyBullet.splice(index, 1);
-                //   }
-                // });
+                    (0, _config.renderData).enemyBullet.forEach(function(bullet, index) {
+                        if (ps.ps === bullet.data.position) (0, _config.renderData).enemyBullet.splice(index, 1);
+                    });
                 }
             });
             return count < -1;
