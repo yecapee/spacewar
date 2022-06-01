@@ -64,15 +64,12 @@ function keyCodeMap(keycode, type) {
       }
       if (type == "keyup") keyType.SPACE = false;
     },
-    65: function () {
-      if (type == "keydown") {
-        ship.skill();
-      }
-    },
   };
 
   if (map[keycode]) {
     map[keycode]();
+  } else {
+    ship.skill(keycode);
   }
 }
 
@@ -160,9 +157,22 @@ var ship = new createShip({
   look: "crystal",
   skills: [
     {
+      skillKey: 65,
+      type: "atomicExplosionCanKill",
+      launchTime: [250, 120, 6],
+      skillPoint: function (ps) {
+        var xy = ezPositionWithCheckScope(ps);
+        var point = [[0, 0]];
+        var rs = point.map(function (_xy) {
+          return xy(_xy[0], _xy[1]);
+        });
+        return rs;
+      },
+    },
+    {
+      skillKey: 83,
       type: "atomicExplosion",
       launchTime: [250, 120, 6],
-      skillLook: "MONSTER1_openmouth",
       skillPoint: function (ps) {
         var xy = ezPositionWithCheckScope(ps);
         var point = [[0, 0]];
@@ -389,6 +399,8 @@ function start() {
   // window._music();
   start = function () {};
 }
+
+window.r = renderData;
 
 //todo
 

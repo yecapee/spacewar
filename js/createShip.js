@@ -255,17 +255,14 @@ export default function (obj) {
     }
   };
 
-  this.skill = function () {
+  this.skill = function (keycode) {
     var _this = this;
-    this.skills.forEach(
-      function (skill) {
-        skill.skillPoint(this.position).forEach(function (position) {
-          launchSkillsByShip(position, skill.type, _this);
-          isLaunchSkill = true;
-          lookType = skill.skillLook;
-        });
-      }.bind(this)
-    );
+    var skill = this.skills.find((skill) => skill.skillKey === keycode);
+    skill.skillPoint(this.position).forEach(function (position) {
+      launchSkillsByShip(position, skill.type, _this);
+      isLaunchSkill = true;
+      lookType = skill.skillLook;
+    });
     // this.grapic(viewDom, lookType);
   };
 

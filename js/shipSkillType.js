@@ -83,4 +83,48 @@ export default {
       return count < -1;
     };
   },
+  atomicExplosionCanKill: function (position, ship) {
+    var time = 300 - (40 - w) * 20;
+    var prePs = ship.position;
+    var count = time;
+    return function (ship, viewDom) {
+      count--;
+      var t = (1 / time) * (time - count);
+      var p0 = positionToXY(ship.position);
+      var pointLength = 20;
+      var skillPath = [];
+      for (var i = 0; i <= pointLength; i++) {
+        var psData = circle(
+          p0.x,
+          p0.y,
+          (time - count) * 1,
+          pointLength,
+          i,
+          time - count
+        );
+        !psData.outScope &&
+          skillPath.push({
+            ps: psData.position_big,
+            brickType: "0",
+            x: psData.x,
+            y: psData.y,
+          });
+      }
+
+      skillPath.forEach(function (ps) {
+        if (ps.ps) {
+          var enemyImg = document.getElementById("bulletBall");
+          viewDom.drawImage(enemyImg, ps.x, ps.y, 15, 15);
+
+          renderData.enemy.forEach(function (_enemy, index) {
+            if (ps.ps === _enemy.position) {
+              _enemy.wasHit(ps.ps, viewDom);
+            }
+          });
+        }
+      });
+
+      return count < -1;
+    };
+  },
 };
