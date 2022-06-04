@@ -19,7 +19,7 @@ function bulletPosition() {
   }
 }
 
-function grapicBullet(viewDom) {
+function graphicBullet(viewDom) {
   var enemyBulleArr = renderData.enemyBullet;
 
   var thisBullet = this.bullet;
@@ -167,7 +167,7 @@ export default function (obj) {
     }
   };
 
-  this.grapic = function (viewDom) {
+  this.graphic = function (viewDom) {
     var _ = this;
     var _wasHit = this.wasHit.bind(this);
     var _touch = this.touch.bind(this);
@@ -180,7 +180,7 @@ export default function (obj) {
     this.path = path;
     this.pathObj = pathObj;
     bulletPosition.call(this);
-    grapicBullet.call(this, viewDom);
+    graphicBullet.call(this, viewDom);
 
     if (!isDead) {
       lookPath[this.look](this.position, this.lookType).forEach(function (
@@ -238,7 +238,7 @@ export default function (obj) {
       isLaunchSkill = true;
       lookType = skill.skillLook;
     });
-    // this.grapic(viewDom, lookType);
+    // this.graphic(viewDom, lookType);
   };
 
   this.dead = function () {

@@ -63,6 +63,7 @@ export default function (obj) {
   this.shotLook = obj.shotLook || obj.look;
   this.bulletType = obj.bulletType || 'normal';
   this.skills = obj.skills || [];
+  this.graphicType = obj.graphicType || 'path';
 
   var deadCb = obj.deadCb || function () { };
   var hit = false;
@@ -89,13 +90,13 @@ export default function (obj) {
         })
         this.dead();
       } else {
-        this.grapic.call(this, viewDom, _look);
+        this.graphic.call(this, viewDom, _look);
         if (cb) cb();
       };
     }
   };
 
-  this.grapic = function (viewDom, lootype) {
+  this.graphic = function (viewDom, lootype) {
     var color = hit ? 'red' : 'white';
     if (lootype != _look) {
       this.look = lootype;
@@ -103,6 +104,17 @@ export default function (obj) {
       setLook = setTimeout(function () {
         this.look = _look;
       }.bind(this), 200);
+    }
+
+    if(this.graphicType == 'img'){
+      var enemyImg = document.getElementById(this.look);
+      viewDom.drawImage(
+        enemyImg,
+        positionToXY(this.position).x - enemyImg.width / 2,
+        positionToXY(this.position).y - enemyImg.height,
+        enemyImg.width,
+        enemyImg.height
+      );
     }
 
     lookPath[this.look](this.position).forEach(function (ps, index) {
@@ -153,7 +165,7 @@ export default function (obj) {
       survivalTime++;
       hit = false;
     }
-    this.grapic(viewDom, lookType);
+    this.graphic(viewDom, lookType);
   };
 
   this.dead = function () {

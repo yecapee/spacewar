@@ -55,7 +55,7 @@ export default function (obj) {
     return survivalTime;
   };
 
-  this.grapic = function (viewDom) {
+  this.graphic = function (viewDom) {
     var color = this.color;
     lookPath[this.look](this.position).forEach(function (ps, index) {
       bricks(ps, viewDom, color);
@@ -63,7 +63,7 @@ export default function (obj) {
   };
 
   this.action = function (renderType, viewDom, shipPs) {
-    this.grapic(viewDom);
+    this.graphic(viewDom);
     if (renderType === 'OBJ_MOVE') {
       itemMove.call(this);
       survivalTime++;

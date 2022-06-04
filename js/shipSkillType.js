@@ -29,6 +29,25 @@ function circle(x, y, r, all, now, margin) {
   };
 }
 
+function semicircle(x, y, r, all, now, margin) {
+  var ang = ((Math.PI * 2) / all) * 0.5;
+  var _margin = ((2 * Math.PI) / 360) * (margin || 0);
+  var _x = Math.round(x + r * Math.cos(ang * (now + all*.9) + _margin));
+  var _y = Math.round(y + r * Math.sin(ang * (now + all*.9) + _margin));
+
+  return {
+    position_big: xyToPosition(_x, _y),
+    position: sXsYToPosition(_x, _y),
+    outScope:
+      Math.round(_x / pixelWeigth) < 0 ||
+      Math.round(_x / pixelWeigth) > w - 1 ||
+      Math.round(_y / pixelWeigth) < 0 ||
+      Math.round(_y / pixelWeigth) > h - 1,
+    x: _x,
+    y: _y,
+  };
+}
+
 export default {
   atomicExplosion: function (position, ship) {
     var time = 300 - (40 - w) * 20;
@@ -89,12 +108,13 @@ export default {
     var count = time;
     return function (ship, viewDom) {
       count--;
+      if (count % 1 == 0) prePs -= w;
       var t = (1 / time) * (time - count);
-      var p0 = positionToXY(ship.position);
-      var pointLength = 20;
+      var p0 = positionToXY(prePs);
+      var pointLength = 2;
       var skillPath = [];
       for (var i = 0; i <= pointLength; i++) {
-        var psData = circle(
+        var psData = semicircle(
           p0.x,
           p0.y,
           (time - count) * 1,
@@ -118,15 +138,9 @@ export default {
 
           renderData.enemy.forEach(function (obj) {
             obj.wasHit(ps.ps, viewDom, function () {
-             //  thisBullet.splice(thisBullet.indexOf(el), 1);
-            })
+              //  thisBullet.splice(thisBullet.indexOf(el), 1);
+            });
           });
-
-          // renderData.enemy.forEach(function (_enemy, index) {
-          //   if (ps.ps === _enemy.position) {
-          //     _enemy.wasHit(ps.ps, viewDom);
-          //   }
-          // });
         }
       });
 

@@ -27,17 +27,17 @@ function positionLimit(nowPosition) {
 };
 
 export default {
-  goStop: function () {
+  goStop: function (useType = 'enemy') {
     var me = this;
     if (this.getST() < 6) this.position += w;
     if (this.getST() > 80) this.position += w;
     if (this.position > w * h - 1) {
-      renderData.enemy.find(function (el, index) {
-        if (el === me) renderData.enemy.splice(index, 1);
+      renderData[useType].find(function (el, index) {
+        if (el === me) renderData[useType].splice(index, 1);
       })
     };
   },
-  gostMove: function () {
+  gostMove: function (useType = 'enemy') {
     var me = this;
     var thisY = Math.floor(this.position / h);
     var r = h / 4;
@@ -50,21 +50,21 @@ export default {
       this.position = positionLimit.call(this, this.mainX + xMargin)
     }
     if (this.position > w * h - 1) {
-      renderData.enemy.find(function (el, index) {
-        if (el === me) renderData.enemy.splice(index, 1);
+      renderData[useType].find(function (el, index) {
+        if (el === me) renderData[useType].splice(index, 1);
       })
     };
   },
-  goToOut: function () {
+  goToOut: function (useType = 'enemy') {
     this.position += w;
     var me = this;
-    if (this.position > w * h - 1) {
-      renderData.enemy.find(function (el, index) {
-        if (el === me) renderData.enemy.splice(index, 1);
+    if (this.position > w * h * 1.5) {
+      renderData[useType].find(function (el, index) {
+        if (el === me) renderData[useType].splice(index, 1);
       })
     };
   },
-  pingpong: function () {
+  pingpong: function (useType = 'enemy') {
     var xy = ezPosition(this.position);
     var prePs = positionTosXsY(this.prePosition);
     var nowPs = positionTosXsY(this.position);

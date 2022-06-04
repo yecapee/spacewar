@@ -38,12 +38,18 @@ var turret = {
 var Zark0 = {
   name: "ZARK-ZERO",
   life: 1,
+  showLife: true,
+  lifeBarPosition: function (ps) {
+    var xy = ezPositionWithCheckScope(ps);
+    return xy(0, -9);
+  },
   // position: Math.floor(Math.random() * w),
   shot: true,
   shotTime: [200, 54, 9],
   movePath: "gostMove",
   moveTime: 5,
   look: "zark",
+  graphicType: "img",
   bulletType: "normal",
 };
 
@@ -231,6 +237,42 @@ var GreenPoint = {
   },
 };
 
+var Rock = {
+  name: "Rock",
+  movePath: "goToOut",
+  moveTime: 5,
+  look: "rock0",
+  showProbability: .1,
+  repeatLock:200,
+};
+
+var Rock1 = {
+  name: "Rock",
+  movePath: "goToOut",
+  moveTime: 10,
+  look: "rock1",
+  showProbability: .1,
+  repeatLock:200,
+};
+
+var Rock2 = {
+  name: "Rock",
+  movePath: "goToOut",
+  moveTime: 1,
+  look: "rock2",
+  showProbability: .1,
+  repeatLock:200,
+};
+
+var Rock3 = {
+  name: "Rock",
+  movePath: "goToOut",
+  moveTime: 2,
+  look: "rock3",
+  showProbability: .1,
+  repeatLock:200,
+};
+
 var hp_1 = {
   name: "hp_1",
   movePath: "pingpong",
@@ -285,6 +327,7 @@ var script = {
     enemyQuantity: 1,
     stopCount: false,
     stopEnemyPush: false,
+    mapObject: [Rock, Rock1, Rock2, Rock3],
   },
   // 1: {
   //   // enemy: [Zark1, Fort0],

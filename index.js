@@ -5,6 +5,7 @@ import script from "./js/script";
 import createEnemy from "./js/createEnemy";
 import createShip from "./js/createShip";
 import createItem from "./js/createItem";
+import createObject from "./js/createObject";
 // import music from './js/bgmusic';
 import { animation } from "./js/aniEffectMethod";
 import { positionToXY, ezPositionWithCheckScope } from "./js/positionMethod";
@@ -30,6 +31,7 @@ var bgCount = 0;
 var shotFn;
 var ruleObj = {};
 var scriptMileage = renCount;
+var mapObjectLock = 0;
 
 var keyType = {
   UP: false,
@@ -201,6 +203,7 @@ function gaphic(TYPE) {
   if (TYPE === "OBJ_MOVE") {
     var createObj = false;
     var item = ruleObj.item;
+    var mapObject = ruleObj.mapObject;
 
     // enemy push
     if (renCount == nextPolling && !stopEnemyPush) {
@@ -250,12 +253,32 @@ function gaphic(TYPE) {
     }
     //
 
+    // item
     if (item) {
       item.forEach(function (itemData) {
         itemData.position = Math.floor(Math.random() * w);
         renderData.item.push(new createItem(itemData));
       });
       ruleObj.item = null;
+    }
+
+    // mapObject
+    if (mapObject) {
+      var enemyObj = ruleObj.enemy[renCount % ruleObj.enemy.length];
+      mapObject.forEach(function (objectData) {
+        if (
+          Math.random() * 100 <= objectData.showProbability &&
+          mapObjectLock == 0
+        ) {
+          objectData.position = Math.floor(Math.random() * w);
+          const object =  new createObject(objectData)
+          renderData.mapObject.push(object);
+          mapObjectLock = object.repeatLock;
+        }
+      });
+      if (mapObjectLock != 0) {
+        mapObjectLock--;
+      }
     }
 
     bgCount++;
@@ -275,8 +298,13 @@ function gaphic(TYPE) {
   var viewDom = document.getElementById("view").getContext("2d");
   viewDom.clearRect(0, 0, vwidth, vheight);
 
+  // mapObject
+  renderData.mapObject.forEach(function (obj) {
+    obj.action(TYPE, viewDom, ship.position);
+  });
+
   // ship
-  ship.grapic(viewDom);
+  ship.graphic(viewDom);
 
   //enmyBullet
   renderData.enemyBullet.map(function (bullt) {
@@ -330,7 +358,9 @@ function gaphic(TYPE) {
     "<br/> Life: " +
     ship.life +
     "/" +
-    ship.maxLife;
+    ship.maxLife +
+    "<br/> mapObjectLock:" +
+    mapObjectLock;
 
   document.getElementById("life").style.width =
     (100 / ship.maxLife) * ship.life + "%";

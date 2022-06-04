@@ -47,4 +47,5 @@ exports.renderData = {
   item: [],
   skills: [],
   shipSkills: [],
+  mapObject: [],
 };
