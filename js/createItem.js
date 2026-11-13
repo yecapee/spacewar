@@ -10,6 +10,7 @@ import {
   renderData,
 } from './config';
 import bricks from './bricks';
+import drawItem from './itemRenderer.mjs';
 
 function restoreLifeAction(type, value, ship) {
   //'liftReset','liftMax-6','liftRestore-6'
@@ -51,12 +52,15 @@ export default function (obj) {
 
   var effect = obj.effect || function () { };
   var survivalTime = 0;
+  const center = {};
 
   this.getST = function () {
     return survivalTime;
   };
 
   this.draw = function (viewDom) {
+    if (this.removed) return;
+    if (drawItem(viewDom, this, positionToXY(this.position, center), pixelWeigth)) return;
     var color = this.color;
     world.cache.get(this).pathObj.forEach(function (ps, index) {
       bricks(ps, viewDom, color);

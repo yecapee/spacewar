@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPACEWAR · 道具預覽</title>
+<style>
+* { box-sizing: border-box; } body { margin: 0; padding: 32px 20px; background: #080d17; color: #e8edf6; font: 14px/1.7 system-ui, sans-serif; }
+main { max-width: 880px; margin: auto; } h1 { font-size: 24px; letter-spacing: 2px; } p { color: #a5b4ce; }
+.items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+article { padding: 18px; background: #101b2b; border: 1px solid #26364d; border-radius: 8px; text-align: center; }
+canvas { width: 100%; max-width: 240px; height: auto; image-rendering: pixelated; }
+h2 { font-size: 16px; margin: 8px; } small { color: #a5b4ce; }
+a { color: #86ffd0; } @media(max-width:600px) { .items { grid-template-columns: 1fr; } article { padding: 12px; } }
+</style>
+<main>
+<h1>SPACEWAR / 補給模組</h1>
+<p>白色裝甲 · 統一 96 × 96 像素素材<br>上方：放大檢視　下方：遊戲實際尺寸</p>
+<section class="items">
+<article><canvas width="240" height="240" data-kind="repair"></canvas><h2>修復補給</h2><small>恢復 1 點生命</small></article>
+<article><canvas width="240" height="240" data-kind="hull"></canvas><h2>機體強化</h2><small>生命上限 +2，並完全修復</small></article>
+<article><canvas width="240" height="240" data-kind="triple"></canvas><h2>三向火力</h2><small>升級為三向射擊</small></article>
+</section>
+<p><a href="/dist/">進入遊戲 →</a></p>
+</main>
+<script type="module">
+import drawItem from '../js/itemRenderer.mjs';
+const types = { repair: { restoreLife: ['liftRestore-1'] }, hull: { restoreLife: ['liftMax-2','liftReset'] }, triple: { changeBullet: 'treble' } };
+function draw() {
+  for (const canvas of document.querySelectorAll('canvas')) {
+    const ctx = canvas.getContext('2d'); ctx.clearRect(0,0,240,240);
+    const item = types[canvas.dataset.kind];
+    drawItem(ctx,item,{x:120,y:75},32);
+    drawItem(ctx,item,{x:120,y:185},15);
+  }
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</html>

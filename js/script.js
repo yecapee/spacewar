@@ -215,7 +215,7 @@ var GreenPoint = {
   moveTime: 10,
   restoreLife: ["liftMax-2", "liftReset"],
   look: "hp+",
-  color: "rgba(0,255,0,1)",
+  color: "#cf9cff",
   effect: function (ship) {
     renderData.aniEffect.push(
       animation(80, function (renCount, viewDom) {
@@ -223,7 +223,7 @@ var GreenPoint = {
         var all = 5;
         for (var i = 1; i <= all; i++) {
           var nowPs = circle(p0.x, p0.y, 1.5 * renCount, all, i);
-          viewDom.fillStyle = "rgba(0,255,0,.8)";
+          viewDom.fillStyle = "rgba(207,156,255,.8)";
           viewDom.fillRect(nowPs.x, nowPs.y, 15, 15);
         }
       })
@@ -237,7 +237,7 @@ var hp_1 = {
   moveTime: 10,
   restoreLife: ["liftRestore-1"],
   look: "hp+",
-  color: "rgba(255,255,0,1)",
+  color: "#86ffd0",
   effect: function (ship) {
     renderData.aniEffect.push(
       animation(80, function (renCount, viewDom) {
@@ -245,7 +245,7 @@ var hp_1 = {
         var all = 5;
         for (var i = 1; i <= all; i++) {
           var nowPs = circle(p0.x, p0.y, 1.5 * renCount, all, i);
-          viewDom.fillStyle = "rgba(255,255,0,.8)";
+          viewDom.fillStyle = "rgba(134,255,208,.8)";
           viewDom.fillRect(nowPs.x, nowPs.y, 15, 15);
         }
       })
@@ -259,7 +259,7 @@ var TrebleBullet = {
   moveTime: 10,
   changeBullet: "treble",
   look: "porweUp",
-  color: "rgba(255,0,0,1)",
+  color: "#ffbc55",
   effect: function (ship) {
     ship.look = "modular-plus";
     renderData.aniEffect.push(
@@ -268,7 +268,7 @@ var TrebleBullet = {
         var all = 5;
         for (var i = 1; i <= all; i++) {
           var nowPs = circle(p0.x, p0.y, 1.5 * renCount, all, i);
-          viewDom.fillStyle = "rgba(255,0,0,.8)";
+          viewDom.fillStyle = "rgba(255,188,85,.8)";
           viewDom.fillRect(nowPs.x, nowPs.y, 15, 15);
         }
       })
