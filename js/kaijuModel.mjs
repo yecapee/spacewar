@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
-// Low-poly articulated creature from the approved standalone study.
+// Abstract articulated creature: broad facets, sparse claws and a seven-joint tail.
 export function createKaijuModel() {
 const scene = new THREE.Group();
 const mat = (color,roughness=.8) => new THREE.MeshStandardMaterial({color,roughness,metalness:.15,flatShading:true});
@@ -10,13 +10,12 @@ const throatMat=new THREE.MeshStandardMaterial({color:'#220d35',emissive:'#a747f
 const eyeMat=new THREE.MeshStandardMaterial({color:'#f1bbff',emissive:'#ce73ff',emissiveIntensity:2.5});
 function group(parent,x=0,y=0,z=0){const g=new THREE.Group();g.position.set(x,y,z);parent.add(g);return g;}
 function mesh(parent,geometry,material,x=0,y=0,z=0,sx=1,sy=1,sz=1){const m=new THREE.Mesh(geometry,material);m.position.set(x,y,z);m.scale.set(sx,sy,sz);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
-const ico=new THREE.IcosahedronGeometry(1,0), sphere=new THREE.SphereGeometry(1,8,6), box=new THREE.BoxGeometry(1,1,1);
+const ico=new THREE.OctahedronGeometry(1,0), box=new THREE.BoxGeometry(1,1,1);
 const root=group(scene,0,0,0), body=group(root,0,3.1,0);
 mesh(body,ico,skin,0,1.2,0,1.65,2.25,1.12);
 mesh(body,ico,chestMat,0,1.65,.67,1.15,1.5,.67);
 mesh(body,ico,dark,0,-.15,-.12,1.5,1.15,1.02);
-// Broad layered chest facets keep the creature readable without a dense mesh.
-for(let i=0;i<3;i++) mesh(body,ico,i%2?skin:chestMat,0,2.05-i*.65,1.04,1.02-i*.09,.38,.29);
+// One broad chest plane replaces the small layered armor details.
 const neck=group(body,0,2.8,.1);
 mesh(neck,ico,skin,0,.2,.25,.85,1.22,.83);
 const head=group(neck,0,.7,.4);
@@ -26,17 +25,16 @@ mesh(head,ico,dark,0,.58,.48,.8,.42,1.02);
 for(const sign of [-1,1]) {
   const brow=mesh(head,box,edge,sign*.61,.5,.96,.52,.17,.75);brow.rotation.z=sign*.14;
   mesh(head,box,eyeMat,sign*.66,.33,1.13,.12,.1,.27);
-  mesh(head,box,dark,sign*.31,.38,1.7,.18,.08,.1);
 }
 const jaw=group(head,0,-.1,.55);
 mesh(jaw,ico,skin,0,-.18,.57,.69,.29,.98);
 mesh(jaw,box,dark,0,-.04,.74,.89,.12,1.22);
-const mouthCore=mesh(head,sphere,throatMat,0,-.11,.85,.44,.26,.5);
+const mouthCore=mesh(head,ico,throatMat,0,-.11,.85,.44,.26,.5);
 mesh(jaw,box,throatMat,0,.035,.7,.67,.06,1.02);
 const toothGeo=new THREE.ConeGeometry(.075,.22,4);
-for(const sign of [-1,1]) for(let i=0;i<5;i++) {
-  const upper=mesh(head,toothGeo,claw,sign*.41,-.14,.66+i*.22);upper.rotation.z=Math.PI;
-  mesh(jaw,toothGeo,claw,sign*.39,.06,.18+i*.22);
+for(const sign of [-1,1]) for(let i=0;i<2;i++) {
+  const upper=mesh(head,toothGeo,claw,sign*.41,-.14,.7+i*.65);upper.rotation.z=Math.PI;
+  mesh(jaw,toothGeo,claw,sign*.39,.06,.25+i*.65);
 }
 const muzzle=group(head,0,-.16,1.76);
 const arms=[];
@@ -44,7 +42,7 @@ for(const sign of [-1,1]) {
   const arm=group(body,sign*1.24,2.05,.5);arm.rotation.z=sign*.24;
   mesh(arm,ico,skin,sign*.22,-.5,.14,.48,.84,.52);
   const hand=group(arm,sign*.23,-1.04,.5);mesh(hand,ico,chestMat,0,0,0,.34,.5,.37);
-  for(let i=0;i<3;i++){const c=mesh(hand,toothGeo,claw,(i-1)*.16,-.39,.2);c.rotation.x=-.6;}
+  for(let i=0;i<2;i++){const c=mesh(hand,toothGeo,claw,(i-.5)*.25,-.39,.2);c.rotation.x=-.6;}
   arms.push(arm);
 }
 const legs=[], feet=[];
@@ -61,10 +59,10 @@ for(const sign of [-1,1]) {
 // A linked tail swings with a lag that increases towards the tip.
 const tail=[], dorsal=[];
 let tailParent=group(body,0,-.05,-.8);
-for(let i=0;i<9;i++) {
-  const joint=group(tailParent,0,0,i===0?0:-.94);
-  const width=.86*(1-i/10);
-  mesh(joint,ico,i%2?skin:dark,0,-.02,-.44,width,width*.7,.8);
+for(let i=0;i<7;i++) {
+  const joint=group(tailParent,0,0,i===0?0:-1.2);
+  const width=.86*(1-i/8);
+  mesh(joint,ico,i%2?skin:dark,0,-.02,-.56,width,width*.7,1.02);
   joint.rotation.x=i===0?-.4:.025;tail.push(joint);tailParent=joint;
 }
 function plate(parent,x,y,z,size,index) {
@@ -74,8 +72,9 @@ function plate(parent,x,y,z,size,index) {
   const material=new THREE.MeshStandardMaterial({color:'#74728c',emissive:'#a452ff',emissiveIntensity:0,flatShading:true,roughness:.6});
   const m=mesh(parent,g,material,x,y,z);dorsal.push({mesh:m,index});return m;
 }
-for(let i=0;i<9;i++) plate(tail[i],0,.35*(1-i/10),-.32,.28+(8-i)*.055,8-i);
+for(let i=0;i<tail.length;i++) plate(tail[i],0,.35*(1-i/8),-.4,.28+(6-i)*.07,8-i*8/6);
 for(let row=0;row<5;row++) for(const side of [-1,0,1]) {
+  if(side!==0&&row!==1&&row!==3)continue;
   const y=.4+row*.64,z=-1.02+row*.075,size=(side===0?1.1:.68)*(1-Math.abs(row-2)*.12);
   const fin=plate(body,side*.58,y,z,size,9+row);fin.rotation.x=-.5;fin.rotation.z=side*-.3;
 }

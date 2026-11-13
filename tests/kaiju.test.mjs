@@ -35,7 +35,7 @@ test('heavy gait moves only on footfalls and stays in bounds on narrow screens',
 
 test('low-poly rig retains independent jaw animation and an oblique camera with a stable mouth projection',()=>{
   const model=createKaijuModel(),camera=createKaijuCamera();
-  assert.ok(model.stats.triangles<=1300);assert.ok(model.stats.drawCalls<=70);
+  assert.ok(model.stats.triangles<=650);assert.ok(model.stats.drawCalls<=55);
   const closed={...sampleKaijuSequence(200),walkTime:3};poseKaiju(model,closed);
   const closedAngle=model.jaw.rotation.x;
   const active={...sampleKaijuSequence(350),walkTime:4};poseKaiju(model,active);
