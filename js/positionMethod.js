@@ -2,6 +2,7 @@ import {
   w,
   h,
   pixelWeigth,
+  vheight,
 } from './config';
 
 var positionTosXsY = function (position) {
@@ -19,7 +20,7 @@ exports.positionToXY = function (ps) {
   return {
     ps: ps,
     x: x * pixelWeigth + pixelWeigth / 2,
-    y: y * window.innerHeight / h,
+    y: y * vheight / h,
     __x: x,
     __y: y,
     limit: w * h - 1,

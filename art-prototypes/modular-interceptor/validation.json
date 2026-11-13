@@ -1,0 +1,30 @@
+{
+  "mechanismSamples": 101,
+  "linkLengths": [
+    0.7,
+    1
+  ],
+  "files": [
+    {
+      "name": "modular-interceptor.glb",
+      "bytes": 522916,
+      "meshes": 86,
+      "animations": [
+        "Deploy",
+        "Retract"
+      ]
+    },
+    {
+      "name": "modular-interceptor-normal.glb",
+      "bytes": 465640,
+      "meshes": 86,
+      "animations": []
+    },
+    {
+      "name": "modular-interceptor-attack.glb",
+      "bytes": 465672,
+      "meshes": 86,
+      "animations": []
+    }
+  ]
+}

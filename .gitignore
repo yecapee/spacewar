@@ -58,3 +58,7 @@ typings/
 
 # dotenv environment variables file
 .env
+
+# Local Parcel development output and cache
+.parcel-dev/
+.parcel-cache/

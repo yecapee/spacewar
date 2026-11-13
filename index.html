@@ -1,76 +1,84 @@
+<!doctype html>
 <html lang="zh-Hant">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-<link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag() { dataLayer.push(arguments); }
-  gtag('js', new Date());
-  gtag('config', 'UA-110926326-1');
-</script>
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/0.12.54/Tone.min.js"></script> -->
-<!-- Google Tag Manager (noscript) -->
-<noscript>
-  <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5NN74MQ" height="0" width="0"
-    style="display:none;visibility:hidden"></iframe>
-</noscript>
-<!-- End Google Tag Manager (noscript) -->
-
-<meta property="og:title" content="Spacewar" />
-<meta property="og:url" content="https://yecapee.github.io/spacewar/dist/" />
-<meta property="og:image" content="https://yecapee.github.io/spacewar/game.png" />
-<meta property="og:image" content="https://yecapee.github.io/spacewar/gozilla.png" />
-<meta property="og:description" content="A ptt style of space game" />
-<title>SPACEWAR</title>
-
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080d17">
+  <meta name="description" content="Spacewar — 在無盡星海中生存，以粒子空氣盾抵擋敵彈的像素射擊遊戲。">
+  <meta property="og:title" content="Spacewar">
+  <meta property="og:image" content="https://yecapee.github.io/spacewar/game.png">
+  <title>SPACEWAR — 無盡航行</title>
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
 <body>
-  <audio id="bgmusic" loop>
-    <source src="http://grayscale.scene.pl/msx/zizibum.mp3">
-  </audio>
-  <div class="ready" id="ready">
-    <div class="title">
-      <h1>OUTERSPACE IS NO END.</h1>
-      <p>Developed by yecapee</p>
-      <div class="start-controls">
-        <p><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> 移動戰機</p>
-        <p><kbd>Space</kbd> 按住連續射擊</p>
-        <p><kbd>A</kbd> 攻擊波：擴散攻擊敵人</p>
-        <p><kbd>S</kbd> 防禦波：清除敵方子彈</p>
-        <p class="touch-tip">觸控：在遊戲區拖曳移動，自動射擊</p>
-      </div>
-      <p class="start-prompt">按空白鍵或點擊畫面開始</p>
+  <div class="ambient" aria-hidden="true"></div>
+  <canvas id="view" aria-label="Spacewar 遊戲區"></canvas>
+  <p id="graphicsStatus" class="graphics-status" role="alert" hidden></p>
+  <div id="damageFlash" aria-hidden="true"></div>
 
-    </div>
-  </div>
-  <div id="debug"></div>
-  <div id="score" unselectable="on"></div>
-  <div id="life"></div>
-  <canvas id="view"></canvas>
+  <header class="hud">
+    <section class="telemetry" aria-label="戰況資訊">
+      <div class="brand">SPACE<span>WAR</span><i class="signal-dot"></i></div>
+      <div class="score-heading">本次擊破 <span>HI <b id="bestScore">0000</b></span></div>
+      <div id="score">0000</div>
+      <div class="flight-line"><span>航行距離</span><b id="mileage">0000</b></div>
+      <div id="healthPanel" class="health-panel">
+        <div class="health-heading"><span>機體完整度</span><b id="lifeText">5 / 5</b></div>
+        <div class="health-track"><div id="life"></div></div>
+      </div>
+    </section>
+    <nav class="run-actions" aria-label="遊戲控制">
+      <button id="pauseButton" disabled>Ⅱ 暫停</button>
+      <button id="restartButton" class="quiet-button">↻ 重來</button>
+    </nav>
+  </header>
+
+  <div class="mission-note" aria-hidden="true"><span class="small-label">DEEP SPACE / ENDLESS FLIGHT</span><p id="runStatus">等待出擊</p><span class="coordinate">保持航向。突破極限。</span></div>
+
   <aside class="controls-help" aria-label="操作與技能說明">
-    <h2>操作指南</h2>
-    <div class="keyboard-tip"><kbd>↑ ↓ ← →</kbd><span>移動</span></div>
-    <div class="keyboard-tip"><kbd>Space</kbd><span>按住連射</span></div>
-    <div><kbd>A</kbd><span>攻擊波 · 攻擊敵人</span></div>
-    <div><kbd>S</kbd><span>防禦波 · 清除敵彈</span></div>
-    <p class="touch-tip">拖曳移動 · 自動射擊<br>技能可使用鍵盤 A／S</p>
+    <h2><span>機載系統</span><span class="small-label">SYSTEMS / 02</span></h2>
+    <button id="attackButton" class="skill-button attack-skill" disabled>
+      <kbd>A</kbd><span class="skill-copy"><strong>攻擊波</strong><small>音爆 → 隨機短雷射連發</small></span><span class="skill-symbol" aria-hidden="true">✳</span>
+    </button>
+    <button id="shieldButton" class="skill-button shield-skill" disabled>
+      <kbd>S</kbd><span class="skill-copy"><strong>空氣盾</strong><small>自動迎擊來彈，殘盾收攏</small></span><span class="skill-symbol" aria-hidden="true">◠</span>
+    </button>
+    <div class="shield-track"><div id="shieldMeter"></div></div>
+    <p class="shield-status" id="shieldStatus" role="status">可施放 · S</p>
+    <div class="keyboard-tip"><span>↑ ↓ ← → 移動</span><span>Space 連射</span></div>
+    <div class="keyboard-tip secondary-tip"><span>P / Esc 暫停</span><span>R 重新出擊</span></div>
+    <p class="touch-tip">在遊戲區拖曳移動，自動射擊<br>點擊技能卡即可施放</p>
   </aside>
 
-  <img id="shipImg" src="./img/ship.png" style="display:none">
-  <img id="shipBulletNormal" src="./img/bullet_normal.png" style="display:none">
-  <img id="bulletBall" src="./img/bulletBall.png" style="display:none">
-  <img id="laser" src="./img/laser.png" style="display:none">
-  <img id="zarkImg" src="./img/zark.png" style="display:none">
-  <img id="explosion" src="./img/explosion.png" style="display:none">
-  <script>
-    bgmusic.volume = 0.1;
-    function _music() {
-      // bgmusic.autoplay = true;
-      bgmusic.play();
-    }
-  </script>
+  <section class="ready" id="ready" data-screen="ready" role="dialog" aria-modal="true" aria-labelledby="overlayTitle">
+    <div class="title">
+      <div class="small-label overlay-eyebrow" id="overlayEyebrow">ARCADE / SURVIVAL</div>
+      <div class="orbital-mark" aria-hidden="true"><span>✦</span></div>
+      <h1 id="overlayTitle">SPACEWAR</h1>
+      <p class="overlay-description" id="overlayDescription">在無盡星海中，留下一道航跡。</p>
+      <div class="result-summary" id="resultSummary" hidden>
+        <div><span>本次擊破</span><strong id="resultScore">0</strong></div>
+        <div><span>航行距離</span><strong id="resultMileage">0</strong></div>
+      </div>
+      <div class="start-controls">
+        <div><kbd>↑ ↓ ← →</kbd><span>移動戰機</span></div>
+        <div><kbd>Space</kbd><span>按住連續射擊</span></div>
+        <div><kbd>A</kbd><span>攻擊波 · 多波短雷射</span></div>
+        <div><kbd>S</kbd><span>空氣盾 · 自動迎擊，耗盡重放</span></div>
+      </div>
+      <p class="touch-tip">拖曳戰機移動並射擊，點擊技能卡施放技能。</p>
+      <button id="startButton" class="primary-button">開始出擊</button>
+      <p class="start-prompt">SPACE 確認 <span>·</span> P / ESC 暫停</p>
+      <div class="credit">DEVELOPED BY YECAPEE</div>
+    </div>
+  </section>
+  <div id="debug"></div>
+  <img id="shipImg" src="./img/ship.png" hidden alt="">
+  <img id="shipBulletNormal" src="./img/bullet_normal.png" hidden alt="">
+  <img id="bulletBall" src="./img/bulletBall.png" hidden alt="">
+  <img id="laser" src="./img/laser.png" hidden alt="">
+  <img id="zarkImg" src="./img/zark.png" hidden alt="">
+  <img id="explosion" src="./img/explosion.png" hidden alt="">
+  <script type="module" src="index.js"></script>
 </body>
-
-
-<script type="module" src="index.js"></script>
-
 </html>

@@ -31,3 +31,23 @@ export function explosionSound() {
   noise.start().volume.rampTo(-8, 0);
   noise.volume.rampTo(-Infinity, 3);
 }
+
+const sonicSynth = new Tone.MembraneSynth({
+  pitchDecay: .015,
+  octaves: 2,
+  envelope: { attack: .001, decay: .06, sustain: 0, release: .03 },
+}).toMaster();
+sonicSynth.volume.value = -22;
+const impactSynth = new Tone.MembraneSynth({
+  pitchDecay: .07,
+  octaves: 5,
+  envelope: { attack: .002, decay: .28, sustain: 0, release: .2 },
+}).toMaster();
+impactSynth.volume.value = -13;
+
+export function sonicBoomSound() {
+  sonicSynth.triggerAttackRelease('C4', .04);
+}
+export function heavyWaveSound() {
+  impactSynth.triggerAttackRelease('C1', .12);
+}

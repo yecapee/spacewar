@@ -6,12 +6,15 @@ import bulletTypeMap from './enemyBulletType';
 import skillTypeMap from './enemySkillType';
 import bricks from './bricks';
 import { explosionSound } from './sound';
+import feedback from './feedback.mjs';
+import drawEnemy from './enemyRenderer.mjs';
 import {
   w,
   h,
   pixelWeigth,
   renderData,
   killCount,
+  vheight,
 } from './config';
 
 function enemyMove() {
@@ -65,7 +68,7 @@ export default function (obj) {
   this.skills = obj.skills || [];
 
   var deadCb = obj.deadCb || function () { };
-  var hit = false;
+  var hitFrames = 0;
   var survivalTime = 0;
   var _look = this.look;
   var setLook;
@@ -79,7 +82,9 @@ export default function (obj) {
     var path = lookPath[this.look](this.position).map(el => el.ps);
     if (this.life < 1) return false;
     if (path.includes(bulletPs)) {
-      hit = true;
+      hitFrames = 4;
+      var impact = positionToXY(bulletPs);
+      feedback.burst(impact.x, impact.y, '#fff4cf', 5, 1.5);
       this.life--;
       if (this.life < 1) {
         renderData.enemy.find(function (el, index) {
@@ -99,7 +104,6 @@ export default function (obj) {
   };
 
   this.grapic = function (viewDom, lootype) {
-    var color = hit ? 'red' : 'white';
     if (lootype != _look) {
       this.look = lootype;
       setLook && clearTimeout(setLook);
@@ -108,9 +112,7 @@ export default function (obj) {
       }.bind(this), 200);
     }
 
-    lookPath[this.look](this.position).forEach(function (ps, index) {
-      bricks(ps, viewDom, color);
-    });
+    drawEnemy(viewDom, this, lookPath[this.look](this.position), pixelWeigth, positionToXY, hitFrames > 0, vheight / h);
 
     if(this.showLife){
       var ps = positionToXY(
@@ -154,20 +156,16 @@ export default function (obj) {
       };
 
       survivalTime++;
-      hit = false;
+
     }
     this.grapic(viewDom, lookType);
+    if (renderType === 'OBJ_MOVE' && hitFrames > 0) hitFrames--;
   };
 
   this.dead = function () {
     var position = this.position;
     var deadPs = positionToXY(position);
-    var explosion = document.getElementById("explosion");
-    renderData.aniEffect.push(
-      animation(50, function (renCount, viewDom) {
-        viewDom.drawImage(explosion, deadPs.x - (50 - renCount) / 2, deadPs.y, 120 - renCount, 120 - renCount);
-      })
-    );
+    feedback.destroy(deadPs.x, deadPs.y, this.showLife);
     obj = null;
     explosionSound();
     deadCb();

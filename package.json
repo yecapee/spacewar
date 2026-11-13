@@ -4,9 +4,9 @@
   "description": "Just a simple game",
   "browsers": "Chrome 80",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test tests/*.test.mjs",
     "build": "parcel build index.html --public-url ./",
-    "start": "parcel index.html"
+    "start": "parcel index.html --dist-dir .parcel-dev"
   },
   "repository": {
     "type": "git",
@@ -20,6 +20,7 @@
   "homepage": "https://github.com/yecapee/spacewar#readme",
   "dependencies": {
     "lodash": "^4.17.21",
+    "three": "0.170.0",
     "tone": "^0.12.80"
   },
   "devDependencies": {

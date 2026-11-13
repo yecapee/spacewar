@@ -1,0 +1,185 @@
+<div id="modular-fighter-3d">
+  <div class="viz-controls">
+    <button class="btn btn-primary" type="button" data-pose="0" aria-pressed="true">普通型態</button>
+    <button class="btn" type="button" data-pose="1" aria-pressed="false">攻擊型態</button>
+    <label class="form-label">展開程度 <output id="modular-fighter-amount" class="tabular-nums">0%</output>
+      <input id="modular-fighter-deploy" class="form-range" type="range" min="0" max="100" step="1" value="0" aria-label="機體展開程度">
+    </label>
+  </div>
+  <canvas id="modular-fighter-canvas" class="cursor-interaction" role="img" aria-label="模組化戰機三維原型，可拖曳旋轉、滾輪縮放；展開時雙側武器艙移動，中央駕駛艙與後置引擎保持固定。">模組化戰機 3D 原型</canvas>
+  <div class="viz-row">
+    <button class="btn btn-ghost" type="button" data-view="perspective">立體</button>
+    <button class="btn btn-ghost" type="button" data-view="top">俯視</button>
+    <button class="btn btn-ghost" type="button" data-view="side">側面</button>
+    <span id="modular-fighter-state" class="text-small text-muted" role="status" aria-live="polite">普通型態</span>
+  </div>
+  <div id="modular-fighter-error" class="text-destructive" role="alert" hidden></div>
+</div>
+<style>
+  #modular-fighter-3d { display: grid; gap: calc(var(--font-size-base, 14px) * .7); width: 100%; }
+  #modular-fighter-3d .viz-controls label { flex: 1; min-width: 140px; }
+  #modular-fighter-canvas { display: block; width: 100%; height: clamp(320px, 58vw, 480px); touch-action: none; }
+  #modular-fighter-state { margin-left: auto; }
+</style>
+<script type="module">
+const root = document.getElementById('modular-fighter-3d');
+const canvas = document.getElementById('modular-fighter-canvas');
+const slider = document.getElementById('modular-fighter-deploy');
+const amount = document.getElementById('modular-fighter-amount');
+const stateLabel = document.getElementById('modular-fighter-state');
+const error = document.getElementById('modular-fighter-error');
+
+/* MODEL_FACTORY */
+
+try {
+  const T = await import('https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js');
+  const renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
+  renderer.outputColorSpace = T.SRGBColorSpace;
+  renderer.toneMapping = T.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.18;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = T.PCFSoftShadowMap;
+  const scene = new T.Scene();
+  const ship = buildModularInterceptor(T);
+  scene.add(ship.root);
+  const camera = new T.PerspectiveCamera(42, 1, .05, 60);
+  const lookAt = new T.Vector3(0, .25, .15);
+  let theta = 2.42, phi = .82, distance = 8.7;
+  const sky = new T.HemisphereLight(0xe8f3ff, 0x5a6471, 2.25);
+  scene.add(sky);
+  const key = new T.DirectionalLight(0xfff4df, 3.4);
+  key.position.set(-3, 7, -5);
+  key.castShadow = true;
+  key.shadow.mapSize.set(1024, 1024);
+  key.shadow.camera.left = -5; key.shadow.camera.right = 5;
+  key.shadow.camera.top = 5; key.shadow.camera.bottom = -5;
+  key.shadow.normalBias = .025;
+  scene.add(key);
+  const fill = new T.DirectionalLight(0x85d8ff, 1.3);
+  fill.position.set(5, 3, 4); scene.add(fill);
+  const ground = new T.Mesh(new T.PlaneGeometry(18, 18), new T.ShadowMaterial({ opacity: .16 }));
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = -.26;
+  ground.receiveShadow = true; scene.add(ground);
+  const grid = new T.GridHelper(12, 24);
+  grid.position.y = -.265;
+  grid.material.transparent = true;
+  grid.material.opacity = .14;
+  scene.add(grid);
+  let progress = 0, animationFrame = null;
+  function render() {
+    camera.position.setFromSphericalCoords(distance, phi, theta).add(lookAt);
+    camera.lookAt(lookAt);
+    renderer.render(scene, camera);
+  }
+  function resize() {
+    const box = canvas.getBoundingClientRect();
+    if (!box.width || !box.height) return;
+    renderer.setSize(box.width, box.height, false);
+    camera.aspect = box.width / box.height;
+    camera.updateProjectionMatrix();
+    render();
+  }
+  function updateTheme() {
+    const css = getComputedStyle(root);
+    const color = css.getPropertyValue('--muted-foreground').trim();
+    const resolved = color && CSS.supports('color', color) ? color : css.color;
+    const probe = document.createElement('span');
+    probe.style.color = resolved;
+    root.append(probe);
+    grid.material.color.setStyle(getComputedStyle(probe).color);
+    probe.remove();
+    render();
+  }
+  const resizeObserver = new ResizeObserver(resize);
+  resizeObserver.observe(canvas);
+  const themeObserver = new MutationObserver(updateTheme);
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] });
+  updateTheme();
+
+  function setPose(value) {
+    progress = Math.max(0, Math.min(1, value));
+    ship.setDeployment(progress);
+    slider.value = Math.round(progress * 100);
+    amount.textContent = `${Math.round(progress * 100)}%`;
+    root.querySelectorAll('[data-pose]').forEach((button) => button.setAttribute('aria-pressed', String(Math.abs(Number(button.dataset.pose) - progress) < .001)));
+    stateLabel.textContent = progress < .01 ? '普通型態' : progress > .99 ? '攻擊型態' : '展開過渡';
+    render();
+  }
+  function remember() {
+    window.openai?.setWidgetState?.({ modelContent: { deployment: Math.round(progress * 100), model: 'modular-interceptor' }, privateContent: { theta, phi, distance } })?.catch(() => {});
+  }
+  function restore(saved) {
+    const state = saved?.modelContent || saved || {};
+    const view = saved?.privateContent || {};
+    if (Number.isFinite(view.theta)) theta = view.theta;
+    if (Number.isFinite(view.phi)) phi = view.phi;
+    if (Number.isFinite(view.distance)) distance = view.distance;
+    setPose(Number.isFinite(state.deployment) ? state.deployment / 100 : 0);
+  }
+  restore(window.openai?.widgetState);
+  window.addEventListener('openai:set_globals', (event) => {
+    if (event.detail.globals?.widgetState) restore(event.detail.globals.widgetState);
+  });
+  slider.addEventListener('input', () => {
+    cancelAnimationFrame(animationFrame);
+    setPose(Number(slider.value) / 100);
+  });
+  slider.addEventListener('change', remember);
+  root.querySelectorAll('[data-pose]').forEach((button) => button.addEventListener('click', () => {
+    cancelAnimationFrame(animationFrame);
+    const start = progress, end = Number(button.dataset.pose);
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { setPose(end); remember(); return; }
+    const begun = performance.now();
+    function animate(now) {
+      const t = Math.min(1, (now - begun) / 650);
+      setPose(start + (end - start) * t);
+      if (t < 1) animationFrame = requestAnimationFrame(animate);
+      else remember();
+    }
+    animationFrame = requestAnimationFrame(animate);
+  }));
+  root.querySelectorAll('[data-view]').forEach((button) => button.addEventListener('click', () => {
+    if (button.dataset.view === 'top') { theta = Math.PI; phi = .025; }
+    else if (button.dataset.view === 'side') { theta = Math.PI / 2; phi = 1.35; }
+    else { theta = 2.42; phi = .82; }
+    render(); remember();
+  }));
+  const pointers = new Map();
+  let pinch = 0;
+  canvas.addEventListener('pointerdown', (event) => {
+    canvas.setPointerCapture(event.pointerId);
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()]; pinch = Math.hypot(a.x - b.x, a.y - b.y);
+    }
+  });
+  canvas.addEventListener('pointermove', (event) => {
+    const previous = pointers.get(event.pointerId);
+    if (!previous) return;
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (pointers.size === 1) {
+      theta -= (event.clientX - previous.x) * .008;
+      phi = Math.max(.03, Math.min(Math.PI - .12, phi - (event.clientY - previous.y) * .008));
+    } else {
+      const [a, b] = [...pointers.values()];
+      const next = Math.hypot(a.x - b.x, a.y - b.y);
+      if (next > 0 && pinch > 0) distance = Math.max(5, Math.min(17, distance * pinch / next));
+      pinch = next;
+    }
+    render();
+  });
+  for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) canvas.addEventListener(name, (event) => { pointers.delete(event.pointerId); pinch = 0; remember(); });
+  canvas.addEventListener('wheel', (event) => {
+    event.preventDefault();
+    distance = Math.max(5, Math.min(17, distance * Math.exp(event.deltaY * .001)));
+    render(); remember();
+  }, { passive: false });
+  resize();
+} catch (failure) {
+  error.hidden = false;
+  error.textContent = '3D 預覽無法載入；模型檔仍可下載至 3D 軟體查看。';
+  console.error(failure);
+}
+</script>

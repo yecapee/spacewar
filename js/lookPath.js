@@ -53,6 +53,9 @@ function createMapfn(pathArr) {
 }
 
 export default {
+  // Keep the central fuselage hurtbox stable while the weapon outriggers deploy.
+  'modular': createMapfn([[0,-1],[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1]]),
+  'modular-plus': createMapfn([[0,-1],[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1]]),
   'zark': createMapfn([[0, 0], [1, -1], [-1, -1]]),
   'fort': createMapfn([[0, 0], [1, -1], [-1, -1], [0, -2]]),
   'turret': createMapfn([[1,1],[-1,-1],[-1,1],[1,-1],[0,0]]),

@@ -261,7 +261,7 @@ var TrebleBullet = {
   look: "porweUp",
   color: "rgba(255,0,0,1)",
   effect: function (ship) {
-    ship.look = "crystal-plus";
+    ship.look = "modular-plus";
     renderData.aniEffect.push(
       animation(80, function (renCount, viewDom) {
         var p0 = positionToXY(ship.position);

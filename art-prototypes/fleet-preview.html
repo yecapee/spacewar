@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spacewar · 機隊改版預覽</title>
+<style>
+  :root { --theme-accent:#ff9d89; color-scheme: dark; font-family: system-ui, sans-serif; background:#080e1b; color:#e4ecfa; }
+  body { max-width:1040px; margin:32px auto; padding:0 24px; }
+  header { display:flex; flex-wrap:wrap; align-items:baseline; gap:20px; }
+  h1 { font-size:22px; font-weight:500; letter-spacing:2px; }
+  p { color:#97a9c4; font-size:13px; line-height:1.8; }
+  nav { display:flex; align-items:center; flex-wrap:wrap; gap:12px; padding:12px 0; }
+  button { color:#dce7fc; background:#17243b; border:1px solid #3f5478; border-radius:4px; padding:9px 16px; cursor:pointer; }
+  button[aria-pressed=true] { border-color:var(--theme-accent); color:var(--theme-accent); }
+  [data-direction] { touch-action:none; min-width:42px; }
+  .direction-tip { font-size:12px; color:#a4b7d1; }
+  input { accent-color:var(--theme-accent); flex:1; max-width:280px; min-width:100px; }
+  .palette { display:flex; flex-wrap:wrap; gap:10px; margin:8px 0 14px; align-items:center; }
+  .palette button { display:grid; gap:8px; padding:10px 14px; font-size:12px; }
+  .swatches { display:flex; gap:4px; }
+  .swatches i { width:18px; height:18px; border-radius:50%; border:1px solid #ffffff35; }
+  .custom-color { display:flex; align-items:center; gap:8px; font-size:12px; color:#a4b7d1; }
+  input[type=color] { min-width:42px; max-width:42px; width:42px; height:36px; padding:2px; background:#17243b; border:1px solid #3f5478; border-radius:4px; cursor:pointer; }
+  #paletteName { color:var(--theme-accent); font-size:12px; }
+  canvas { width:100%; height:auto; border-block:1px solid #29374f; }
+  .error { color:#ffb9d7; }
+  a { color:#a1edff; }
+</style>
+<header><h1>SPACEWAR / 機隊改版</h1><p>模組化 3D 主角機 × A2.2 敵方機隊</p></header>
+<section aria-label="主角機配色盤">
+  <div class="palette" id="paletteOptions"></div>
+  <div class="custom-color"><label for="hullColor">自訂機身主色</label><input id="hullColor" type="color" value="#fff1d2"><output id="paletteName">奶油珊瑚</output></div>
+</section>
+<nav aria-label="機體型態預覽">
+  <button data-pose="0" aria-pressed="true">普通型態</button>
+  <button data-pose="1" aria-pressed="false">攻擊型態</button>
+  <label for="deployment">展開程度</label><input id="deployment" type="range" min="0" max="100" value="0"><output id="amount">0%</output>
+  <button id="hit">受擊閃白</button>
+</nav>
+<nav aria-label="輔助推進器方向測試">
+  <span>推進方向</span>
+  <button data-direction="left" aria-label="向左操控" aria-pressed="false">←</button>
+  <button data-direction="up" aria-label="向前操控" aria-pressed="false">↑</button>
+  <button data-direction="down" aria-label="向後操控" aria-pressed="false">↓</button>
+  <button data-direction="right" aria-label="向右操控" aria-pressed="false">→</button>
+  <span class="direction-tip">按住方向鍵／WASD 或按鈕，鬆開回正</span>
+  <output id="thrustStatus" aria-live="polite">推進器待命</output>
+</nav>
+<canvas id="fleet" width="1000" height="650" aria-label="主角機與六種敵機預覽"></canvas>
+<p>按住方向鍵／WASD 或方向按鈕：往前啟動中央主推進器；往右時左側輔助推進器下放並啟動；往左時換右側。斜向可同時作動，鬆開平順回正、熄火。滑桿可檢查普通／攻擊型態的折臂與砲管。</p>
+<p id="graphicsStatus" class="error" role="alert" hidden></p>
+<p><a href="http://127.0.0.1:1234/">回到遊戲</a></p>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/":"/node_modules/three/"}}</script>
+<script type="module">
+  import drawShip from '../js/shipRenderer.mjs';
+  import drawEnemy from '../js/enemyRenderer.mjs';
+  const canvas = document.getElementById('fleet'), ctx = canvas.getContext('2d');
+  const slider = document.getElementById('deployment');
+  const palettes = [
+    {name:'奶油珊瑚',shell:'#fff1d2',side:'#b7c0c3',steel:'#d6dfdc',accent:'#ff927d',canopy:'#28677a',glow:'#72edcc'},
+    {name:'薄荷奶霜',shell:'#bde8d6',side:'#a9b9b5',steel:'#dae7df',accent:'#ffb295',canopy:'#315967',glow:'#8ce8ff'},
+    {name:'莓果奶白',shell:'#f3e5ee',side:'#b7aebb',steel:'#e6dce4',accent:'#e86d91',canopy:'#654b69',glow:'#ffd38d'},
+    {name:'暮光藍莓',shell:'#cad5f5',side:'#adafb9',steel:'#dbe1ef',accent:'#f5bd75',canopy:'#4b5177',glow:'#a3f3ff'},
+  ];
+  let paletteIndex=0, palette={...palettes[0]};
+  let progress = 0, flash = false, animation = 0;
+  let thrustX = 0, thrustY = 0, thrustAnimation = 0, thrustTime = 0;
+  const keyboard = new Set(), pointers = new Map();
+  const directionKeys = {ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down'};
+  const pixel = 23, columns = 100;
+  const toXY = (ps) => ({ x: ps % columns * pixel, y: Math.floor(ps / columns) * pixel });
+  const grid = (x, y) => Math.round(x / pixel) + Math.round(y / pixel) * columns;
+  function text(label, x, y, color = '#a5b8d8') { ctx.fillStyle=color; ctx.font='12px system-ui';ctx.fillText(label,x,y); }
+  function draw() {
+    ctx.clearRect(0,0,1000,650);
+    ctx.fillStyle='#0c1526';ctx.fillRect(0,0,420,650);
+    text('MODULAR INTERCEPTOR',28,38,palette.accent);
+    text(progress === 1 ? '攻擊型態' : progress === 0 ? '普通型態' : '機構展開中',28,62);
+    drawShip(ctx,{x:210,y:300},370,{deployment:progress,bank:.09-thrustX*.07,pitch:thrustY*.04,upgraded:false,tailThruster:true,thrustX,thrustY,palette});
+    text('淡灰側面 · 短尾推進器 · 57% 最大展開幅度',28,605);
+    const entries = [
+      ['ZARK ZERO','ZARK-ZERO','zark',560,150],
+      ['ZARK PLUS','ZARK-PLUS','zark',840,150],
+      ['FORT','FORT','fort',560,330],
+      ['TURRET','turret','turret',840,330],
+      ['CIRCLE BOSS','circleKiller','CIRCLE',560,550],
+      ['GOZILLA BOSS','GOZILLA','MONSTER1',840,545],
+    ];
+    for(const [label,name,look,x,y] of entries) {
+      text(label,x-90,y-80);
+      const position=grid(x,y);
+      let points=[{ps:position}];
+      if(look==='CIRCLE') points=Array.from({length:9},(_,i)=>({ps:grid(x+72*Math.cos(i*Math.PI/4),y+72*Math.sin(i*Math.PI/4))}));
+      ctx.save();
+      if(look==='MONSTER1') {ctx.translate(x,y);ctx.scale(.62,.62);ctx.translate(-x,-y);}
+      drawEnemy(ctx,{name,look,position},points,look==='CIRCLE'?18:pixel,toXY,flash);
+      ctx.restore();
+    }
+    slider.value=Math.round(progress*100);document.getElementById('amount').textContent=`${slider.value}%`;
+    document.querySelectorAll('[data-pose]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.pose)===progress)));
+  }
+  slider.addEventListener('input',()=>{cancelAnimationFrame(animation);progress=Number(slider.value)/100;draw();});
+  document.querySelectorAll('[data-pose]').forEach(button=>button.addEventListener('click',()=>{
+    cancelAnimationFrame(animation);const from=progress,to=Number(button.dataset.pose),start=performance.now();
+    function step(now){const t=Math.min(1,(now-start)/600);progress=from+(to-from)*t;draw();if(t<1)animation=requestAnimationFrame(step);}
+    animation=requestAnimationFrame(step);
+  }));
+  document.getElementById('hit').onclick=()=>{flash=!flash;draw();};
+  function applyPalette() {
+    document.documentElement.style.setProperty('--theme-accent',palette.accent);
+    document.getElementById('hullColor').value=palette.shell;
+    document.getElementById('paletteName').textContent=`${palette.name} · ${palette.shell.toUpperCase()}`;
+    document.querySelectorAll('[data-palette]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.palette)===paletteIndex)));
+    try { localStorage.setItem('spacewar-fleet-palette',JSON.stringify({index:paletteIndex,palette})); } catch {}
+    draw();
+  }
+  palettes.forEach((colors,index)=>{
+    const button=document.createElement('button');button.dataset.palette=index;button.setAttribute('aria-label',`套用${colors.name}配色`);button.setAttribute('aria-pressed',String(index===paletteIndex));
+    const label=document.createElement('span');label.textContent=colors.name;button.append(label);
+    const swatches=document.createElement('span');swatches.className='swatches';swatches.setAttribute('aria-hidden','true');
+    for(const key of ['shell','side','accent','canopy','glow']){const swatch=document.createElement('i');swatch.style.background=colors[key];swatches.append(swatch);}
+    button.append(swatches);button.onclick=()=>{paletteIndex=index;palette={...colors};applyPalette();};document.getElementById('paletteOptions').append(button);
+  });
+  document.getElementById('hullColor').addEventListener('input',event=>{paletteIndex=-1;palette={...palette,name:'自訂配色',shell:event.target.value};applyPalette();});
+  try {
+    const saved=JSON.parse(localStorage.getItem('spacewar-fleet-palette'));
+    if(saved && saved.palette && ['shell','side','steel','accent','canopy','glow'].every(key=>/^#[0-9a-f]{6}$/i.test(saved.palette[key]))) {
+      paletteIndex=saved.index;palette={...saved.palette};
+    }
+  } catch {}
+  applyPalette();
+  function targetThrust() {
+    const pressed = new Set([...keyboard].map(key=>directionKeys[key]).concat([...pointers.values()]));
+    return { x:Number(pressed.has('right'))-Number(pressed.has('left')), y:Number(pressed.has('down'))-Number(pressed.has('up')), pressed };
+  }
+  function animateThrust(now) {
+    const target=targetThrust(), dt=Math.min(.05,(now-thrustTime)/1000);thrustTime=now;
+    const blend=1-Math.exp(-dt*13);
+    thrustX+=(target.x-thrustX)*blend;thrustY+=(target.y-thrustY)*blend;
+    const settled=Math.abs(target.x-thrustX)<.002 && Math.abs(target.y-thrustY)<.002;
+    if(settled){thrustX=target.x;thrustY=target.y;}
+    draw();
+    thrustAnimation=settled?0:requestAnimationFrame(animateThrust);
+  }
+  function updateThrust() {
+    const target=targetThrust();
+    document.querySelectorAll('[data-direction]').forEach(button=>button.setAttribute('aria-pressed',String(target.pressed.has(button.dataset.direction))));
+    const active=[];
+    if(target.y<0)active.push('主推進器');
+    if(target.x>0)active.push('左輔助推進器');
+    if(target.x<0)active.push('右輔助推進器');
+    document.getElementById('thrustStatus').textContent=active.length?`${active.join('＋')}作動`:'推進器回正、待命';
+    if(!thrustAnimation){thrustTime=performance.now();thrustAnimation=requestAnimationFrame(animateThrust);}
+  }
+  document.addEventListener('keydown',event=>{
+    if(!directionKeys[event.code] || event.target.tagName==='INPUT')return;
+    event.preventDefault();keyboard.add(event.code);updateThrust();
+  });
+  document.addEventListener('keyup',event=>{if(directionKeys[event.code]){keyboard.delete(event.code);updateThrust();}});
+  document.querySelectorAll('[data-direction]').forEach(button=>{
+    button.addEventListener('pointerdown',event=>{event.preventDefault();button.setPointerCapture(event.pointerId);pointers.set(event.pointerId,button.dataset.direction);updateThrust();});
+    const release=event=>{pointers.delete(event.pointerId);updateThrust();};
+    button.addEventListener('pointerup',release);button.addEventListener('pointercancel',release);button.addEventListener('lostpointercapture',release);
+  });
+  function releaseThrust(){keyboard.clear();pointers.clear();updateThrust();}
+  window.addEventListener('blur',releaseThrust);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseThrust();});
+  // Asset loads can complete after the first frame; redraw briefly, then go idle.
+  draw();for(const delay of [100,300,1000])setTimeout(draw,delay);
+</script>
+</html>

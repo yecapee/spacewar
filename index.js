@@ -1,23 +1,16 @@
 import "./main.css";
-import lookPath from "./js/lookPath";
-import movePathList from "./js/movePathList";
 import script from "./js/script";
 import createEnemy from "./js/createEnemy";
 import createShip from "./js/createShip";
 import createItem from "./js/createItem";
-// import music from './js/bgmusic';
-import { animation } from "./js/aniEffectMethod";
-import { positionToXY, ezPositionWithCheckScope } from "./js/positionMethod";
+import { createMovement, createFixedClock } from "./js/gameplay.mjs";
+import feedback from "./js/feedback.mjs";
+import { ezPositionWithCheckScope } from "./js/positionMethod";
 import {
-  atc,
-  pixelWeigth,
   w,
   h,
   renderTime,
-  bulletTime,
-  moveTime,
   renderData,
-  controlTime,
   vwidth,
   vheight,
   shipLife,
@@ -27,7 +20,13 @@ var renCount = 0;
 var nextPolling = 1;
 var killCount = 0;
 var bgCount = 0;
-var shotFn;
+var phase = "ready";
+var deathFrames = 0;
+var fireCooldown = 0;
+var touchFiring = false;
+var finalResult = null;
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const clock = createFixedClock(renderTime);
 var ruleObj = {};
 var scriptMileage = renCount;
 
@@ -39,97 +38,35 @@ var keyType = {
   SPACE: false,
 };
 
-function keyCodeMap(keycode, type) {
-  var map = {
-    38: function () {
-      if (type == "keydown") keyType.UP = true;
-      if (type == "keyup") keyType.UP = false;
-    },
-    39: function () {
-      if (type == "keydown") keyType.RIGHT = true;
-      if (type == "keyup") keyType.RIGHT = false;
-    },
-    40: function () {
-      if (type == "keydown") keyType.DOWN = true;
-      if (type == "keyup") keyType.DOWN = false;
-    },
-    37: function () {
-      if (type == "keydown") keyType.LEFT = true;
-      if (type == "keyup") keyType.LEFT = false;
-    },
-    32: function () {
-      if (type == "keydown") {
-        keyType.SPACE = true;
-        ship.shot();
-      }
-      if (type == "keyup") keyType.SPACE = false;
-    },
-  };
-
-  if (map[keycode]) {
-    map[keycode]();
-  } else if (type === "keydown") {
-    ship.skill(keycode);
+function resetInputs() {
+  Object.keys(keyType).forEach((key) => keyType[key] = false);
+  touchFiring = false;
+  fireCooldown = 0;
+  if (ship) {
+    ship.lookType = "CLOSE";
+    ship.flightDirection = { x: 0, y: 0 };
   }
 }
 
-function actionMove(ship) {
-  var action = {
-    UP: function () {
-      var ps = ship.position;
-      ship.position = ps - w > -1 ? ps - w : ps;
-    },
-    RIGHT: function () {
-      var ps = ship.position;
-      if (ps + 1 <= w * h - 1) {
-        if ((ps + 1) % w !== 0) {
-          ship.position = ps + 1;
-        }
-      }
-    },
-    DOWN: function () {
-      var ps = ship.position;
-      var nowY = Math.round((ps - (ps % w)) / w);
-      if (ps + w < w * h) {
-        ship.position = nowY < h ? ps + w : ps;
-      }
-    },
-    LEFT: function () {
-      var ps = ship.position;
-      if (ps - 1 > -1) {
-        if (ps % w !== 0) {
-          ship.position = ps - 1;
-        }
-      }
-    },
-    SPACE: function () {
-      shotDriver();
-    },
-  };
-  for (var key in keyType) {
-    if (keyType[key] == true) action[key]();
+function actionMove() {
+  if (ship.isDead) return;
+  if (movement.position !== ship.position) movement.sync(ship.position);
+  const direction = { x: Number(keyType.RIGHT) - Number(keyType.LEFT), y: Number(keyType.DOWN) - Number(keyType.UP) };
+  ship.flightDirection = touchFiring && !direction.x && !direction.y ? null : direction;
+  ship.position = movement.move(direction.x, direction.y);
+  fireCooldown = Math.max(0, fireCooldown - 1);
+  var firing = keyType.SPACE || touchFiring;
+  ship.lookType = firing ? "OPEN" : "CLOSE";
+  if (firing && fireCooldown === 0) {
+    ship.shot();
+    fireCooldown = Math.max(1, Math.round(1000 / ship.shotFps / renderTime));
   }
-  if (!keyType.SPACE) closeShot();
-}
-
-function shotDriver() {
-  if (!shotFn) {
-    shotFn = setInterval(function () {
-      ship.shot();
-      ship.lookType = "OPEN";
-    }, 1000 / ship.shotFps);
-  }
-}
-
-function closeShot() {
-  clearInterval(shotFn);
-  ship.lookType = "CLOSE";
-  shotFn = null;
 }
 
 function bulletPosition(shipPs) {
   var enemyBulleArr = renderData.enemyBullet;
   for (var key = enemyBulleArr.length - 1; key >= 0; key--) {
+    enemyBulleArr[key].previousData = enemyBulleArr[key].data;
     enemyBulleArr[key].data = enemyBulleArr[key].fn(shipPs);
     if (enemyBulleArr[key].data.clear) {
       enemyBulleArr.splice(key, 1);
@@ -148,12 +85,14 @@ function clearRenderData() {
   //console.log(renderData);
 }
 
-var ship = new createShip({
-  name: "CrystalShip",
+const spawnPosition = w * Math.floor(h * .76) + Math.floor(w / 2);
+function makeShip() {
+  return new createShip({
+  name: "ModularInterceptor",
   life: shipLife,
-  position: w * Math.floor(h / 2) - Math.floor(w / 2),
-  deadPosition: w * Math.floor(h / 2) - Math.floor(w / 2),
-  look: "crystal",
+  position: spawnPosition,
+  deadPosition: spawnPosition,
+  look: "modular",
   skills: [
     {
       skillKey: 65,
@@ -170,7 +109,7 @@ var ship = new createShip({
     },
     {
       skillKey: 83,
-      type: "atomicExplosion",
+      type: "airShield",
       launchTime: [250, 120, 6],
       skillPoint: function (ps) {
         var xy = ezPositionWithCheckScope(ps);
@@ -182,22 +121,26 @@ var ship = new createShip({
       },
     },
   ],
-  deadCb: function (ship) {
-    killCount = 0;
-    renCount = 0;
-    scriptMileage = 0;
-    nextPolling = 100;
-    clearRenderData();
+  deadCb: function () {
+    finalResult = { score: killCount, mileage: scriptMileage };
+    phase = "dying";
+    deathFrames = 32;
+    resetInputs();
+    document.getElementById("pauseButton").disabled = true;
   },
-});
+  });
+}
+var ship = makeShip();
+const movement = createMovement(w, h, ship.position);
+
 
 function gaphic(TYPE) {
   var bestScore = localStorage.getItem("bestScore") || 0;
   var bestMileage = localStorage.getItem("bestMileage") || 0;
-  script(scriptMileage, ruleObj, nextPolling);
+  if (phase === "playing") script(scriptMileage, ruleObj, nextPolling);
   var { stopCount, stopEnemyPush } = ruleObj;
   var boss = ruleObj.boss || [];
-  if (TYPE === "OBJ_MOVE") {
+  if (TYPE === "OBJ_MOVE" && phase === "playing") {
     var createObj = false;
     var item = ruleObj.item;
 
@@ -266,26 +209,34 @@ function gaphic(TYPE) {
       localStorage.setItem("bestMileage", scriptMileage);
   }
 
-  bulletPosition(ship.position);
+  if (phase === "playing") bulletPosition(ship.position);
 
   //canvas
   var viewDom = document.getElementById("view").getContext("2d");
   viewDom.clearRect(0, 0, vwidth, vheight);
 
-  // ship
-  ship.grapic(viewDom);
+  // Resolve shields before the ship can take damage from the same bullet.
+  if (phase === "playing") ship.updateShield();
 
-  //enmyBullet
-  renderData.enemyBullet.map(function (bullt) {
-    var enemyImg = document.getElementById(bullt.data.look);
-    viewDom.drawImage(
-      enemyImg,
-      bullt.data.x - 15 / 2,
-      bullt.data.y - 5,
-      bullt.data.w,
-      bullt.data.h
-    );
+  // ship
+  if (phase === "playing") ship.grapic(viewDom);
+
+  // Warm pixel projectiles stay distinct from the player's cyan shots.
+  viewDom.save();
+  viewDom.shadowColor = "#ff785a";
+  viewDom.shadowBlur = 8;
+  renderData.enemyBullet.forEach(function (bullet) {
+    var data = bullet.data;
+    viewDom.fillStyle = "#ff8965";
+    if (data.look === "laser") {
+      viewDom.fillRect(data.x - 3, data.y - 5, 6, 23);
+    } else {
+      viewDom.fillRect(data.x - 5, data.y - 5, 10, 10);
+      viewDom.fillStyle = "#fff1c7";
+      viewDom.fillRect(data.x - 2, data.y - 2, 4, 4);
+    }
   });
+  viewDom.restore();
 
   // enmy
   renderData.enemy.slice().forEach(function (obj) {
@@ -294,7 +245,7 @@ function gaphic(TYPE) {
 
   // skill
   renderData.skills.slice().forEach(function (skill) {
-    if (skill(ship, viewDom)) {
+    if (phase === "playing" && skill(ship, viewDom)) {
       var index = renderData.skills.indexOf(skill);
       if (index !== -1) renderData.skills.splice(index, 1);
     }
@@ -302,11 +253,13 @@ function gaphic(TYPE) {
 
   // shipskill
   renderData.shipSkills.slice().forEach(function (skill) {
-    if (skill(ship, viewDom)) {
+    if (phase === "playing" && skill(ship, viewDom)) {
       var index = renderData.shipSkills.indexOf(skill);
       if (index !== -1) renderData.shipSkills.splice(index, 1);
     }
   });
+
+  if (ship.airShield) ship.airShield.draw(viewDom);
 
   // item
   renderData.item.slice().forEach(function (obj) {
@@ -318,99 +271,164 @@ function gaphic(TYPE) {
     el(viewDom);
   });
 
-  //bg
-  document.getElementById("view").style.backgroundPositionY = bgCount + "px";
-
-  document.getElementById("score").innerHTML =
-    'Score: <div class="score">' +
-    killCount +
-    "</div><br/> Mileage: " +
-    scriptMileage +
-    "<br/>Best score: " +
-    (localStorage.getItem("bestScore") || 0) +
-    "<br/> Best Mileage: " +
-    bestMileage +
-    "<br/> Life: " +
-    ship.life +
-    "/" +
-    ship.maxLife;
-
-  document.getElementById("life").style.width =
-    (100 / ship.maxLife) * ship.life + "%";
+  var response = feedback.render(viewDom, reducedMotion.matches);
+  document.getElementById("view").style.transform = `translate(${response.x}px, ${response.y}px)`;
+  document.getElementById("damageFlash").style.opacity = response.flash;
+  document.getElementById("view").style.backgroundPositionY = `0px, ${bgCount * .35}px`;
+  updateHud();
 }
 
-document.addEventListener(
-  "keydown",
-  function (e) {
-    if (![32, 37, 38, 39, 40, 65, 83].includes(e.keyCode)) return;
-    e.preventDefault();
-    if (e.repeat) return;
-    start();
-    keyCodeMap(e.keyCode, "keydown");
-  },
-  false
-);
-document.addEventListener(
-  "keyup",
-  function (e) {
-    keyCodeMap(e.keyCode, "keyup");
-    if (e.keyCode === 32) closeShot();
-  },
-  false
-);
+function setText(id, value) {
+  var element = document.getElementById(id);
+  if (element.textContent !== String(value)) element.textContent = String(value);
+}
 
-document.getElementById("view").addEventListener("touchstart", touchAction, { passive: false });
-document.getElementById("view").addEventListener("touchmove", touchAction, { passive: false });
-document.addEventListener("touchend", closeShot, false);
+function updateHud() {
+  setText("score", String(killCount).padStart(4, "0"));
+  setText("bestScore", String(localStorage.getItem("bestScore") || 0).padStart(4, "0"));
+  setText("mileage", String(scriptMileage).padStart(4, "0"));
+  setText("lifeText", `${ship.life} / ${ship.maxLife}`);
+  var health = ship.life / ship.maxLife;
+  document.getElementById("life").style.width = `${health * 100}%`;
+  document.getElementById("healthPanel").classList.toggle("critical", health <= .4);
+  var shield = ship.airShield;
+  var count = shield ? shield.remaining : 0;
+  var maximum = shield ? shield.particles.length : 1;
+  document.getElementById("shieldMeter").style.width = `${count / maximum * 100}%`;
+  setText("shieldStatus", ship.isDead ? "戰機已失聯" : shield
+    ? `${shield.phase === "ready" ? (shield.tracking ? "追蹤來彈" : "防護中") : "展開中"} · ${count} / ${maximum} 粒`
+    : "可施放 · S");
+  document.getElementById("shieldButton").disabled = Boolean(shield) || phase !== "playing";
+  document.getElementById("attackButton").disabled = phase !== "playing";
+  setText("runStatus", phase === "paused" ? "暫停中" : phase === "over" || phase === "dying" ? "訊號中斷" : phase === "ready" ? "等待出擊" : "任務進行中");
+}
 
-function touchAction(event) {
-  var event = event || window.event;
-  event.preventDefault();
-  if (event.touches[0]) {
-    var rect = document.getElementById("view").getBoundingClientRect();
-    var x = Math.max(0, Math.min(w - 1, Math.floor((event.touches[0].clientX - rect.left) / rect.width * w)));
-    var y = Math.max(0, Math.min(h - 1, Math.floor((event.touches[0].clientY - rect.top) / rect.height * h)));
-    var _ps = w * y + x;
-    ship.position = _ps;
-    shotDriver();
+const overlay = document.getElementById("ready");
+function showOverlay(screen) {
+  overlay.hidden = false;
+  overlay.dataset.screen = screen;
+  document.getElementById("startButton").focus({ preventScroll: true });
+  document.getElementById("resultSummary").hidden = screen !== "over";
+  setText("overlayEyebrow", screen === "paused" ? "FLIGHT ON HOLD" : screen === "over" ? "SIGNAL LOST" : "ARCADE / SURVIVAL");
+  setText("overlayTitle", screen === "paused" ? "任務暫停" : screen === "over" ? "本次航行結束" : "SPACEWAR");
+  setText("overlayDescription", screen === "paused" ? "深呼吸。準備好，再回到星海。" : screen === "over" ? "整理裝備，下一次飛得更遠。" : "在無盡星海中，留下一道航跡。");
+  setText("startButton", screen === "paused" ? "繼續任務" : screen === "over" ? "再次出擊" : "開始出擊");
+  if (screen === "over") {
+    setText("resultScore", finalResult.score);
+    setText("resultMileage", finalResult.mileage);
   }
 }
 
-document.getElementById("view").height = vheight;
-document.getElementById("view").width = vwidth;
+function startRun() {
+  clearRenderData();
+  renderData.aniEffect.length = 0;
+  feedback.reset();
+  ship = makeShip();
+  movement.sync(ship.position);
+  renCount = 0;
+  scriptMileage = 0;
+  killCount = 0;
+  bgCount = 0;
+  nextPolling = 20;
+  finalResult = null;
+  resetInputs();
+  phase = "playing";
+  clock.reset();
+  overlay.hidden = true;
+  document.getElementById("pauseButton").disabled = false;
+  setText("pauseButton", "Ⅱ 暫停");
+  updateHud();
+  document.getElementById("startButton").blur();
+}
 
-window.addEventListener("blur", function () {
-  Object.keys(keyType).forEach((key) => keyType[key] = false);
-  closeShot();
+function togglePause(forcePause = false) {
+  if (phase !== "playing" && phase !== "paused") return;
+  if (phase === "playing") {
+    phase = "paused";
+    resetInputs();
+    showOverlay("paused");
+    setText("pauseButton", "▶ 繼續");
+  } else if (!forcePause) {
+    phase = "playing";
+    overlay.hidden = true;
+    document.getElementById("startButton").blur();
+    setText("pauseButton", "Ⅱ 暫停");
+  }
+  clock.reset();
+  updateHud();
+}
+
+document.getElementById("startButton").onclick = () => phase === "paused" ? togglePause() : startRun();
+document.getElementById("pauseButton").onclick = () => togglePause();
+document.getElementById("restartButton").onclick = startRun;
+document.getElementById("attackButton").onclick = () => { if (phase === "playing") ship.skill(65); };
+document.getElementById("shieldButton").onclick = () => { if (phase === "playing") { ship.skill(83); updateHud(); } };
+
+const keyMap = { ArrowUp: "UP", ArrowRight: "RIGHT", ArrowDown: "DOWN", ArrowLeft: "LEFT", Space: "SPACE" };
+document.addEventListener("keydown", function (event) {
+  if (event.code === "Space" && event.target.closest("button")) return;
+  if (!keyMap[event.code] && !["KeyA", "KeyS", "KeyP", "KeyR", "Escape"].includes(event.code)) return;
+  event.preventDefault();
+  if (event.repeat) return;
+  if (event.code === "Escape" || event.code === "KeyP") { togglePause(); return; }
+  if (event.code === "KeyR") { startRun(); return; }
+  if (phase !== "playing") {
+    if (event.code === "Space" && phase !== "dying") {
+      if (phase === "paused") togglePause(); else startRun();
+    }
+    return;
+  }
+  if (keyMap[event.code]) keyType[keyMap[event.code]] = true;
+  if (event.code === "KeyA") ship.skill(65);
+  if (event.code === "KeyS") { ship.skill(83); updateHud(); }
 });
-document.addEventListener("touchcancel", closeShot);
+document.addEventListener("keyup", function (event) {
+  if (keyMap[event.code]) keyType[keyMap[event.code]] = false;
+});
 
-var preTimetamp = null;
+const canvas = document.getElementById("view");
+canvas.height = vheight;
+canvas.width = vwidth;
+document.documentElement.style.setProperty("--play-width", `${vwidth}px`);
+function pointerMove(event) {
+  var rect = canvas.getBoundingClientRect();
+  var x = Math.max(1, Math.min(w - 2, Math.floor((event.clientX - rect.left) / rect.width * w)));
+  var y = Math.max(1, Math.min(h - 2, Math.floor((event.clientY - rect.top) / rect.height * h)));
+  ship.position = w * y + x;
+  movement.sync(ship.position);
+}
+canvas.addEventListener("pointerdown", (event) => {
+  if (event.pointerType === "mouse" || phase !== "playing") return;
+  event.preventDefault();
+  canvas.setPointerCapture(event.pointerId);
+  touchFiring = true;
+  pointerMove(event);
+});
+canvas.addEventListener("pointermove", (event) => {
+  if (touchFiring && phase === "playing") pointerMove(event);
+});
+canvas.addEventListener("pointerup", () => { touchFiring = false; });
+canvas.addEventListener("pointercancel", () => { touchFiring = false; });
+window.addEventListener("blur", () => togglePause(true));
+document.addEventListener("visibilitychange", () => { if (document.hidden) togglePause(true); });
 
 function step(timestamp) {
-  var progress;
-  if (preTimetamp === null) preTimetamp = timestamp;
-  progress = timestamp - preTimetamp;
-
-  if (progress >= renderTime) {
-    preTimetamp = timestamp;
-    //animation
-    !atc.isMobile() && actionMove(ship);
-    gaphic("OBJ_MOVE");
-    //
-  }
+  if (phase === "playing" || phase === "dying") {
+    clock.advance(timestamp, () => {
+      if (phase === "playing") actionMove();
+      if (phase === "playing" || phase === "dying") gaphic(phase === "playing" ? "OBJ_MOVE" : "RENDER_ONLY");
+      if (phase === "dying" && --deathFrames <= 0) {
+        phase = "over";
+        showOverlay("over");
+        updateHud();
+      }
+    });
+  } else clock.reset();
   requestAnimationFrame(step);
 }
-
-//music
-document.getElementById("ready").onclick = start;
-
-function start() {
-  document.getElementById("ready").style.zIndex = -1;
-  requestAnimationFrame(step);
-  // window._music();
-  start = function () {};
-}
+showOverlay("ready");
+updateHud();
+requestAnimationFrame(step);
 
 window.r = renderData;
 

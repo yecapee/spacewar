@@ -1,8 +1,41 @@
 # Spacewar
 
-Just a simple game
+Canvas 射擊遊戲，搭配即時 3D 模組化主角機與 A2.2 風格的像素敵機。
 
-Use Arrow key to move startship,
-and Space key to shot
+## 執行
+
+```sh
+npm install
+npm start
+```
+
+開啟 http://127.0.0.1:1234。`npm run build` 產生正式版本，`npm test` 執行測試。
+
+## 操作
+
+- 方向鍵移動；按住 Space 連射並展開攻擊型態，放開後收合。
+- A：音爆後向各方向發射多波隨機短雷射。
+- S：空氣盾，會迎向來彈，耗盡後可重新施放。
+- P / Esc 暫停，R 重新出擊；觸控拖曳移動並自動射擊。
+
+## 美術與效能
+
+主角機由 Three.js 實際繪製低面數模型，再合成到遊戲畫布；具有普通／攻擊型態的連續折臂動畫，以及移動時的傾斜。機身主色為 `#FFFFFF`，側面為淡灰色。火砲最大展開幅度限制在原示範的 57%，砲管仍完整伸出。遊戲版為 1,136 個三角形、40 個材質批次，使用簡化光照、不產生陰影貼圖，共用一個繪製器。姿態與型態不變時重用渲染結果。
+
+中央短尾主推進器與半尺寸輔助推進器已實裝：向前啟動主推進器；向右時左輔助推進器下放並啟動，向左則反之。左右操控會讓機身側傾、機鼻小幅轉向，前後操控會俯仰；按住時保持姿態，鬆開平順回正。鍵盤姿態依操控方向判定，觸控依拖曳位移判定；斜向可同時作動。減少動態效果偏好會取消機身傾斜。
+
+敵機使用 `img/enemies/` 的 A2.2 圖片，保留紫灰裝甲、桃紅標記與橘色核心。一般敵機最長邊 96px，大型 Boss 為 160px；受擊遮罩只建立一次。環形 Boss 的節點沿實際碰撞位置排列。
+
+`art-prototypes/modular-interceptor/` 保留原始設計與 GLB。遊戲模型共用該幾何工廠，以低細節選項移除倒角與微小零件，再依動畫關節合併材質。模型預算與折臂運動由 `tests/shipModel.test.mjs` 檢查。
+
+`art-prototypes/enemy-a22/` 保留敵機圖集與提示詞。`art-prototypes/fleet-preview.html` 可透過專案根目錄的靜態伺服器檢視整支機隊：
+
+```sh
+python3 -m http.server 8768 --bind 127.0.0.1
+```
+
+開啟 http://127.0.0.1:8768/art-prototypes/fleet-preview.html（先執行 `npm install`）。
+
+預覽頁與遊戲共用機體、折臂與推進器設計。頁面含四組即時配色盤與自訂機身主色，選擇儲存在該預覽頁的 localStorage，重新整理後保留；遊戲使用固定的 `#FFFFFF` 主色。
 
 link: https://yecapee.github.io/spacewar/dist/

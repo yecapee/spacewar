@@ -5,6 +5,10 @@ import { animation } from "./aniEffectMethod";
 import bricks from "./bricks";
 import { deadSound } from "./sound";
 import skillTypeMap from "./shipSkillType";
+import createAirShield from "./airShield.mjs";
+import feedback from "./feedback.mjs";
+import drawShip from "./shipRenderer.mjs";
+import { createShipVisual } from "./shipVisual.mjs";
 
 import { positionToXY, positionTosXsY } from "./positionMethod";
 import { w, h, pixelWeigth, renderData, killCount } from "./config";
@@ -26,8 +30,14 @@ function grapicBullet(viewDom) {
 
   thisBullet.slice().forEach(function (el) {
     var ps = el.data.position;
-    var bulletImg = document.getElementById(el.data.look);
-    viewDom.drawImage(bulletImg, el.data.x - 13 / 2, el.data.y - 5, 13, 64);
+    viewDom.save();
+    viewDom.shadowColor = "#74eaff";
+    viewDom.shadowBlur = 10;
+    viewDom.fillStyle = "#78edff";
+    viewDom.fillRect(el.data.x - 3, el.data.y - 10, 6, 24);
+    viewDom.fillStyle = "#f0fdff";
+    viewDom.fillRect(el.data.x - 1, el.data.y - 10, 2, 18);
+    viewDom.restore();
 
     // A projectile is consumed by its first collision.
     var enemyBulletIndex = enemyBulleArr.findIndex(function (bullet) {
@@ -66,14 +76,18 @@ export default function (obj) {
   this.shotFps = 8;
   this.maxLife = obj.life;
   this.skills = obj.skills || [];
+  this.airShield = null;
   this.path = lookPath[this.look](this.position, this.lookType).map(
     (el) => el.ps
   );
   this.pathObj = lookPath[this.look](this.position, this.lookType);
   this.invincible = false;
+  this.invincibleTicks = 0;
+  this.flightDirection = null;
 
   var deadCb = obj.deadCb || function () {};
   var hit = false;
+  const shipVisual = createShipVisual(positionToXY(this.position), pixelWeigth);
 
   this.wasHit = function (data) {
     var { bulletPs, bulletIndex, viewDom, shipPath } = data;
@@ -87,6 +101,9 @@ export default function (obj) {
   this.injured = function () {
     if (this.invincible) return;
     this.invincible = true;
+    this.invincibleTicks = 36;
+    const impact = positionToXY(this.position);
+    feedback.damage(impact.x, impact.y);
     deadSound();
     this.life--;
     renderData.aniEffect.push(
@@ -104,12 +121,7 @@ export default function (obj) {
       this.isDead = true;
       this.dead();
     }
-    setTimeout(
-      function () {
-        this.invincible = false;
-      }.bind(this),
-      300
-    );
+
   };
 
   this.touch = function (data) {
@@ -162,6 +174,8 @@ export default function (obj) {
   };
 
   this.grapic = function (viewDom) {
+    if (this.invincibleTicks > 0) this.invincibleTicks--;
+    this.invincible = this.invincibleTicks > 0;
     var _ = this;
     var _wasHit = this.wasHit.bind(this);
     var _touch = this.touch.bind(this);
@@ -177,12 +191,17 @@ export default function (obj) {
     grapicBullet.call(this, viewDom);
 
     if (!isDead) {
-      lookPath[this.look](this.position, this.lookType).forEach(function (
-        ps,
-        index
-      ) {
-        bricks(ps, viewDom);
+      viewDom.save();
+      if (this.invincible && this.invincibleTicks % 6 < 3) viewDom.globalAlpha = .3;
+      const exhaust = positionToXY(this.position);
+      const visual = shipVisual.update(exhaust, {
+        firing: this.lookType === 'OPEN',
+        upgraded: this.bulletType === 'treble',
+        reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+        direction: this.flightDirection,
       });
+      drawShip(viewDom, exhaust, pixelWeigth * 6, visual);
+      viewDom.restore();
 
       // touchEnemy
       var enemyMap = renderData.enemy.reduce(function (total, el) {
@@ -227,43 +246,29 @@ export default function (obj) {
     }
   };
 
+  this.updateShield = function () {
+    if (this.airShield && this.airShield.update(positionToXY(this.position), renderData.enemyBullet)) {
+      this.airShield = null;
+    }
+  };
+
   this.skill = function (keycode) {
     if (this.isDead) return;
     var skill = this.skills.find((skill) => skill.skillKey === keycode);
     if (!skill) return;
+    if (skill.type === "airShield") {
+      if (!this.airShield) this.airShield = createAirShield(positionToXY(this.position), pixelWeigth, (particle) => feedback.burst(particle.x, particle.y, "#dca4ff", 10, 2.5));
+      return;
+    }
     skill.skillPoint(this.position).forEach((position) => {
       if (position !== undefined) launchSkillsByShip(position, skill.type, this);
     });
   };
 
   this.dead = function () {
-    var position = this.position;
-    var deadPs = positionToXY(position);
-    var explosion = document.getElementById("explosion");
-    renderData.aniEffect.push(
-      animation(
-        50,
-        function (renCount, viewDom) {
-          viewDom.drawImage(
-            explosion,
-            deadPs.x - (50 - renCount) / 2,
-            deadPs.y,
-            120 - renCount,
-            120 - renCount
-          );
-          //console.log(renCount);
-          if (renCount == 50) {
-            this.life = obj.life;
-            this.maxLife = obj.life;
-            this.position = this.deadPosition;
-            this.isDead = false;
-            this.bullet = [];
-            this.bulletType = "normal";
-            this.look = obj.look;
-          }
-        }.bind(this)
-      )
-    );
+    this.airShield = null;
+    const impact = positionToXY(this.position);
+    feedback.destroy(impact.x, impact.y, true);
     deadCb();
   };
 }
