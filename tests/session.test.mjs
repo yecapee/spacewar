@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 import { createMovement, createFixedClock } from '../js/gameplay.mjs';
+import { createTouchGestures } from '../js/touchGestures.mjs';
 
 // Run the actual session controller with lightweight DOM/render/audio substitutes.
 function session() {
@@ -12,7 +13,9 @@ function session() {
   function element(id) {
     if (!elements.has(id)) elements.set(id, {
       style: { setProperty() {} }, classList: { toggle() {} }, dataset: {}, textContent: '',
-      hidden: false, disabled: false, blur() {}, focus() {}, addEventListener() {},
+      hidden: false, disabled: false, blur() {}, focus() {}, listeners: {},
+      addEventListener(type, handler) { this.listeners[type] = handler; },
+      setPointerCapture() {}, getBoundingClientRect: () => ({ left: 0, top: 0, width: 600, height: 900 }),
       getContext: () => context2d,
     });
     return elements.get(id);
@@ -20,7 +23,7 @@ function session() {
   let frame;
   let shots = 0;
   const context = vm.createContext({
-    createMovement, createFixedClock,
+    createMovement, createFixedClock, createTouchGestures,
     document: {
       getElementById: element, documentElement: element('html'),
       addEventListener: (type, handler) => { handlers[type] = handler; },
@@ -38,8 +41,9 @@ function session() {
         this.life = this.maxLife = options.life;
         this.position = options.position;
         this.shotFps = 8;
+        this.casts = [];
       }
-      updateShield() {} grapic() {} skill() {}
+      updateShield() {} grapic() {} skill(key) { this.casts.push(key); }
       shot() { shots++; }
     },
   });
@@ -94,4 +98,27 @@ test('death preserves the final score, opens the result screen, and restart clea
   assert.equal(elements.get('score').textContent, '0000');
   assert.equal(elements.get('mileage').textContent, '0000');
   assert.equal(elements.get('ready').hidden, true);
+});
+
+test('touch gestures invoke actual player skills and cancelled or paused input does not', () => {
+  const { context, elements } = session(); context.startRun();
+  const canvas = elements.get('view');
+  const event = (x, y, time) => ({ pointerId: 1, pointerType: 'touch', clientX: x, clientY: y, timeStamp: time, preventDefault() {} });
+  for (const time of [0, 180]) {
+    canvas.listeners.pointerdown(event(300, 500, time));
+    canvas.listeners.pointerup(event(300, 500, time + 40));
+  }
+  assert.deepEqual([...context.ship.casts], [65]);
+  const point = (i) => event(300 + 50 * Math.cos(i * Math.PI / 20), 500 + 50 * Math.sin(i * Math.PI / 20), 500 + i * 20);
+  canvas.listeners.pointerdown(point(0));
+  for (let i = 1; i < 40; i++) canvas.listeners.pointermove(point(i));
+  canvas.listeners.pointerup(point(40));
+  assert.deepEqual([...context.ship.casts], [65, 83]);
+  canvas.listeners.pointerdown(event(300, 500, 2000));
+  canvas.listeners.pointercancel(event(300, 500, 2040));
+  canvas.listeners.pointerup(event(300, 500, 2060));
+  context.togglePause();
+  canvas.listeners.pointerdown(event(300, 500, 2200));
+  canvas.listeners.pointerup(event(300, 500, 2240));
+  assert.deepEqual([...context.ship.casts], [65, 83]);
 });

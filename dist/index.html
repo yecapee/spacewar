@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang=zh-Hant><script type=importmap>{"imports":{"4R1BC":"./a22-gozilla.c70dce14.png","6Em0p":"./a22-fort.17f2e97d.png","7oyqP":"./a22-zark-zero.cc44706d.png","9d3Z3":"./a22-turret.78505b36.png","dPiQg":"./a22-orbit-node.b3aa5738.png","emGdB":"./a22-zark-plus.1fbbb29e.png"}}</script><link rel=stylesheet href=spacewar.3749feb0.css><meta charset=UTF-8><meta name=viewport content="width=device-width, initial-scale=1.0"><meta name=theme-color content=#080d17><meta name=description content="Spacewar — 在無盡星海中生存，以粒子空氣盾抵擋敵彈的像素射擊遊戲。"><meta property=og:title content=Spacewar><meta property=og:image content=https://yecapee.github.io/spacewar/game.png><title>SPACEWAR — 無盡航行</title><link href="https://fonts.googleapis.com/css?family=Press+Start+2P&amp;display=swap" rel=stylesheet><body>
+<!DOCTYPE html><html lang=zh-Hant><script type=importmap>{"imports":{"4R1BC":"./a22-gozilla.c70dce14.png","6Em0p":"./a22-fort.17f2e97d.png","7oyqP":"./a22-zark-zero.cc44706d.png","9d3Z3":"./a22-turret.78505b36.png","dPiQg":"./a22-orbit-node.b3aa5738.png","emGdB":"./a22-zark-plus.1fbbb29e.png"}}</script><link rel=stylesheet href=spacewar.31fdbbe1.css><meta charset=UTF-8><meta name=viewport content="width=device-width, initial-scale=1.0"><meta name=theme-color content=#080d17><meta name=description content="Spacewar — 在無盡星海中生存，以粒子空氣盾抵擋敵彈的像素射擊遊戲。"><meta property=og:title content=Spacewar><meta property=og:image content=https://yecapee.github.io/spacewar/game.png><title>SPACEWAR — 無盡航行</title><link href="https://fonts.googleapis.com/css?family=Press+Start+2P&amp;display=swap" rel=stylesheet><body>
   <div class=ambient aria-hidden=true></div>
   <canvas id=view aria-label="Spacewar 遊戲區"></canvas>
   <p id=graphicsStatus class=graphics-status role=alert hidden></p>
@@ -29,13 +29,13 @@
       <kbd>A</kbd><span class=skill-copy><strong>攻擊波</strong><small>音爆 → 隨機短雷射連發</small></span><span class=skill-symbol aria-hidden=true>✳</span>
     </button>
     <button id=shieldButton class="shield-skill skill-button" disabled>
-      <kbd>S</kbd><span class=skill-copy><strong>空氣盾</strong><small>自動迎擊來彈，殘盾收攏</small></span><span class=skill-symbol aria-hidden=true>◠</span>
+      <kbd>S</kbd><span class=skill-copy><strong>空氣盾</strong><small>近距離迎擊 · 撞擊敵機扣血</small></span><span class=skill-symbol aria-hidden=true>◠</span>
     </button>
     <div class=shield-track><div id=shieldMeter></div></div>
     <p class=shield-status id=shieldStatus role=status>可施放 · S</p>
     <div class=keyboard-tip><span>↑ ↓ ← → 移動</span><span>Space 連射</span></div>
     <div class="keyboard-tip secondary-tip"><span>P / Esc 暫停</span><span>R 重新出擊</span></div>
-    <p class=touch-tip>在遊戲區拖曳移動，自動射擊<br>點擊技能卡即可施放</p>
+    <p class=touch-tip>拖曳移動並射擊 · 畫圓施放防護盾<br>雙擊施放攻擊波，也可點擊技能卡</p>
   </aside>
 
   <section class=ready id=ready data-screen=ready role=dialog aria-modal=true aria-labelledby=overlayTitle>
@@ -54,7 +54,7 @@
         <div><kbd>A</kbd><span>攻擊波 · 多波短雷射</span></div>
         <div><kbd>S</kbd><span>空氣盾 · 自動迎擊，耗盡重放</span></div>
       </div>
-      <p class=touch-tip>拖曳戰機移動並射擊，點擊技能卡施放技能。</p>
+      <p class=touch-tip>拖曳移動並射擊<br>畫圓施放防護盾 · 雙擊施放攻擊波</p>
       <button id=startButton class=primary-button>開始出擊</button>
       <p class=start-prompt>SPACE 確認 <span>·</span> P / ESC 暫停</p>
       <div class=credit>DEVELOPED BY YECAPEE</div>
@@ -67,4 +67,4 @@
   <img id=laser src=laser.2474abb0.png hidden alt>
   <img id=zarkImg src=zark.fa72e16e.png hidden alt>
   <img id=explosion src=explosion.ef47ec84.png hidden alt>
-  <script type=module src=spacewar.6ea857a6.js></script>
+  <script type=module src=spacewar.189e1a06.js></script>

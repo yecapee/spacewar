@@ -30,6 +30,8 @@ function hitTime(from, to, halfWidth, halfHeight) {
 
 export default function createAirShield(shipOrigin, pixelSize, onBreak = () => {}) {
   const radius = pixelSize * 5;
+  const trackingRange = radius * 2.2;
+  const contactCooldown = new WeakMap();
   const count = Math.ceil(radius * ARC_ANGLE / PARTICLE_SIZE) + 1;
   let age = 0;
   let facing = -Math.PI / 2;
@@ -45,11 +47,12 @@ export default function createAirShield(shipOrigin, pixelSize, onBreak = () => {
     particles,
     phase: "fan",
     tracking: false,
+    trackingRange,
     get facingAngle() { return facing; },
     get remaining() {
       return particles.filter((particle) => particle.alive).length;
     },
-    update(origin, bullets) {
+    update(origin, bullets, enemies = []) {
       age++;
       pivot.x = origin.x;
       pivot.y = origin.y + pixelSize * 1.5;
@@ -61,7 +64,7 @@ export default function createAirShield(shipOrigin, pixelSize, onBreak = () => {
       this.tracking = false;
       if (this.phase === "ready") {
         let nearest = null;
-        let nearestDistance = Infinity;
+        let nearestDistance = trackingRange ** 2;
         for (const bullet of bullets) {
           const current = bullet.data;
           const previous = bullet.previousData;
@@ -76,6 +79,13 @@ export default function createAirShield(shipOrigin, pixelSize, onBreak = () => {
           if (distance < nearestDistance) {
             nearest = current;
             nearestDistance = distance;
+          }
+        }
+        for (const target of enemies) {
+          if (target.enemy.life < 1) continue;
+          for (const point of target.points) {
+            const distance = (point.x - origin.x) ** 2 + (point.y - origin.y) ** 2;
+            if (distance < nearestDistance) { nearest = point; nearestDistance = distance; }
           }
         }
         if (nearest) {
@@ -138,6 +148,27 @@ export default function createAirShield(shipOrigin, pixelSize, onBreak = () => {
           target.alive = false;
           onBreak(target);
           bullets.splice(index, 1);
+        }
+      }
+      // A hull contact consumes one shield segment and deals one ordinary hit.
+      // A brief per-enemy interval prevents one overlap draining the whole arc.
+      for (const target of enemies) {
+        if (target.enemy.life < 1 || age < (contactCooldown.get(target.enemy) || 0)) continue;
+        let impact = null, firstHit = Infinity;
+        for (const point of target.points) for (const particle of particles) {
+          if (!particle.alive) continue;
+          const angle = particle.renderAngle;
+          const local = (x, y) => ({ x: -Math.sin(angle) * x + Math.cos(angle) * y, y: Math.cos(angle) * x + Math.sin(angle) * y });
+          const time = hitTime(
+            local((point.previousX ?? point.x) - particle.previousX, (point.previousY ?? point.y) - particle.previousY),
+            local(point.x - particle.x, point.y - particle.y),
+            PARTICLE_SIZE / 2 + (point.radius || 0), 3 + (point.radius || 0)
+          );
+          if (time !== null && time < firstHit) { firstHit = time; impact = { point, particle }; }
+        }
+        if (impact && target.enemy.wasHit(impact.point.position, undefined, undefined, true)) {
+          impact.particle.alive = false; onBreak(impact.particle);
+          contactCooldown.set(target.enemy, age + 8);
         }
       }
       return this.remaining === 0;

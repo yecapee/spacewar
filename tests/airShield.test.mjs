@@ -205,7 +205,7 @@ test('a last remaining segment regroups directly in front of the ship', () => {
   near(last.y, tail.y - 75);
 });
 
-function approaching(angle, distance = 250) {
+function approaching(angle, distance = 130) {
   const x = tail.x + Math.cos(angle) * distance;
   const y = tail.y + Math.sin(angle) * distance;
   return {
@@ -218,7 +218,7 @@ const angleDelta = (a, b) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
 test('deployed shield smoothly turns toward the closest approaching bullet', () => {
   const shield = createAirShield(origin, pixelSize);
   advance(shield);
-  const close = approaching(0, 200);
+  const close = approaching(0, 120);
   const far = approaching(Math.PI, 350);
   shield.update(origin, [far, close]);
   assert.equal(shield.tracking, true);
@@ -236,7 +236,7 @@ test('shots moving away do not distract the shield from an incoming attack', () 
   advance(shield);
   const receding = approaching(Math.PI, 100);
   [receding.data, receding.previousData] = [receding.previousData, receding.data];
-  const incoming = approaching(0, 300);
+  const incoming = approaching(0, 140);
   for (let frame = 0; frame < 45; frame++) shield.update(origin, [receding, incoming]);
   near(shield.facingAngle, 0);
   const heading = shield.facingAngle;
@@ -260,11 +260,36 @@ test('tracking takes the shortest turn across the angle boundary and keeps a bou
 test('incoming bullets do not interrupt the tail fan and 180 degree deployment animation', () => {
   const shield = createAirShield(origin, pixelSize);
   for (let frame = 0; frame < 29; frame++) {
-    shield.update(origin, [approaching(0, 300)]);
+    shield.update(origin, [approaching(0, 140)]);
     assert.equal(shield.tracking, false);
     near(shield.facingAngle, -Math.PI / 2);
   }
-  shield.update(origin, [approaching(0, 300)]);
+  shield.update(origin, [approaching(0, 140)]);
   assert.equal(shield.phase, 'ready');
   assert.equal(shield.tracking, true);
+});
+
+test('remote shots and enemy hulls do not steer the shield; nearby hulls are threats', () => {
+  const shield = createAirShield(origin, pixelSize); advance(shield);
+  const enemy = { life: 10, wasHit() { return false; } };
+  const distant = { enemy, points: [{ x: origin.x + 400, y: origin.y }] };
+  shield.update(origin, [approaching(0, 400)], [distant]);
+  assert.equal(shield.tracking, false); near(shield.facingAngle, -Math.PI / 2);
+  const nearby = { enemy, points: [{ x: tail.x + 125, y: tail.y, radius: 7.5 }] };
+  for (let i = 0; i < 45; i++) shield.update(origin, [], [nearby]);
+  assert.equal(shield.tracking, true); near(shield.facingAngle, 0);
+  const facing = shield.facingAngle;
+  shield.update(origin, [], [distant]);
+  assert.equal(shield.tracking, false); near(shield.facingAngle, facing);
+});
+test('hull contact deals one hit, consumes one segment, and respects a contact interval', () => {
+  const shield = createAirShield(origin, pixelSize); advance(shield);
+  const point = shield.particles[4];
+  const enemy = { life: 10, wasHit() { this.life--; return true; } };
+  const target = { enemy, points: [{ x: point.x, y: point.y, position: 123, radius: 10 }] };
+  const count = shield.remaining;
+  shield.update(origin, [], [target]);
+  assert.equal(enemy.life, 9); assert.equal(shield.remaining, count - 1);
+  for (let i = 0; i < 5; i++) shield.update(origin, [], [target]);
+  assert.equal(enemy.life, 9); assert.equal(shield.remaining, count - 1);
 });

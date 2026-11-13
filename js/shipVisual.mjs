@@ -3,11 +3,13 @@ export const PLAYER_PALETTE = Object.freeze({
   accent: '#ff927d', canopy: '#28677a', glow: '#72edcc',
 });
 
+let nextInstance = 0;
 export function createShipVisual(initialCenter, cellSize) {
   let previous = { ...initialCenter };
   const state = {
     deployment: 0, bank: 0, pitch: 0, yaw: 0, thrustX: 0, thrustY: 0,
     upgraded: false, tailThruster: true, palette: PLAYER_PALETTE,
+    instanceId: ++nextInstance, reducedMotion: false,
   };
   const clamp = (value, limit = 1) => Math.max(-limit, Math.min(limit, value));
   function approach(value, target, blend) {
@@ -29,6 +31,7 @@ export function createShipVisual(initialCenter, cellSize) {
       state.thrustX = approach(state.thrustX, inputX, reducedMotion ? 1 : .3);
       state.thrustY = approach(state.thrustY, inputY, reducedMotion ? 1 : .3);
       state.upgraded = upgraded;
+      state.reducedMotion = reducedMotion;
       previous = { x: center.x, y: center.y };
       return state;
     },

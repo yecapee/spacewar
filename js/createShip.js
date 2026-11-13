@@ -136,40 +136,7 @@ export default function (obj) {
     if (!this.isDead) {
       //
       shipBulletType[this.bulletType](this.position, this.bullet);
-      //
-      var shotPositon = this.position;
-      renderData.aniEffect.push(
-        animation(30, function (renCount, viewDom) {
-          var margin1 = 4 + Math.random() * 20;
-          var margin2 = 4 + Math.random() * 20;
-          var margin3 = Math.random() * 5;
-          var margin4 = Math.random() * 5;
-          var ap0 = positionToXY(shotPositon);
-          var t = (1 / 30) * (30 - renCount);
 
-          var ax =
-            (1 - t) * (1 - t) * ap0.x +
-            2 * t * (1 - t) * ap0.x +
-            t * t * (ap0.x - margin1);
-          var ay =
-            (1 - t) * (1 - t) * ap0.y +
-            2 * t * (1 - t) * (ap0.y - margin1) +
-            t * t * (ap0.y - margin1);
-          var bx =
-            (1 - t) * (1 - t) * ap0.x +
-            2 * t * (1 - t) * ap0.x +
-            t * t * (ap0.x + margin2);
-          var by =
-            (1 - t) * (1 - t) * ap0.y +
-            2 * t * (1 - t) * (ap0.y - margin2) +
-            t * t * (ap0.y - margin2);
-
-          viewDom.fillStyle =
-            renCount % 2 ? "rgba(255,255,255,.8)" : "rgba(255,255,0,.8)";
-          viewDom.fillRect(ax - margin3, ay, 3, 3);
-          viewDom.fillRect(bx + margin4, by, 3, 3);
-        })
-      );
     }
   };
 
@@ -247,7 +214,17 @@ export default function (obj) {
   };
 
   this.updateShield = function () {
-    if (this.airShield && this.airShield.update(positionToXY(this.position), renderData.enemyBullet)) {
+    if (!this.airShield) return;
+    const enemies = renderData.enemy.map((enemy) => {
+      const current = positionToXY(enemy.position);
+      const previous = positionToXY(enemy.previousPosition ?? enemy.position);
+      return { enemy, points: lookPath[enemy.look](enemy.position, true).map((point) => {
+        const center = positionToXY(point.ps);
+        return { x: center.x, y: center.y, previousX: center.x + previous.x - current.x,
+          previousY: center.y + previous.y - current.y, position: point.ps, radius: pixelWeigth / 2 };
+      }) };
+    });
+    if (this.airShield.update(positionToXY(this.position), renderData.enemyBullet, enemies)) {
       this.airShield = null;
     }
   };

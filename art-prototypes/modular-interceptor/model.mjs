@@ -5,6 +5,7 @@ export function buildModularInterceptor(T, { lowDetail = false, maxSpread = 1, t
   const moving = [];
   const auxiliaryThrusters = [];
   const thrustJets = { main: null, left: null, right: null };
+  const nozzleEmitters = {};
   function surface(options) {
     if (!lowDetail) return new T.MeshStandardMaterial(options);
     const { color, emissive, emissiveIntensity, flatShading } = options;
@@ -97,6 +98,9 @@ export function buildModularInterceptor(T, { lowDetail = false, maxSpread = 1, t
     chamber.rotation.x = Math.PI / 2;
     const exhaust = group('Main_Active_Exhaust', thruster, true);
     thrustJets.main = exhaust;
+    const emitter = group('Main_Nozzle_Emitter', thruster);
+    emitter.position.set(0, 0, .435);
+    nozzleEmitters.main = emitter;
     const aperture = mesh('Tail_Nozzle_Aperture', new T.CylinderGeometry(.16, .16, .028, 6), materials.glow, exhaust, [0, 0, .423]);
     aperture.rotation.x = Math.PI / 2;
     // Short, separated plasma bands have no rigid pointed tail silhouette.
@@ -133,6 +137,9 @@ export function buildModularInterceptor(T, { lowDetail = false, maxSpread = 1, t
       chamber.rotation.x = Math.PI / 2;
       const exhaust = group(`Auxiliary_Active_Exhaust_${name}`, engine, true);
       thrustJets[sign < 0 ? 'left' : 'right'] = exhaust;
+      const emitter = group(`Auxiliary_Nozzle_Emitter_${name}`, engine);
+      emitter.position.set(0, .015, 1.085);
+      nozzleEmitters[sign < 0 ? 'left' : 'right'] = emitter;
       const aperture = mesh(`Auxiliary_Nozzle_Aperture_${name}`, new T.CylinderGeometry(.13, .13, .025, 6), materials.plasma, exhaust, [0, .015, 1.075]);
       aperture.rotation.x = Math.PI / 2;
       block(`Auxiliary_Top_Channel_${name}`, [.12, .37, .025], materials.plasma, exhaust, [0, .45, -.31], .02);
@@ -209,14 +216,17 @@ export function buildModularInterceptor(T, { lowDetail = false, maxSpread = 1, t
       // Counter-steering stance: right input lowers the left auxiliary drive;
       // left input lowers the right. Zero input restores the paired rest pose.
       const lowered = Math.max(0, -sign * x);
-      gimbal.position.set(sign * .86, .4 - lowered * .06, .65 + lowered * .12);
-      gimbal.rotation.set(y * .15 + lowered * .08, -x * .12, -sign * y * .08);
+      const reverse = Math.max(0, y);
+      // Fold out on opposite sides before facing forward for reverse thrust.
+      // A slight lift keeps the small drives clear of the weapon cassettes.
+      gimbal.position.set(sign * (.86 + Math.sin(reverse * Math.PI) * .15), .4 - lowered * .06 + reverse * .25, .65 + lowered * .12);
+      gimbal.rotation.set(y * .15 + lowered * .08, sign * reverse * Math.PI - x * .12, -sign * y * .08);
     }
     if (thrustJets.main) thrustJets.main.visible = y < -.03;
-    if (thrustJets.left) thrustJets.left.visible = x > .03;
-    if (thrustJets.right) thrustJets.right.visible = x < -.03;
+    if (thrustJets.left) thrustJets.left.visible = x > .03 || y > .03;
+    if (thrustJets.right) thrustJets.right.visible = x < -.03 || y > .03;
     root.updateMatrixWorld(true);
   }
   setThrustDirection(0, 0);
-  return { root, setDeployment, setThrustDirection, auxiliaryThrusters, thrustJets, moving, materials, assemblies };
+  return { root, setDeployment, setThrustDirection, auxiliaryThrusters, thrustJets, nozzleEmitters, moving, materials, assemblies };
 }

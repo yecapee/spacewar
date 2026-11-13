@@ -76,6 +76,12 @@ test('game auxiliary drives counter-steer and return to the paired rest pose', (
   assert.equal(ship.thrustJets.main.visible, true);
   assert.equal(ship.thrustJets.left.visible, true);
   assert.equal(ship.thrustJets.right.visible, false);
+  ship.setThrustDirection(0, 1);
+  assert.equal(left.rotation.y, -Math.PI);
+  assert.equal(right.rotation.y, Math.PI);
+  assert.equal(ship.thrustJets.main.visible, false);
+  assert.equal(ship.thrustJets.left.visible, true);
+  assert.equal(ship.thrustJets.right.visible, true);
   ship.setThrustDirection(0, 0);
   assert.ok(left.position.equals(restLeft) && right.position.equals(restRight));
   assert.equal(left.rotation.x + left.rotation.y + left.rotation.z, 0);

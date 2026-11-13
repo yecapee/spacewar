@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { createGameShip } from './shipModel.mjs';
+import { createThrusterExhaust, projectNozzles } from './thrusterExhaust.mjs';
 
 let renderer;
 let unavailable = false;
@@ -28,6 +29,8 @@ function createRenderer(displaySize, tailThruster) {
   const frameContext = frame.getContext('2d');
   let signature = '';
   let contextLost = false;
+  const exhaust = createThrusterExhaust();
+  let instanceId;
   gpu.domElement.addEventListener('webglcontextlost', (event) => { event.preventDefault(); contextLost = true; });
   gpu.domElement.addEventListener('webglcontextrestored', () => { contextLost = false; signature = ''; });
 
@@ -37,6 +40,7 @@ function createRenderer(displaySize, tailThruster) {
       const thrustX = state.thrustX || 0, thrustY = state.thrustY || 0;
       const palette = state.palette;
       const yaw = state.yaw || 0;
+      if (state.instanceId !== instanceId) { exhaust.reset(); instanceId = state.instanceId; }
       const next = `${state.deployment.toFixed(3)}:${state.bank.toFixed(3)}:${state.pitch.toFixed(3)}:${yaw.toFixed(3)}:${state.upgraded}:${thrustX.toFixed(3)}:${thrustY.toFixed(3)}:${palette ? Object.values(palette).join(',') : ''}`;
       if (!contextLost && next !== signature) {
         ship.setDeployment(state.deployment);
@@ -59,6 +63,7 @@ function createRenderer(displaySize, tailThruster) {
         signature = next;
       }
       context.imageSmoothingEnabled = true;
+      exhaust.draw(context, projectNozzles(ship, camera, position, size, state), palette?.glow, state.reducedMotion);
       context.drawImage(frame, position.x - size / 2, position.y - size / 2, size, size);
     },
   };

@@ -5,6 +5,7 @@ import createShip from "./js/createShip";
 import createItem from "./js/createItem";
 import { createMovement, createFixedClock } from "./js/gameplay.mjs";
 import feedback from "./js/feedback.mjs";
+import { createTouchGestures } from "./js/touchGestures.mjs";
 import { ezPositionWithCheckScope } from "./js/positionMethod";
 import {
   w,
@@ -25,6 +26,8 @@ var deathFrames = 0;
 var fireCooldown = 0;
 var touchFiring = false;
 var finalResult = null;
+const touchGestures = createTouchGestures();
+let activeTouchId = null;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const clock = createFixedClock(renderTime);
 var ruleObj = {};
@@ -42,6 +45,8 @@ function resetInputs() {
   Object.keys(keyType).forEach((key) => keyType[key] = false);
   touchFiring = false;
   fireCooldown = 0;
+  touchGestures.cancel();
+  activeTouchId = null;
   if (ship) {
     ship.lookType = "CLOSE";
     ship.flightDirection = { x: 0, y: 0 };
@@ -296,7 +301,7 @@ function updateHud() {
   var maximum = shield ? shield.particles.length : 1;
   document.getElementById("shieldMeter").style.width = `${count / maximum * 100}%`;
   setText("shieldStatus", ship.isDead ? "戰機已失聯" : shield
-    ? `${shield.phase === "ready" ? (shield.tracking ? "追蹤來彈" : "防護中") : "展開中"} · ${count} / ${maximum} 粒`
+    ? `${shield.phase === "ready" ? (shield.tracking ? "迎擊威脅" : "防護中") : "展開中"} · ${count} / ${maximum} 粒`
     : "可施放 · S");
   document.getElementById("shieldButton").disabled = Boolean(shield) || phase !== "playing";
   document.getElementById("attackButton").disabled = phase !== "playing";
@@ -399,16 +404,32 @@ function pointerMove(event) {
 }
 canvas.addEventListener("pointerdown", (event) => {
   if (event.pointerType === "mouse" || phase !== "playing") return;
+  if (activeTouchId !== null) { touchGestures.cancel(); return; }
+  activeTouchId = event.pointerId;
   event.preventDefault();
   canvas.setPointerCapture(event.pointerId);
+  if (event.pointerType === 'touch') touchGestures.start({ x: event.clientX, y: event.clientY }, event.timeStamp);
   touchFiring = true;
   pointerMove(event);
 });
 canvas.addEventListener("pointermove", (event) => {
-  if (touchFiring && phase === "playing") pointerMove(event);
+  if (event.pointerId === activeTouchId && touchFiring && phase === "playing") {
+    touchGestures.move({ x: event.clientX, y: event.clientY });
+    pointerMove(event);
+  }
 });
-canvas.addEventListener("pointerup", () => { touchFiring = false; });
-canvas.addEventListener("pointercancel", () => { touchFiring = false; });
+canvas.addEventListener("pointerup", (event) => {
+  if (event.pointerId !== activeTouchId) return;
+  const gesture = phase === 'playing' ? touchGestures.end({ x: event.clientX, y: event.clientY }, event.timeStamp) : null;
+  touchFiring = false; activeTouchId = null;
+  if (gesture) { ship.skill(gesture === 'shield' ? 83 : 65); updateHud(); }
+});
+function cancelTouch(event) {
+  if (event.pointerId !== activeTouchId) return;
+  touchFiring = false; activeTouchId = null; touchGestures.cancel();
+}
+canvas.addEventListener("pointercancel", cancelTouch);
+canvas.addEventListener("lostpointercapture", cancelTouch);
 window.addEventListener("blur", () => togglePause(true));
 document.addEventListener("visibilitychange", () => { if (document.hidden) togglePause(true); });
 

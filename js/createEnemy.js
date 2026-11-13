@@ -56,6 +56,7 @@ export default function (obj) {
   this.mainX = obj.position;
   this.lifeBarPosition = obj.lifeBarPosition || function (position) { return position };
   this.position = obj.position; //位置
+  this.previousPosition = obj.position;
   this.shot = obj.shot; //會不會發射子彈
   this.shotTime = obj.shotTime; //連發數
   this.shotPoint = obj.shotPoint || function (position) { return [position] }; //發射點
@@ -77,11 +78,11 @@ export default function (obj) {
     return survivalTime;
   };
 
-  this.wasHit = function (bulletPs, viewDom, cb) {
+  this.wasHit = function (bulletPs, viewDom, cb, confirmedContact = false) {
     var me = this;
     var path = lookPath[this.look](this.position).map(el => el.ps);
     if (this.life < 1) return false;
-    if (path.includes(bulletPs)) {
+    if (confirmedContact || path.includes(bulletPs)) {
       hitFrames = 4;
       var impact = positionToXY(bulletPs);
       feedback.burst(impact.x, impact.y, '#fff4cf', 5, 1.5);
@@ -94,7 +95,7 @@ export default function (obj) {
           }
         })
         this.dead();
-      } else {
+      } else if (viewDom) {
         this.grapic.call(this, viewDom, _look);
       };
       if (cb) cb();
@@ -129,6 +130,7 @@ export default function (obj) {
     var isLaunchSkill = false;
     var lookType = _look;
     if (renderType === 'OBJ_MOVE') {
+      this.previousPosition = this.position;
       enemyMove.call(this);
       this.skills.forEach(function (skill) {
         if (survivalTime % skill.launchTime[0] < skill.launchTime[1]) {

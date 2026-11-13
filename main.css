@@ -62,6 +62,7 @@ kbd { display: inline-flex; align-items: center; justify-content: center; min-wi
 .keyboard-tip { display: flex; justify-content: space-between; gap: 12px; font-size: 10px; color: #a5b4ce; }
 .secondary-tip { margin-top: 8px; color: #64758e; font-size: 9px; }
 .touch-tip { display: none; color: var(--muted); font-size: 11px; line-height: 1.8; }
+.ready .touch-tip { color: #a5b9d3; font-size: 12px; line-height: 1.9; }
 .ready { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: 24px; background: #060c18d9; backdrop-filter: blur(9px); overflow-y: auto; }
 .title { position: relative; width: min(100%, 520px); padding: 36px 40px 24px; text-align: center; border: 1px solid #a6c1ef25; background: linear-gradient(160deg, #16253cee, #0b1221f5); box-shadow: 0 40px 100px #0005; border-radius: 6px; }
 .overlay-eyebrow { color: #8eaccb; font-size: 10px; letter-spacing: 4px; }
@@ -120,10 +121,11 @@ h1 { font: 30px/1.6 'Press Start 2P', monospace; letter-spacing: -2px; margin: 0
   .start-controls div { font-size: 10px; gap: 6px; }
   .overlay-description { font-size: 12px; }
 }
-@media (pointer: coarse) {
+@media (pointer: coarse), (max-width: 700px) {
   .touch-tip { display: block; }
   .keyboard-tip { display: none; }
   .controls-help .touch-tip { margin: 8px 0 0; }
+  .ready .start-controls, .start-prompt { display: none; }
 }
 @media (max-height: 650px) {
   .ready { align-items: flex-start; }

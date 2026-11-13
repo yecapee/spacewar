@@ -140,7 +140,7 @@
     const settled=Math.abs(target.x-thrustX)<.002 && Math.abs(target.y-thrustY)<.002;
     if(settled){thrustX=target.x;thrustY=target.y;}
     draw();
-    thrustAnimation=settled?0:requestAnimationFrame(animateThrust);
+    thrustAnimation=settled && !target.x && !target.y?0:requestAnimationFrame(animateThrust);
   }
   function updateThrust() {
     const target=targetThrust();
@@ -149,6 +149,7 @@
     if(target.y<0)active.push('主推進器');
     if(target.x>0)active.push('左輔助推進器');
     if(target.x<0)active.push('右輔助推進器');
+    if(target.y>0){active.length=0;active.push('雙側輔助推進器向外轉 180°');}
     document.getElementById('thrustStatus').textContent=active.length?`${active.join('＋')}作動`:'推進器回正、待命';
     if(!thrustAnimation){thrustTime=performance.now();thrustAnimation=requestAnimationFrame(animateThrust);}
   }
