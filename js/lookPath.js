@@ -23,8 +23,7 @@ function circle(x, y, r, all, now, margin) {
 }
 
 function circleMap() {
-  var renCount = 0;
-  return function (ps, getmap) {
+  return function (ps, getmap, renCount = 0) {
     var p0 = positionTosXsY(ps);
     var pointLength = 8;
     var rs = [];
@@ -32,13 +31,12 @@ function circleMap() {
       var psData = circle(p0.x, p0.y, 5, pointLength, i, Math.round(renCount / 20));
       !psData.outScope && rs.push({ ps: psData.position, brickType: '0' });
     }
-    if (!getmap) renCount++;
     return rs;
   }
 }
 
 function createMapfn(pathArr) {
-  return function (ps) {
+  const shape = function (ps) {
     var xy = ezPositionWithCheckScope(ps);
     var path = pathArr;
     var rs = [
@@ -47,9 +45,11 @@ function createMapfn(pathArr) {
       })
     ];
     return rs.filter(function (obj) {
-      return obj.ps;
+      return obj.ps !== undefined;
     });
   }
+  shape.offsets = pathArr;
+  return shape;
 }
 
 export default {

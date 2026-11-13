@@ -32,9 +32,7 @@ export default {
     if (this.getST() < 6) this.position += w;
     if (this.getST() > 80) this.position += w;
     if (this.position > w * h - 1) {
-      renderData.enemy.find(function (el, index) {
-        if (el === me) renderData.enemy.splice(index, 1);
-      })
+      this.removed = true;
     };
   },
   gostMove: function () {
@@ -50,18 +48,14 @@ export default {
       this.position = positionLimit.call(this, this.mainX + xMargin)
     }
     if (this.position > w * h - 1) {
-      renderData.enemy.find(function (el, index) {
-        if (el === me) renderData.enemy.splice(index, 1);
-      })
+      this.removed = true;
     };
   },
   goToOut: function () {
     this.position += w;
     var me = this;
     if (this.position > w * h - 1) {
-      renderData.enemy.find(function (el, index) {
-        if (el === me) renderData.enemy.splice(index, 1);
-      })
+      this.removed = true;
     };
   },
   pingpong: function () {

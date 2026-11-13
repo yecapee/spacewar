@@ -1,14 +1,9 @@
 import { renderData } from './config';
 exports.animation = function (totalRenCount, aniFn) {
-  var renCount = 1;
-  var fn = function (viewDom) {
-    if (renCount == totalRenCount) {
-      var index = renderData.aniEffect.indexOf(fn);
-      if (index !== -1) renderData.aniEffect.splice(index, 1);
-    }
-    aniFn(renCount, viewDom);
-    renCount++;
-  }
+  var renCount = 0;
+  var fn = function (viewDom) { if (renCount > 0) aniFn(renCount, viewDom); };
+  fn.update = function () { renCount++; return renCount <= totalRenCount; };
+  fn.draw = fn;
   return fn;
 };
 

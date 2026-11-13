@@ -19,20 +19,13 @@ export default {
       },
       radius: Math.hypot(vwidth, vheight),
     });
-    return function (ship, context) {
-      const targets = renderData.enemy.slice().map((enemy) => ({
-        enemy,
-        points: lookPath[enemy.look](enemy.position)
-          .filter((point) => point.ps !== undefined)
-          .map((point) => {
-            const location = positionToXY(point.ps);
-            return { position: point.ps, x: location.x, y: location.y + pixelWeigth / 2, radius: pixelWeigth / 2 };
-          }),
-      }));
-      const shipCenter = positionToXY(ship.position);
-      const complete = burst.update(targets, context, { x: shipCenter.x, y: shipCenter.y + pixelWeigth / 2 });
-      burst.draw(context);
-      return complete;
+    return {
+      update(ship, world) {
+        const targets = world.enemies;
+        const shipCenter = positionToXY(ship.position);
+        return burst.update(targets, undefined, { x: shipCenter.x, y: shipCenter.y + pixelWeigth / 2 });
+      },
+      draw(context) { burst.draw(context); },
     };
   },
 };

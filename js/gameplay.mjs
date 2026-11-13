@@ -3,6 +3,7 @@ export function createFixedClock(stepMs, maxSteps = 5) {
   let previous = null;
   let accumulated = 0;
   return {
+    get alpha() { return accumulated / stepMs; },
     reset() { previous = null; accumulated = 0; },
     advance(timestamp, tick) {
       if (previous === null) { previous = timestamp; return; }

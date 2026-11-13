@@ -1,3 +1,4 @@
+import world from './world';
 import lookPath from './lookPath';
 import movePathList from './movePathList';
 import { animation } from './aniEffectMethod';
@@ -55,23 +56,23 @@ export default function (obj) {
     return survivalTime;
   };
 
-  this.grapic = function (viewDom) {
+  this.draw = function (viewDom) {
     var color = this.color;
-    lookPath[this.look](this.position).forEach(function (ps, index) {
+    world.cache.get(this).pathObj.forEach(function (ps, index) {
       bricks(ps, viewDom, color);
     });
   };
 
-  this.action = function (renderType, viewDom, shipPs) {
-    this.grapic(viewDom);
-    if (renderType === 'OBJ_MOVE') {
-      itemMove.call(this);
-      survivalTime++;
-    }
+  this.grapic = this.draw;
+  this.update = function () {
+    if (this.removed) return;
+    this.previousPosition = this.position;
+    itemMove.call(this); survivalTime++;
   };
 
   this.wasPickUp = function (ship) {
-    renderData.item.splice(renderData.item.indexOf(this), 1);
+    if (this.removed) return;
+    this.removed = true;
     var position = this.position;
     var deadPs = positionToXY(position);
     var restoreLife = this.restoreLife;
@@ -91,7 +92,7 @@ export default function (obj) {
     }
 
     effect(ship);
-    delete this;
+
   }
 
 }

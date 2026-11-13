@@ -37,7 +37,7 @@ test('simple scattered particles spawn only at the main tail and expire after st
   const emitter = { name: 'main', x: 10, y: 20, dx: 0, dy: 1, strength: 1, width: 4 };
   effect.draw(context, [{ ...emitter, name: 'left' }]); assert.equal(effect.count, 0);
   effect.draw(context, [emitter]); assert.equal(effect.count, 2);
-  effect.draw(context, []);
+  rectangles.length = 0; effect.draw(context, []);
   assert.equal(rectangles[0][0], 9); assert.equal(rectangles[0][1], 23);
   for (let i = 0; i < 24; i++) effect.draw(context, []);
   assert.equal(effect.count, 0);

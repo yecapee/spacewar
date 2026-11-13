@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import { sweptBounds } from '../js/engine.mjs';
 import createAirShield from '../js/airShield.mjs';
 import { createShipVisual } from '../js/shipVisual.mjs';
 
@@ -102,9 +103,13 @@ function createPlayer() {
     .replace('export default function (obj)', 'function CreateShip(obj)');
   const renderData = { enemyBullet: [], shipSkills: [], aniEffect: [], enemy: [], item: [] };
   const context = vm.createContext({
+    sweptBounds, world: {
+      enemies: { query(_bounds, out) { out.length = 0; return out; } },
+      bullets: { query(_bounds, out) { out.length = 0; for (const bullet of renderData.enemyBullet) if (!bullet.dead) out.push(bullet); return out; } },
+    },
     createAirShield, createShipVisual, feedback: { burst() {}, damage() {}, destroy() {} }, renderData, pixelWeigth: pixelSize, w: 40,
     lookPath: { crystal: () => [] },
-    positionToXY: () => origin,
+    positionToXY: (_ps, out = {}) => Object.assign(out, origin),
     animation: () => () => {},
     document: { getElementById: () => ({}) },
   });

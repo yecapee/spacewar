@@ -14,17 +14,12 @@ var positionTosXsY = function (position) {
   };
 }
 
-exports.positionToXY = function (ps) {
+exports.positionToXY = function (ps, output = {}) {
   var x = ps % w;
   var y = Math.round((ps - x) / w);
-  return {
-    ps: ps,
-    x: x * pixelWeigth + pixelWeigth / 2,
-    y: y * vheight / h,
-    __x: x,
-    __y: y,
-    limit: w * h - 1,
-  };
+  output.ps = ps; output.x = x * pixelWeigth + pixelWeigth / 2; output.y = y * vheight / h;
+  output.__x = x; output.__y = y; output.limit = w * h - 1;
+  return output;
 }
 
 // exports.xyToPosition = function (x, y) {

@@ -1,3 +1,4 @@
+import world from './world';
 import lookPath from './lookPath';
 import movePathList from './movePathList';
 import { animation } from './aniEffectMethod';
@@ -72,7 +73,8 @@ export default function (obj) {
   var hitFrames = 0;
   var survivalTime = 0;
   var _look = this.look;
-  var setLook;
+  var lookTicks = 0;
+  this.removed = false;
 
   this.getST = function () {
     return survivalTime;
@@ -80,40 +82,28 @@ export default function (obj) {
 
   this.wasHit = function (bulletPs, viewDom, cb, confirmedContact = false) {
     var me = this;
-    var path = lookPath[this.look](this.position).map(el => el.ps);
+    var path = world.cache.get(this).cells;
     if (this.life < 1) return false;
-    if (confirmedContact || path.includes(bulletPs)) {
+    if (confirmedContact || path.has(bulletPs)) {
       hitFrames = 4;
       var impact = positionToXY(bulletPs);
       feedback.burst(impact.x, impact.y, '#fff4cf', 5, 1.5);
       this.life--;
       if (this.life < 1) {
-        renderData.enemy.find(function (el, index) {
-          if (el === me) {
-            var bestScore = localStorage.getItem('bestScore');
-            renderData.enemy.splice(index, 1);
-          }
-        })
         this.dead();
-      } else if (viewDom) {
-        this.grapic.call(this, viewDom, _look);
-      };
+      }
       if (cb) cb();
       return true;
     }
     return false;
   };
 
-  this.grapic = function (viewDom, lootype) {
-    if (lootype != _look) {
-      this.look = lootype;
-      setLook && clearTimeout(setLook);
-      setLook = setTimeout(function () {
-        this.look = _look;
-      }.bind(this), 200);
-    }
-
-    drawEnemy(viewDom, this, lookPath[this.look](this.position), pixelWeigth, positionToXY, hitFrames > 0, vheight / h);
+  this.draw = function (viewDom, alpha = 1) {
+    if (this.removed || this.life < 1) return;
+    const current = positionToXY(this.position), previous = positionToXY(this.previousPosition);
+    const dx = (previous.x - current.x) * (1 - alpha), dy = (previous.y - current.y) * (1 - alpha);
+    viewDom.save(); viewDom.translate(dx, dy);
+    drawEnemy(viewDom, this, world.cache.get(this).pathObj, pixelWeigth, positionToXY, hitFrames > 0, vheight / h);
 
     if(this.showLife){
       var ps = positionToXY(
@@ -124,12 +114,15 @@ export default function (obj) {
       viewDom.fillStyle = 'orange';
       viewDom.fillRect(ps.x-50, ps.y, Math.round(100*this.life/this.maxlife), 5);
     }
+    viewDom.restore();
   };
+  this.grapic = this.draw;
 
-  this.action = function (renderType, viewDom, ship) {
+  this.update = function (ship) {
     var isLaunchSkill = false;
     var lookType = _look;
-    if (renderType === 'OBJ_MOVE') {
+    if (!this.removed && this.life > 0) {
+      if (lookTicks > 0 && --lookTicks === 0) this.look = _look;
       this.previousPosition = this.position;
       enemyMove.call(this);
       this.skills.forEach(function (skill) {
@@ -160,14 +153,15 @@ export default function (obj) {
       survivalTime++;
 
     }
-    this.grapic(viewDom, lookType);
-    if (renderType === 'OBJ_MOVE' && hitFrames > 0) hitFrames--;
+    if (lookType !== _look) { this.look = lookType; lookTicks = 8; }
+    if (hitFrames > 0) hitFrames--;
   };
 
   this.dead = function () {
     var position = this.position;
     var deadPs = positionToXY(position);
     feedback.destroy(deadPs.x, deadPs.y, this.showLife);
+    this.removed = true;
     obj = null;
     explosionSound();
     deadCb();

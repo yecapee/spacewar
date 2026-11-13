@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "build": "parcel build index.html --public-url ./",
-    "start": "parcel index.html --dist-dir .parcel-dev"
+    "start": "parcel index.html --dist-dir .parcel-dev",
+    "benchmark": "node scripts/benchmark-engine.mjs"
   },
   "repository": {
     "type": "git",

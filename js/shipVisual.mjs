@@ -9,7 +9,7 @@ export function createShipVisual(initialCenter, cellSize) {
   const state = {
     deployment: 0, bank: 0, pitch: 0, yaw: 0, thrustX: 0, thrustY: 0,
     upgraded: false, tailThruster: true, palette: PLAYER_PALETTE,
-    instanceId: ++nextInstance, reducedMotion: false,
+    simulationTick: 0, instanceId: ++nextInstance, reducedMotion: false,
   };
   const clamp = (value, limit = 1) => Math.max(-limit, Math.min(limit, value));
   function approach(value, target, blend) {
@@ -18,6 +18,7 @@ export function createShipVisual(initialCenter, cellSize) {
   }
   return {
     update(center, { firing = false, upgraded = false, reducedMotion = false, direction = null } = {}) {
+      state.simulationTick++;
       const dx = center.x - previous.x, dy = center.y - previous.y;
       const inputX = clamp(direction ? direction.x : dx / cellSize);
       const inputY = clamp(direction ? direction.y : dy / cellSize);

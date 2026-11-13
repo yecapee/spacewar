@@ -44,3 +44,9 @@ python3 -m http.server 8768 --bind 127.0.0.1
 預覽頁與遊戲共用機體、折臂與推進器設計。頁面含四組即時配色盤與自訂機身主色，選擇儲存在該預覽頁的 localStorage，重新整理後保留；遊戲使用固定的 `#FFFFFF` 主色。
 
 link: https://yecapee.github.io/spacewar/dist/
+
+## 引擎效能
+
+更新與繪製已分離：維持固定 40Hz 遊戲邏輯，畫面按螢幕刷新並插值位置。碰撞使用空間網格與共用形狀快取，子彈／粒子採回收池，普通彈光暈預先快取，HUD 只在變動時寫入，紀錄每秒批次儲存。
+
+`npm run benchmark` 可重跑固定場景壓測。實作細節、測量範圍與限制見 [PERFORMANCE.md](PERFORMANCE.md)。

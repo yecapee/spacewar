@@ -13,6 +13,7 @@ export function createLaserVolley(origin, { range = 340, waveCount = 4, shotsPer
         distance: 0, previousDistance: 0, active: false, finished: false };
     });
   });
+  const candidates = [], bounds = {};
   let age = 0;
   let reach = 0;
   return {
@@ -37,8 +38,16 @@ export function createLaserVolley(origin, { range = 340, waveCount = 4, shotsPer
           shot.active = false;
           continue;
         }
-        for (const target of targets) {
-          if (target.enemy.life < 1 || wave.hit.has(target.enemy)) continue;
+        let nearby = targets;
+        if (targets.query) {
+          const x0 = shot.origin.x + shot.dx * from, y0 = shot.origin.y + shot.dy * from;
+          const x1 = shot.origin.x + shot.dx * to, y1 = shot.origin.y + shot.dy * to;
+          bounds.minX = Math.min(x0, x1) - HALF_WIDTH; bounds.maxX = Math.max(x0, x1) + HALF_WIDTH;
+          bounds.minY = Math.min(y0, y1) - HALF_WIDTH; bounds.maxY = Math.max(y0, y1) + HALF_WIDTH;
+          nearby = targets.query(bounds, candidates);
+        }
+        for (const target of nearby) {
+          if (target.enemy.life < 1 || target.enemy.removed || wave.hit.has(target.enemy)) continue;
           const point = target.points.find((point) => {
             const dx = point.x - shot.origin.x;
             const dy = point.y - shot.origin.y;
@@ -47,7 +56,7 @@ export function createLaserVolley(origin, { range = 340, waveCount = 4, shotsPer
             const padding = point.radius || 0;
             return along >= from - padding && along <= to + padding && across <= HALF_WIDTH + padding;
           });
-          if (point && target.enemy.wasHit(point.position, context)) wave.hit.add(target.enemy);
+          if (point && target.enemy.wasHit(point.position, context, undefined, true)) wave.hit.add(target.enemy);
         }
       }
       return projectiles.every((shot) => shot.finished);

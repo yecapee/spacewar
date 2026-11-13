@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 import { createMovement, createFixedClock } from '../js/gameplay.mjs';
+import { createRecords } from '../js/records.mjs';
+import { compact } from '../js/engine.mjs';
+import { createProjectileSystem } from '../js/projectileSystem.mjs';
 import { createTouchGestures } from '../js/touchGestures.mjs';
 
 // Run the actual session controller with lightweight DOM/render/audio substitutes.
@@ -21,9 +24,11 @@ function session() {
     return elements.get(id);
   }
   let frame;
-  let shots = 0;
+  let shots = 0, updates = 0, draws = 0;
   const context = vm.createContext({
-    createMovement, createFixedClock, createTouchGestures,
+    createMovement, createFixedClock, createTouchGestures, createRecords, compact,
+    projectiles: createProjectileSystem({ width: 40, height: 60, cellWidth: 15, cellHeight: 15 }),
+    world: { begin() {}, rebuild() {} }, drawProjectile() {},
     document: {
       getElementById: element, documentElement: element('html'),
       addEventListener: (type, handler) => { handlers[type] = handler; },
@@ -31,7 +36,7 @@ function session() {
     window: { matchMedia: () => ({ matches: false }), addEventListener() {} },
     localStorage: { getItem: () => null, setItem() {} },
     requestAnimationFrame: (callback) => { frame = callback; },
-    feedback: { reset() {}, render: () => ({ x: 0, y: 0, flash: 0 }) },
+    feedback: { reset() {}, update() {}, render: () => ({ x: 0, y: 0, flash: 0 }) },
     renderData: { enemy: [], enemyBullet: [], aniEffect: [], item: [], skills: [], shipSkills: [] },
     w: 40, h: 60, vwidth: 600, vheight: 900, shipLife: 5, renderTime: 25,
     script: (_mileage, rules) => Object.assign(rules, { enemy: [], enemyQuantity: 0 }),
@@ -41,16 +46,17 @@ function session() {
         this.life = this.maxLife = options.life;
         this.position = options.position;
         this.shotFps = 8;
+        this.bullet = []; this.simulationPosition = this.previousPosition = this.position;
         this.casts = [];
       }
-      updateShield() {} grapic() {} skill(key) { this.casts.push(key); }
+      updateShield() {} update() { updates++; } draw() { draws++; } grapic() {} skill(key) { this.casts.push(key); }
       shot() { shots++; }
     },
   });
   const source = readFileSync(new URL('../index.js', import.meta.url), 'utf8')
     .replace(/^import\s+[\s\S]*?;\s*/gm, '');
   vm.runInContext(source, context);
-  return { context, elements, handlers, tick: (time) => frame(time), shots: () => shots };
+  return { context, elements, handlers, tick: (time) => frame(time), shots: () => shots, updates: () => updates, draws: () => draws };
 }
 
 test('pause freezes the session and releases firing; resume does not jump forward', () => {
@@ -122,3 +128,10 @@ test('touch gestures invoke actual player skills and cancelled or paused input d
   canvas.listeners.pointerup(event(300, 500, 2240));
   assert.deepEqual([...context.ship.casts], [65, 83]);
 });
+
+ test('catch-up performs five logical updates but only one render; extra renders do not advance logic', () => {
+  const run = session(); run.context.startRun(); run.tick(0);
+  const rendered = run.draws(); run.tick(125);
+  assert.equal(run.updates(), 5); assert.equal(run.draws() - rendered, 1);
+  run.tick(126); assert.equal(run.updates(), 5); assert.equal(run.draws() - rendered, 2);
+ });

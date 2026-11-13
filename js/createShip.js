@@ -1,251 +1,123 @@
-import lookPath from "./lookPath";
-import movePathList from "./movePathList";
-import shipBulletType from "./shipBulletType";
-import { animation } from "./aniEffectMethod";
-import bricks from "./bricks";
-import { deadSound } from "./sound";
-import skillTypeMap from "./shipSkillType";
-import createAirShield from "./airShield.mjs";
-import feedback from "./feedback.mjs";
-import drawShip from "./shipRenderer.mjs";
-import { createShipVisual } from "./shipVisual.mjs";
-
-import { positionToXY, positionTosXsY } from "./positionMethod";
-import { w, h, pixelWeigth, renderData, killCount } from "./config";
-
-function bulletPosition() {
-  var bulletArr = this.bullet;
-  for (var key = bulletArr.length - 1; key >= 0; key--) {
-    bulletArr[key].data = bulletArr[key].fn();
-    if (bulletArr[key].data.clear) {
-      bulletArr.splice(key, 1);
-    }
-  }
-}
-
-function grapicBullet(viewDom) {
-  var enemyBulleArr = renderData.enemyBullet;
-
-  var thisBullet = this.bullet;
-
-  thisBullet.slice().forEach(function (el) {
-    var ps = el.data.position;
-    viewDom.save();
-    viewDom.shadowColor = "#74eaff";
-    viewDom.shadowBlur = 10;
-    viewDom.fillStyle = "#78edff";
-    viewDom.fillRect(el.data.x - 3, el.data.y - 10, 6, 24);
-    viewDom.fillStyle = "#f0fdff";
-    viewDom.fillRect(el.data.x - 1, el.data.y - 10, 2, 18);
-    viewDom.restore();
-
-    // A projectile is consumed by its first collision.
-    var enemyBulletIndex = enemyBulleArr.findIndex(function (bullet) {
-      return bullet.data.position === ps || bullet.data.position === ps + w;
-    });
-    if (enemyBulletIndex !== -1) {
-      enemyBulleArr.splice(enemyBulletIndex, 1);
-      thisBullet.splice(thisBullet.indexOf(el), 1);
-      return;
-    }
-    renderData.enemy.slice().some(function (obj) {
-      if (obj.wasHit(ps, viewDom) || obj.wasHit(ps + w, viewDom)) {
-        thisBullet.splice(thisBullet.indexOf(el), 1);
-        return true;
-      }
-      return false;
-    });
-  });
-}
-
-function launchSkillsByShip(position, Type, ship) {
-  var skillArr = renderData.shipSkills.push(skillTypeMap[Type](position, ship));
-}
+import shipBulletType from './shipBulletType';
+import { animation } from './aniEffectMethod';
+import bricks from './bricks';
+import { deadSound } from './sound';
+import skillTypeMap from './shipSkillType';
+import createAirShield from './airShield.mjs';
+import feedback from './feedback.mjs';
+import drawShip from './shipRenderer.mjs';
+import { createShipVisual } from './shipVisual.mjs';
+import { positionToXY } from './positionMethod';
+import { w, pixelWeigth, renderData } from './config';
+import world from './world';
+import projectiles from './projectiles';
+import { sweptBounds, segmentBox } from './engine.mjs';
+import { drawProjectile } from './glowSprites.mjs';
 
 export default function (obj) {
-  this.name = obj.name; //名字
-  this.life = obj.life; //生命值
-  this.deadPosition = obj.position; //復活位置
-  this.position = obj.position; //位置
-  this.prePosition;
-  this.killCount = 0; //擊殺數
-  this.bullet = []; //子彈陣列
-  this.bulletType = "normal";
-  this.look = obj.look;
-  this.isDead = false;
-  this.shotFps = 8;
-  this.maxLife = obj.life;
-  this.skills = obj.skills || [];
-  this.airShield = null;
-  this.path = lookPath[this.look](this.position, this.lookType).map(
-    (el) => el.ps
-  );
-  this.pathObj = lookPath[this.look](this.position, this.lookType);
-  this.invincible = false;
-  this.invincibleTicks = 0;
-  this.flightDirection = null;
-
-  var deadCb = obj.deadCb || function () {};
-  var hit = false;
+  Object.assign(this, { name: obj.name, life: obj.life, maxLife: obj.life, position: obj.position,
+    previousPosition: obj.position, simulationPosition: obj.position, deadPosition: obj.position,
+    bullet: [], bulletType: 'normal', look: obj.look, isDead: false, shotFps: 8,
+    skills: obj.skills || [], airShield: null, invincible: false, invincibleTicks: 0, flightDirection: null });
+  const deadCb = obj.deadCb || (() => {});
   const shipVisual = createShipVisual(positionToXY(this.position), pixelWeigth);
-
-  this.wasHit = function (data) {
-    var { bulletPs, bulletIndex, viewDom, shipPath } = data;
-
-    if (shipPath.includes(bulletPs) || shipPath.includes(bulletPs + w)) {
-      this.injured();
-      renderData.enemyBullet.splice(bulletIndex, 1);
-    }
+  const center = {}, previous = {}, display = {}, bounds = {};
+  const nearbyEnemies = [], nearbyBullets = [], nearbyItems = [];
+  let visual = null;
+  const updatePath = () => {
+    const collider = world.cache.get(this);
+    this.pathObj = collider.pathObj; this.path = collider.cells;
+    return collider;
   };
-
   this.injured = function () {
-    if (this.invincible) return;
-    this.invincible = true;
-    this.invincibleTicks = 36;
-    const impact = positionToXY(this.position);
-    feedback.damage(impact.x, impact.y);
-    deadSound();
+    if (this.invincible || this.isDead) return;
+    this.invincible = true; this.invincibleTicks = 36;
+    positionToXY(this.position, center); feedback.damage(center.x, center.y); deadSound();
     this.life--;
-    renderData.aniEffect.push(
-      animation(
-        10,
-        function (renCount, viewDom) {
-          this.pathObj.forEach(function (ps, index) {
-            bricks(ps, viewDom, "rgba(255,0,0,.8)");
-          });
-        }.bind(this)
-      )
-    );
-    if (this.life < 1) {
-      this.life = 0;
-      this.isDead = true;
-      this.dead();
-    }
-
+    renderData.aniEffect.push(animation(10, (_age, context) => {
+      if (this.pathObj) for (const point of this.pathObj) bricks(point, context, 'rgba(255,0,0,.8)');
+    }));
+    if (this.life < 1) { this.life = 0; this.isDead = true; this.dead(); }
   };
-
-  this.touch = function (data) {
-    var { viewDom, touchEnemy, pathObj } = data;
-
-    if (touchEnemy) {
-      this.injured();
-    }
-  };
-
-  this.shot = function () {
-    if (!this.isDead) {
-      //
-      shipBulletType[this.bulletType](this.position, this.bullet);
-
-    }
-  };
-
-  this.grapic = function (viewDom) {
-    if (this.invincibleTicks > 0) this.invincibleTicks--;
-    this.invincible = this.invincibleTicks > 0;
-    var _ = this;
-    var _wasHit = this.wasHit.bind(this);
-    var _touch = this.touch.bind(this);
-    var isDead = this.isDead;
-    var path = lookPath[this.look](this.position, this.lookType).map(
-      (el) => el.ps
-    );
-    var pathObj = lookPath[this.look](this.position, this.lookType);
-
-    this.path = path;
-    this.pathObj = pathObj;
-    bulletPosition.call(this);
-    grapicBullet.call(this, viewDom);
-
-    if (!isDead) {
-      viewDom.save();
-      if (this.invincible && this.invincibleTicks % 6 < 3) viewDom.globalAlpha = .3;
-      const exhaust = positionToXY(this.position);
-      const visual = shipVisual.update(exhaust, {
-        firing: this.lookType === 'OPEN',
-        upgraded: this.bulletType === 'treble',
-        reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-        direction: this.flightDirection,
-      });
-      drawShip(viewDom, exhaust, pixelWeigth * 6, visual);
-      viewDom.restore();
-
-      // touchEnemy
-      var enemyMap = renderData.enemy.reduce(function (total, el) {
-        return [...total, ...lookPath[el.look](el.position).map((el) => el.ps)];
-      }, []);
-      var touchEnemy = path.reduce(function (total, el) {
-        return el === undefined ? false : total || enemyMap.includes(el);
-      }, false);
-
-      _touch({
-        touchEnemy,
-        viewDom,
-        pathObj,
-      });
-
-      if (this.isDead) return;
-
-      // was hit
-      for (var index = renderData.enemyBullet.length - 1; index >= 0; index--) {
-        _wasHit({
-          bulletPs: renderData.enemyBullet[index].data.position,
-          bulletIndex: index,
-          viewDom: viewDom,
-          shipPath: path,
-        });
-        if (this.isDead) return;
-      }
-
-      // touch item
-      renderData.item.slice().forEach(function (item, index) {
-        var itemMap = lookPath[item.look](item.position).map(function (el) {
-          return el.ps;
-        });
-        var touchItem = path.reduce(function (total, el) {
-          return total || itemMap.includes(el);
-        }, false);
-        if (touchItem) {
-          //console.log(JSON.stringify(itemMap),JSON.stringify(path));
-          item.wasPickUp(_);
-        }
-      });
-    }
-  };
-
+  this.shot = function () { if (!this.isDead) shipBulletType[this.bulletType](this.position, this.bullet); };
   this.updateShield = function () {
     if (!this.airShield) return;
-    const enemies = renderData.enemy.map((enemy) => {
-      const current = positionToXY(enemy.position);
-      const previous = positionToXY(enemy.previousPosition ?? enemy.position);
-      return { enemy, points: lookPath[enemy.look](enemy.position, true).map((point) => {
-        const center = positionToXY(point.ps);
-        return { x: center.x, y: center.y, previousX: center.x + previous.x - current.x,
-          previousY: center.y + previous.y - current.y, position: point.ps, radius: pixelWeigth / 2 };
-      }) };
-    });
-    if (this.airShield.update(positionToXY(this.position), renderData.enemyBullet, enemies)) {
-      this.airShield = null;
-    }
+    positionToXY(this.position, center); positionToXY(this.previousPosition, previous);
+    sweptBounds(previous, center, this.airShield.trackingRange + pixelWeigth * 2, bounds);
+    world.enemies.query(bounds, nearbyEnemies); world.bullets.query(bounds, nearbyBullets);
+    if (this.airShield.update(center, nearbyBullets, nearbyEnemies, bullet => { bullet.dead = true; })) this.airShield = null;
   };
-
+  this.update = function () {
+    if (this.invincibleTicks > 0) this.invincibleTicks--;
+    this.invincible = this.invincibleTicks > 0;
+    const collider = updatePath();
+    positionToXY(this.position, center);
+    visual = shipVisual.update(center, { firing: this.lookType === 'OPEN', upgraded: this.bulletType === 'treble',
+      reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches, direction: this.flightDirection });
+    drawShip.update(center, pixelWeigth * 6, visual);
+    projectiles.update(this.bullet);
+    this.updateShield();
+    for (const bullet of this.bullet) {
+      if (bullet.dead) continue;
+      sweptBounds(bullet.previousData, bullet.data, pixelWeigth, bounds);
+      world.bullets.query(bounds, nearbyBullets);
+      let hitBullet = null, hitTime = Infinity;
+      for (const target of nearbyBullets) {
+        if (target.dead) continue;
+        const time = segmentBox(bullet.previousData, bullet.data, target.data.x, target.data.y, 7, 15, target.previousData.x, target.previousData.y);
+        if (time !== null && time < hitTime) { hitBullet = target; hitTime = time; }
+      }
+      if (hitBullet) { hitBullet.dead = bullet.dead = true; continue; }
+      world.enemies.query(bounds, nearbyEnemies);
+      let impact = null, targetEnemy = null;
+      for (const target of nearbyEnemies) {
+        if (target.enemy.life < 1 || target.enemy.removed) continue;
+        const hit = world.hit(bullet.previousData, bullet.data, target);
+        if (hit && (!impact || hit.time < impact.time)) { impact = hit; targetEnemy = target.enemy; }
+      }
+      if (targetEnemy && targetEnemy.wasHit(impact.point.position, undefined, undefined, true)) bullet.dead = true;
+    }
+    projectiles.cleanup(this.bullet);
+    if (!this.isDead) {
+      world.enemies.query(collider.bounds, nearbyEnemies);
+      for (const target of nearbyEnemies) if (target.enemy.life > 0 && !target.enemy.removed) {
+        for (const cell of collider.cells) if (target.cells.has(cell)) { this.injured(); break; }
+      }
+      world.bullets.query(collider.bounds, nearbyBullets);
+      for (const bullet of nearbyBullets) {
+        if (!bullet.dead && world.hit(bullet.previousData || bullet.data, bullet.data, collider, 1)) { this.injured(); bullet.dead = true; }
+        if (this.isDead) break;
+      }
+      if (!this.isDead) {
+        world.items.query(collider.bounds, nearbyItems);
+        for (const target of nearbyItems) if (!target.entity.removed) {
+          for (const cell of collider.cells) if (target.cells.has(cell)) { target.entity.wasPickUp(this); break; }
+        }
+      }
+    }
+    this.simulationPosition = this.position;
+  };
+  this.draw = function (context, alpha = 1) {
+    for (const bullet of this.bullet) {
+      const x = bullet.previousData.x + (bullet.data.x - bullet.previousData.x) * alpha;
+      const y = bullet.previousData.y + (bullet.data.y - bullet.previousData.y) * alpha;
+      drawProjectile(context, x, y - 1, 'player');
+    }
+    if (this.isDead || !visual) return;
+    positionToXY(this.position, center); positionToXY(this.previousPosition, previous);
+    display.x = previous.x + (center.x - previous.x) * alpha; display.y = previous.y + (center.y - previous.y) * alpha;
+    context.save(); if (this.invincible && this.invincibleTicks % 6 < 3) context.globalAlpha = .3;
+    drawShip(context, display, pixelWeigth * 6, visual, alpha); context.restore();
+  };
+  this.grapic = this.draw;
   this.skill = function (keycode) {
     if (this.isDead) return;
-    var skill = this.skills.find((skill) => skill.skillKey === keycode);
-    if (!skill) return;
-    if (skill.type === "airShield") {
-      if (!this.airShield) this.airShield = createAirShield(positionToXY(this.position), pixelWeigth, (particle) => feedback.burst(particle.x, particle.y, "#dca4ff", 10, 2.5));
-      return;
-    }
-    skill.skillPoint(this.position).forEach((position) => {
-      if (position !== undefined) launchSkillsByShip(position, skill.type, this);
-    });
+    const skill = this.skills.find(value => value.skillKey === keycode); if (!skill) return;
+    if (skill.type === 'airShield') {
+      if (!this.airShield) this.airShield = createAirShield(positionToXY(this.position), pixelWeigth, particle => feedback.burst(particle.x, particle.y, '#dca4ff', 10, 2.5));
+    } else for (const position of skill.skillPoint(this.position)) if (position !== undefined) renderData.shipSkills.push(skillTypeMap[skill.type](position, this));
   };
-
   this.dead = function () {
-    this.airShield = null;
-    const impact = positionToXY(this.position);
-    feedback.destroy(impact.x, impact.y, true);
-    deadCb();
+    this.airShield = null; positionToXY(this.position, center); feedback.destroy(center.x, center.y, true); deadCb();
   };
 }

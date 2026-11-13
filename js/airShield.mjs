@@ -52,7 +52,7 @@ export default function createAirShield(shipOrigin, pixelSize, onBreak = () => {
     get remaining() {
       return particles.filter((particle) => particle.alive).length;
     },
-    update(origin, bullets, enemies = []) {
+    update(origin, bullets, enemies = [], onBulletHit = null) {
       age++;
       pivot.x = origin.x;
       pivot.y = origin.y + pixelSize * 1.5;
@@ -66,6 +66,7 @@ export default function createAirShield(shipOrigin, pixelSize, onBreak = () => {
         let nearest = null;
         let nearestDistance = trackingRange ** 2;
         for (const bullet of bullets) {
+          if (bullet.dead) continue;
           const current = bullet.data;
           const previous = bullet.previousData;
           if (!previous || current.clear || ![current.x, current.y, previous.x, previous.y].every(Number.isFinite)) continue;
@@ -82,7 +83,7 @@ export default function createAirShield(shipOrigin, pixelSize, onBreak = () => {
           }
         }
         for (const target of enemies) {
-          if (target.enemy.life < 1) continue;
+          if (target.enemy.life < 1 || target.enemy.removed) continue;
           for (const point of target.points) {
             const distance = (point.x - origin.x) ** 2 + (point.y - origin.y) ** 2;
             if (distance < nearestDistance) { nearest = point; nearestDistance = distance; }
@@ -121,6 +122,7 @@ export default function createAirShield(shipOrigin, pixelSize, onBreak = () => {
 
       for (let index = bullets.length - 1; index >= 0; index--) {
         const bullet = bullets[index];
+        if (bullet.dead) continue;
         // Use the bullet impact point, matching the game's existing ship collisions.
         const current = bullet.data;
         const previous = bullet.previousData || current;
@@ -147,13 +149,14 @@ export default function createAirShield(shipOrigin, pixelSize, onBreak = () => {
         if (target) {
           target.alive = false;
           onBreak(target);
-          bullets.splice(index, 1);
+          if (onBulletHit) onBulletHit(bullet);
+          else bullets.splice(index, 1);
         }
       }
       // A hull contact consumes one shield segment and deals one ordinary hit.
       // A brief per-enemy interval prevents one overlap draining the whole arc.
       for (const target of enemies) {
-        if (target.enemy.life < 1 || age < (contactCooldown.get(target.enemy) || 0)) continue;
+        if (target.enemy.life < 1 || target.enemy.removed || age < (contactCooldown.get(target.enemy) || 0)) continue;
         let impact = null, firstHit = Infinity;
         for (const point of target.points) for (const particle of particles) {
           if (!particle.alive) continue;

@@ -1,115 +1,38 @@
 import { w, h, pixelWeigth } from './config';
-import {
-  positionToXY,
-  positionTosXsY,
-  xyToPosition,
-  sXsYToPosition,
-} from './positionMethod';
+import { positionToXY, xyToPosition } from './positionMethod';
 import skillPath from './skillPath';
 import bricks from './bricks';
-import { renderData } from './config';
-import { animation } from './aniEffectMethod';
-
-
-
-function circle(x, y, r, all, now, margin) {
-  var ang = Math.PI * 2 / all;
-  var _margin = 2 * Math.PI / 360 * (margin || 0);
-  var _x = Math.round(x + r * Math.cos(ang * now + _margin));
-  var _y = Math.round(y + r * Math.sin(ang * now + _margin));
-
-  return {
-    position_big: xyToPosition(_x, _y),
-    position: sXsYToPosition(_x, _y),
-    outScope: Math.round(_x / pixelWeigth) < 0 || Math.round(_x / pixelWeigth) > w - 1 || Math.round(_y / pixelWeigth) < 0 || Math.round(_y / pixelWeigth) > h - 1,
-    x: _x,
-    y: _y,
-  }
-}
-
-
 export default {
-  claw: function (position, ship) {
-    var time = 60;
-    var prePs = position;
-    var count = time;
-    var _taPs = ship.position;
-    return function (ship, viewDom) {
-      count--;
-      var t = 1 / time * (time - count);
-      var isHurt = false;
-
-      if (count > time * .9) {
-        skillPath['claw1'](_taPs).forEach(function (ps) {
-          bricks(ps, viewDom, 'rgba(255,255,255,.8)');
-        });
-        return false;
-      }
-      if (count > time * .8) {
-        skillPath['claw2'](_taPs).forEach(function (ps) {
-          bricks(ps, viewDom, 'rgba(255,255,255,.2)');
-        });
-        return false;
-      }
-      if (count > time * .6) {
-        skillPath['claw3'](_taPs).forEach(function (ps) {
-          bricks(ps, viewDom, 'rgba(255,255,255,.6)');
-          isHurt = isHurt || ship.path.includes(ps.ps);
-        });
-        //if (isHurt) ship.injured();
-        return false;
-      }
-      if (count > time * .4) {
-        skillPath['claw4'](_taPs).forEach(function (ps) {
-          bricks(ps, viewDom, 'rgba(255,255,255,.6)');
-          isHurt = isHurt || ship.path.includes(ps.ps);
-        });
-        if (isHurt) ship.injured();
-        return false;
-      }
-      if (count > 0) {
-        skillPath['claw5'](_taPs).forEach(function (ps) {
-          bricks(ps, viewDom, 'rgba(255,255,255,1.0)');
-          isHurt = isHurt || ship.path.includes(ps.ps);
-        });
-        if (isHurt) ship.injured();
-        return false;
-      }
-
-      return count < -1;
-    }
+  claw(position, ship) {
+    const target = ship.position; let count = 60, path = [], color = '', damaging = false;
+    return {
+      update(player) {
+        count--; const key = count > 54 ? 'claw1' : count > 48 ? 'claw2' : count > 36 ? 'claw3' : count > 24 ? 'claw4' : 'claw5';
+        path = skillPath[key](target); color = count > 54 ? 'rgba(255,255,255,.8)' : count > 48 ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.6)';
+        damaging = count <= 36 && count > 0;
+        if (damaging && path.some(point => player.path.has(point.ps))) player.injured();
+        return count < -1;
+      },
+      draw(context) { for (const point of path) bricks(point, context, color); },
+    };
   },
-  atomicExplosion: function (position, ship) {
-    var time = 300-(40-w)*20;
-    var prePs = position;
-    var count = time;
-    var _taPs = ship.position;
-    return function (ship, viewDom) {
-      count--;
-      var t = 1 / time * (time - count);
-      var isHurt = false;
-      var p0 = positionToXY(prePs);
-      var pointLength = 20;
-      var skillPath = [];
-      for (var i = 0; i <= pointLength; i++) {
-        var psData = circle(p0.x, p0.y, (time - count) * 1, pointLength, i, (time - count));
-        !psData.outScope && skillPath.push({ ps: psData.position_big, brickType: '0', x: psData.x, y: psData.y });
-      }
-
-      skillPath.forEach(function (ps) {
-        //var color = count % 2 ? 'rgba(255,0,0,.5)' : 'rgba(255,0,0,1)';
-        var color = 'rgba(' + Math.round(255 - 200 / time * (time - count)) + ',80,' + Math.round(50 + 205 / time * (time - count)) + ',' + (count / time * .5 + .5 ).toFixed(1) + ')'
-        //bricks(ps, viewDom, 'blue');
-        if (ps.ps) {
-          viewDom.fillStyle = color;
-          viewDom.fillRect(ps.x, ps.y, 15, 15);
-          isHurt = isHurt || ship.path.includes(ps.ps);
+  atomicExplosion(position) {
+    const duration = Math.max(1, 300 - (40 - w) * 20), center = positionToXY(position);
+    const points = Array.from({ length: 21 }, () => ({})); let age = 0, color;
+    return {
+      update(ship) {
+        age++; const count = duration - age;
+        color = `rgba(${Math.round(255 - 200 / duration * age)},80,${Math.round(50 + 205 / duration * age)},${(count / duration * .5 + .5).toFixed(1)})`;
+        for (let i = 0; i < points.length; i++) {
+          const angle = Math.PI * 2 / 20 * i + age * Math.PI / 180, point = points[i];
+          point.x = Math.round(center.x + age * Math.cos(angle)); point.y = Math.round(center.y + age * Math.sin(angle));
+          point.position = xyToPosition(point.x, point.y);
+          point.visible = point.x >= 0 && point.x < w * pixelWeigth && point.y >= 0 && point.y < h * pixelWeigth;
+          if (point.visible && ship.path.has(point.position)) ship.injured();
         }
-      });
-
-      isHurt && ship.injured();
-
-      return count < -1;
-    }
+        return count < -1;
+      },
+      draw(context) { context.fillStyle = color; for (const point of points) if (point.visible) context.fillRect(point.x, point.y, 15, 15); },
+    };
   },
-}
+};

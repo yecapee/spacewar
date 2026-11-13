@@ -5,6 +5,11 @@ import createShip from "./js/createShip";
 import createItem from "./js/createItem";
 import { createMovement, createFixedClock } from "./js/gameplay.mjs";
 import feedback from "./js/feedback.mjs";
+import world from './js/world';
+import projectiles from './js/projectiles';
+import { compact } from './js/engine.mjs';
+import { createRecords } from './js/records.mjs';
+import { drawProjectile } from './js/glowSprites.mjs';
 import { createTouchGestures } from "./js/touchGestures.mjs";
 import { ezPositionWithCheckScope } from "./js/positionMethod";
 import {
@@ -17,6 +22,11 @@ import {
   shipLife,
 } from "./js/config";
 
+const records = createRecords(localStorage);
+const elements = new Map();
+function element(id) { if (!elements.has(id)) elements.set(id, document.getElementById(id)); return elements.get(id); }
+function property(id, key, value) { const node = element(id); if (node[key] !== value) node[key] = value; }
+function style(id, key, value) { const node = element(id); if (node.style[key] !== value) node.style[key] = value; }
 var renCount = 0;
 var nextPolling = 1;
 var killCount = 0;
@@ -28,6 +38,7 @@ var touchFiring = false;
 var finalResult = null;
 const touchGestures = createTouchGestures();
 let activeTouchId = null;
+let pendingTouchPosition = null;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const clock = createFixedClock(renderTime);
 var ruleObj = {};
@@ -46,7 +57,7 @@ function resetInputs() {
   touchFiring = false;
   fireCooldown = 0;
   touchGestures.cancel();
-  activeTouchId = null;
+  activeTouchId = null; pendingTouchPosition = null;
   if (ship) {
     ship.lookType = "CLOSE";
     ship.flightDirection = { x: 0, y: 0 };
@@ -55,6 +66,7 @@ function resetInputs() {
 
 function actionMove() {
   if (ship.isDead) return;
+  if (pendingTouchPosition !== null) { ship.position = pendingTouchPosition; pendingTouchPosition = null; }
   if (movement.position !== ship.position) movement.sync(ship.position);
   const direction = { x: Number(keyType.RIGHT) - Number(keyType.LEFT), y: Number(keyType.DOWN) - Number(keyType.UP) };
   ship.flightDirection = touchFiring && !direction.x && !direction.y ? null : direction;
@@ -68,20 +80,10 @@ function actionMove() {
   }
 }
 
-function bulletPosition(shipPs) {
-  var enemyBulleArr = renderData.enemyBullet;
-  for (var key = enemyBulleArr.length - 1; key >= 0; key--) {
-    enemyBulleArr[key].previousData = enemyBulleArr[key].data;
-    enemyBulleArr[key].data = enemyBulleArr[key].fn(shipPs);
-    if (enemyBulleArr[key].data.clear) {
-      enemyBulleArr.splice(key, 1);
-    }
-  }
-}
-
 function clearRenderData() {
   renderData.enemy.length = 0;
-  renderData.enemyBullet.length = 0;
+  projectiles.clear(renderData.enemyBullet);
+  if (ship) projectiles.clear(ship.bullet);
   renderData.item.length = 0;
   renderData.skills.length = 0;
   renderData.shipSkills.length = 0;
@@ -127,11 +129,12 @@ function makeShip() {
     },
   ],
   deadCb: function () {
+    records.update(killCount, scriptMileage); records.flush();
     finalResult = { score: killCount, mileage: scriptMileage };
     phase = "dying";
     deathFrames = 32;
     resetInputs();
-    document.getElementById("pauseButton").disabled = true;
+    element("pauseButton").disabled = true;
   },
   });
 }
@@ -139,13 +142,11 @@ var ship = makeShip();
 const movement = createMovement(w, h, ship.position);
 
 
-function gaphic(TYPE) {
-  var bestScore = localStorage.getItem("bestScore") || 0;
-  var bestMileage = localStorage.getItem("bestMileage") || 0;
+function updateSimulation() {
   if (phase === "playing") script(scriptMileage, ruleObj, nextPolling);
   var { stopCount, stopEnemyPush } = ruleObj;
   var boss = ruleObj.boss || [];
-  if (TYPE === "OBJ_MOVE" && phase === "playing") {
+  if (phase === "playing") {
     var createObj = false;
     var item = ruleObj.item;
 
@@ -157,8 +158,7 @@ function gaphic(TYPE) {
           enemyObj.position = Math.floor(Math.random() * w);
           enemyObj.deadCb = function () {
             killCount++;
-            if (bestScore < killCount)
-              localStorage.setItem("bestScore", killCount);
+            records.update(killCount, scriptMileage);
           };
           renderData.enemy.push(new createEnemy(enemyObj));
         }
@@ -187,8 +187,7 @@ function gaphic(TYPE) {
         // console.log(enemyObj.position);
         enemyObj.deadCb = function () {
           killCount++;
-          if (bestScore < killCount)
-            localStorage.setItem("bestScore", killCount);
+          records.update(killCount, scriptMileage);
           scriptMileage++;
         };
         renderData.enemy.push(new createEnemy(enemyObj));
@@ -210,110 +209,79 @@ function gaphic(TYPE) {
     renCount++;
     !stopCount && scriptMileage++;
 
-    if (bestMileage < scriptMileage)
-      localStorage.setItem("bestMileage", scriptMileage);
+    records.update(killCount, scriptMileage); records.tick();
   }
 
-  if (phase === "playing") bulletPosition(ship.position);
-
-  //canvas
-  var viewDom = document.getElementById("view").getContext("2d");
-  viewDom.clearRect(0, 0, vwidth, vheight);
-
-  // Resolve shields before the ship can take damage from the same bullet.
-  if (phase === "playing") ship.updateShield();
-
-  // ship
-  if (phase === "playing") ship.grapic(viewDom);
-
-  // Warm pixel projectiles stay distinct from the player's cyan shots.
-  viewDom.save();
-  viewDom.shadowColor = "#ff785a";
-  viewDom.shadowBlur = 8;
-  renderData.enemyBullet.forEach(function (bullet) {
-    var data = bullet.data;
-    viewDom.fillStyle = "#ff8965";
-    if (data.look === "laser") {
-      viewDom.fillRect(data.x - 3, data.y - 5, 6, 23);
-    } else {
-      viewDom.fillRect(data.x - 5, data.y - 5, 10, 10);
-      viewDom.fillStyle = "#fff1c7";
-      viewDom.fillRect(data.x - 2, data.y - 2, 4, 4);
-    }
-  });
-  viewDom.restore();
-
-  // enmy
-  renderData.enemy.slice().forEach(function (obj) {
-    obj.action(TYPE, viewDom, ship);
-  });
-
-  // skill
-  renderData.skills.slice().forEach(function (skill) {
-    if (phase === "playing" && skill(ship, viewDom)) {
-      var index = renderData.skills.indexOf(skill);
-      if (index !== -1) renderData.skills.splice(index, 1);
-    }
-  });
-
-  // shipskill
-  renderData.shipSkills.slice().forEach(function (skill) {
-    if (phase === "playing" && skill(ship, viewDom)) {
-      var index = renderData.shipSkills.indexOf(skill);
-      if (index !== -1) renderData.shipSkills.splice(index, 1);
-    }
-  });
-
-  if (ship.airShield) ship.airShield.draw(viewDom);
-
-  // item
-  renderData.item.slice().forEach(function (obj) {
-    obj.action(TYPE, viewDom, ship.position);
-  });
-
-  // effect
-  renderData.aniEffect.slice().forEach(function (el) {
-    el(viewDom);
-  });
-
-  var response = feedback.render(viewDom, reducedMotion.matches);
-  document.getElementById("view").style.transform = `translate(${response.x}px, ${response.y}px)`;
-  document.getElementById("damageFlash").style.opacity = response.flash;
-  document.getElementById("view").style.backgroundPositionY = `0px, ${bgCount * .35}px`;
+  if (phase === 'playing') {
+    world.begin();
+    projectiles.update(renderData.enemyBullet); projectiles.begin(renderData.enemyBullet);
+    for (const enemy of renderData.enemy) enemy.update(ship);
+    for (const item of renderData.item) item.update();
+    world.rebuild(renderData);
+    ship.update();
+    compact(renderData.skills, skill => !skill.update(ship, world));
+    compact(renderData.shipSkills, skill => !skill.update(ship, world));
+    compact(renderData.enemy, enemy => enemy.life > 0 && !enemy.removed);
+    compact(renderData.item, item => !item.removed);
+    projectiles.cleanup(renderData.enemyBullet);
+  }
+  compact(renderData.aniEffect, effect => effect.update());
+  feedback.update();
   updateHud();
 }
 
-function setText(id, value) {
-  var element = document.getElementById(id);
-  if (element.textContent !== String(value)) element.textContent = String(value);
+function renderScene(alpha = 1) {
+  const viewDom = context2d;
+  viewDom.clearRect(0, 0, vwidth, vheight);
+  if (phase === 'playing') ship.draw(viewDom, alpha);
+  for (const bullet of renderData.enemyBullet) {
+    const old = bullet.previousData || bullet.data;
+    drawProjectile(viewDom, old.x + (bullet.data.x - old.x) * alpha, old.y + (bullet.data.y - old.y) * alpha, bullet.data.look);
+  }
+  for (const enemy of renderData.enemy) enemy.draw(viewDom, alpha);
+  for (const skill of renderData.skills) skill.draw(viewDom);
+  for (const skill of renderData.shipSkills) skill.draw(viewDom);
+  if (ship.airShield) ship.airShield.draw(viewDom);
+  for (const item of renderData.item) item.draw(viewDom);
+  for (const effect of renderData.aniEffect) effect.draw(viewDom);
+  const response = feedback.render(viewDom, reducedMotion.matches);
+  style('view', 'transform', `translate(${response.x}px, ${response.y}px)`);
+  style('damageFlash', 'opacity', String(response.flash));
+  style('view', 'backgroundPositionY', `0px, ${bgCount * .35}px`);
 }
 
+function setText(id, value) {
+  var node = element(id);
+  if (node.textContent !== String(value)) node.textContent = String(value);
+}
+
+let healthCritical;
 function updateHud() {
   setText("score", String(killCount).padStart(4, "0"));
-  setText("bestScore", String(localStorage.getItem("bestScore") || 0).padStart(4, "0"));
+  setText("bestScore", String(records.bestScore).padStart(4, "0"));
   setText("mileage", String(scriptMileage).padStart(4, "0"));
   setText("lifeText", `${ship.life} / ${ship.maxLife}`);
   var health = ship.life / ship.maxLife;
-  document.getElementById("life").style.width = `${health * 100}%`;
-  document.getElementById("healthPanel").classList.toggle("critical", health <= .4);
+  style('life', 'width', `${health * 100}%`);
+  if (healthCritical !== (health <= .4)) { healthCritical = health <= .4; element('healthPanel').classList.toggle('critical', healthCritical); }
   var shield = ship.airShield;
   var count = shield ? shield.remaining : 0;
   var maximum = shield ? shield.particles.length : 1;
-  document.getElementById("shieldMeter").style.width = `${count / maximum * 100}%`;
+  style('shieldMeter', 'width', `${count / maximum * 100}%`);
   setText("shieldStatus", ship.isDead ? "戰機已失聯" : shield
     ? `${shield.phase === "ready" ? (shield.tracking ? "迎擊威脅" : "防護中") : "展開中"} · ${count} / ${maximum} 粒`
     : "可施放 · S");
-  document.getElementById("shieldButton").disabled = Boolean(shield) || phase !== "playing";
-  document.getElementById("attackButton").disabled = phase !== "playing";
+  property("shieldButton", "disabled", Boolean(shield) || phase !== "playing");
+  property("attackButton", "disabled", phase !== "playing");
   setText("runStatus", phase === "paused" ? "暫停中" : phase === "over" || phase === "dying" ? "訊號中斷" : phase === "ready" ? "等待出擊" : "任務進行中");
 }
 
-const overlay = document.getElementById("ready");
+const overlay = element("ready");
 function showOverlay(screen) {
   overlay.hidden = false;
   overlay.dataset.screen = screen;
-  document.getElementById("startButton").focus({ preventScroll: true });
-  document.getElementById("resultSummary").hidden = screen !== "over";
+  element("startButton").focus({ preventScroll: true });
+  element("resultSummary").hidden = screen !== "over";
   setText("overlayEyebrow", screen === "paused" ? "FLIGHT ON HOLD" : screen === "over" ? "SIGNAL LOST" : "ARCADE / SURVIVAL");
   setText("overlayTitle", screen === "paused" ? "任務暫停" : screen === "over" ? "本次航行結束" : "SPACEWAR");
   setText("overlayDescription", screen === "paused" ? "深呼吸。準備好，再回到星海。" : screen === "over" ? "整理裝備，下一次飛得更遠。" : "在無盡星海中，留下一道航跡。");
@@ -325,6 +293,7 @@ function showOverlay(screen) {
 }
 
 function startRun() {
+  records.flush();
   clearRenderData();
   renderData.aniEffect.length = 0;
   feedback.reset();
@@ -340,15 +309,16 @@ function startRun() {
   phase = "playing";
   clock.reset();
   overlay.hidden = true;
-  document.getElementById("pauseButton").disabled = false;
+  element("pauseButton").disabled = false;
   setText("pauseButton", "Ⅱ 暫停");
   updateHud();
-  document.getElementById("startButton").blur();
+  element("startButton").blur();
 }
 
 function togglePause(forcePause = false) {
   if (phase !== "playing" && phase !== "paused") return;
   if (phase === "playing") {
+    records.flush();
     phase = "paused";
     resetInputs();
     showOverlay("paused");
@@ -356,18 +326,18 @@ function togglePause(forcePause = false) {
   } else if (!forcePause) {
     phase = "playing";
     overlay.hidden = true;
-    document.getElementById("startButton").blur();
+    element("startButton").blur();
     setText("pauseButton", "Ⅱ 暫停");
   }
   clock.reset();
   updateHud();
 }
 
-document.getElementById("startButton").onclick = () => phase === "paused" ? togglePause() : startRun();
-document.getElementById("pauseButton").onclick = () => togglePause();
-document.getElementById("restartButton").onclick = startRun;
-document.getElementById("attackButton").onclick = () => { if (phase === "playing") ship.skill(65); };
-document.getElementById("shieldButton").onclick = () => { if (phase === "playing") { ship.skill(83); updateHud(); } };
+element("startButton").onclick = () => phase === "paused" ? togglePause() : startRun();
+element("pauseButton").onclick = () => togglePause();
+element("restartButton").onclick = startRun;
+element("attackButton").onclick = () => { if (phase === "playing") ship.skill(65); };
+element("shieldButton").onclick = () => { if (phase === "playing") { ship.skill(83); updateHud(); } };
 
 const keyMap = { ArrowUp: "UP", ArrowRight: "RIGHT", ArrowDown: "DOWN", ArrowLeft: "LEFT", Space: "SPACE" };
 document.addEventListener("keydown", function (event) {
@@ -391,7 +361,8 @@ document.addEventListener("keyup", function (event) {
   if (keyMap[event.code]) keyType[keyMap[event.code]] = false;
 });
 
-const canvas = document.getElementById("view");
+const canvas = element("view");
+const context2d = canvas.getContext("2d");
 canvas.height = vheight;
 canvas.width = vwidth;
 document.documentElement.style.setProperty("--play-width", `${vwidth}px`);
@@ -399,8 +370,7 @@ function pointerMove(event) {
   var rect = canvas.getBoundingClientRect();
   var x = Math.max(1, Math.min(w - 2, Math.floor((event.clientX - rect.left) / rect.width * w)));
   var y = Math.max(1, Math.min(h - 2, Math.floor((event.clientY - rect.top) / rect.height * h)));
-  ship.position = w * y + x;
-  movement.sync(ship.position);
+  pendingTouchPosition = w * y + x;
 }
 canvas.addEventListener("pointerdown", (event) => {
   if (event.pointerType === "mouse" || phase !== "playing") return;
@@ -430,14 +400,15 @@ function cancelTouch(event) {
 }
 canvas.addEventListener("pointercancel", cancelTouch);
 canvas.addEventListener("lostpointercapture", cancelTouch);
+window.addEventListener("pagehide", () => records.flush());
 window.addEventListener("blur", () => togglePause(true));
 document.addEventListener("visibilitychange", () => { if (document.hidden) togglePause(true); });
 
 function step(timestamp) {
   if (phase === "playing" || phase === "dying") {
     clock.advance(timestamp, () => {
-      if (phase === "playing") actionMove();
-      if (phase === "playing" || phase === "dying") gaphic(phase === "playing" ? "OBJ_MOVE" : "RENDER_ONLY");
+      if (phase === "playing") { ship.previousPosition = ship.simulationPosition; actionMove(); }
+      if (phase === "playing" || phase === "dying") updateSimulation();
       if (phase === "dying" && --deathFrames <= 0) {
         phase = "over";
         showOverlay("over");
@@ -445,6 +416,7 @@ function step(timestamp) {
       }
     });
   } else clock.reset();
+  if (phase === 'playing' || phase === 'dying') renderScene(clock.alpha);
   requestAnimationFrame(step);
 }
 showOverlay("ready");
