@@ -1,10 +1,10 @@
 import {segmentBox} from './engine.mjs';
 export function createKaijuAttack(enemy,{pixel,width,height,toXY,onStage=()=>{},onShieldBreak=()=>{}}){
-  let phase='',lastBurn=-1000,blocked=false,active=false;
+  let phase='',lastBurn=-1000,blocked=false,active=false,previousBeam=null;
   const start={x:0,y:0},end={x:0,y:0},center={},previous={};
   const state=enemy.kaiju.state;
-  function endpoint(){
-    const {mouth,direction:d}=enemy.kaiju;start.x=mouth.x;start.y=mouth.y;
+  function endpoint(mouth=enemy.kaiju.mouth,d=enemy.kaiju.direction){
+    start.x=mouth.x;start.y=mouth.y;
     const tx=Math.abs(d.x)<.00001?Infinity:((d.x>0?width:0)-start.x)/d.x;
     const ty=Math.abs(d.y)<.00001?Infinity:((d.y>0?height:0)-start.y)/d.y;
     const reach=Math.max(0,Math.min(tx>0?tx:Infinity,ty>0?ty:Infinity,Math.hypot(width,height)));
@@ -20,8 +20,22 @@ export function createKaijuAttack(enemy,{pixel,width,height,toXY,onStage=()=>{},
       if(enemy.removed||enemy.life<1)return true;
       if(phase!==state.phase){phase=state.phase;onStage(phase,enemy.kaiju.mouth);}
       endpoint();blocked=false;active=state.flame>.4||state.beam>.4;
-      if(!active||ship.isDead)return false;
-      if(state.beam>.4&&ship.airShield?.phase==='ready'){
+      if(!active||ship.isDead){previousBeam=null;return false;}
+      const current={mouth:{...enemy.kaiju.mouth},direction:{...enemy.kaiju.direction}};
+      const angle=Math.atan2(current.direction.y,current.direction.x);
+      const oldAngle=previousBeam?Math.atan2(previousBeam.direction.y,previousBeam.direction.x):angle;
+      const delta=Math.atan2(Math.sin(angle-oldAngle),Math.cos(angle-oldAngle));
+      const samples=state.beam>.4?Math.max(1,Math.min(16,Math.ceil(Math.abs(delta)*Math.hypot(width,height)/(pixel*.65)))):1;
+      const points=world.cache.get(ship).points;
+      let hit=false;
+      for(let sample=1;sample<=samples;sample++){
+        const progress=sample/samples;
+        if(previousBeam&&state.beam>.4){
+          const a=oldAngle+delta*progress;
+          endpoint({x:previousBeam.mouth.x+(current.mouth.x-previousBeam.mouth.x)*progress,y:previousBeam.mouth.y+(current.mouth.y-previousBeam.mouth.y)*progress},{x:Math.cos(a),y:Math.sin(a)});
+        }else endpoint();
+        blocked=false;
+        if(state.beam>.4&&ship.airShield?.phase==='ready'){
         let first=Infinity,particle=null;
         for(const p of ship.airShield.particles){
           if(!p.alive)continue;
@@ -32,12 +46,13 @@ export function createKaijuAttack(enemy,{pixel,width,height,toXY,onStage=()=>{},
           end.x=start.x+(end.x-start.x)*first;end.y=start.y+(end.y-start.y)*first;blocked=true;
           if(state.tick-lastBurn>=8){particle.alive=false;lastBurn=state.tick;onShieldBreak(particle);}
         }
-      }
-      const points=world.cache.get(ship).points;
-      const hit=points.some(p=>state.beam>.4
+        }
+        hit ||= points.some(p=>state.beam>.4
         ?segmentBox(start,end,p.x,p.y,(p.radius||0)+pixel*.18,(p.radius||0)+pixel*.18)!==null
         :flameHit(p));
+      }
       if(hit)ship.injured();
+      previousBeam=state.beam>.4?current:null;
       return false;
     },
     draw(context,alpha=1){
@@ -47,10 +62,6 @@ export function createKaijuAttack(enemy,{pixel,width,height,toXY,onStage=()=>{},
       const d=enemy.kaiju.direction;
       context.save();context.translate(dx,dy);context.lineCap='round';
       if(state.phase==='charge'){
-        context.globalAlpha=.1+state.charge*.2;context.strokeStyle='#c388ff';context.lineWidth=1;
-        context.setLineDash([4,9]);context.beginPath();
-        for(const angle of [-.55,.55]){context.moveTo(start.x,start.y);context.lineTo(start.x+Math.sin(angle)*height,start.y+Math.cos(angle)*height);}
-        context.stroke();context.setLineDash([]);
         context.globalAlpha=state.charge*.25;context.fillStyle='#b96aff';context.beginPath();context.arc(start.x,start.y,pixel*(.2+state.charge*.45),0,Math.PI*2);context.fill();
       }
       if(state.flame>.01){

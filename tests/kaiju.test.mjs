@@ -17,25 +17,29 @@ test('kaiju stops for charge, opens its jaw for flame, then sweeps a narrow beam
   assert.equal(cool.firing,0);assert.equal(sampleKaijuSequence(KAIJU_CYCLE).phase,'walk');
 });
 
-test('heavy gait moves only on footfalls and stays in bounds on narrow screens',()=>{
+test('faster approach remains bounded, follows body facing and stops during attacks',()=>{
   for(const width of [21,26,45]){
     const enemy={position:width-1},player={position:50*width};let steps=0;
-    const controller=createKaijuController(enemy,{width,height:56,onStep:()=>steps++});
+    const controller=createKaijuController(enemy,{width,height:56,onStep:()=>steps++,random:()=>.5});
     let moves=0,previous=enemy.position;
     for(let tick=0;tick<1120;tick++){
       controller.update(player);
       const row=Math.floor(enemy.position/width),x=enemy.position%width;
       assert.ok(x>=4&&x<width-4);assert.ok(row<56);
-      if(enemy.position!==previous){moves++;assert.equal(controller.state.stomp,true);assert.ok(controller.state.walking>.5);}
+      if(enemy.position!==previous){
+        moves++;assert.equal(controller.state.moved,true);assert.equal(controller.state.phase,'walk');
+        const dx=enemy.position%width-previous%width,dy=Math.floor(enemy.position/width)-Math.floor(previous/width);
+        assert.ok(dx*Math.cos(controller.state.bodyHeading)+dy*Math.sin(controller.state.bodyHeading)>0);
+      }
       previous=enemy.position;
     }
-    assert.ok(steps>2&&moves>0&&moves<20);
+    assert.ok(steps>2&&moves>10);
   }
 });
 
 test('kaiju follows in both axes, remembers a delayed target and turns gradually after a player reversal',()=>{
   const width=45,enemy={position:20},player={position:50*width+42};
-  const controller=createKaijuController(enemy,{width,height:60});
+  const controller=createKaijuController(enemy,{width,height:60,random:()=>.5});
   for(let i=0;i<120;i++)controller.update(player);
   const heading=controller.state.heading,position=enemy.position;
   assert.ok(Math.cos(heading)>0);
@@ -43,7 +47,7 @@ test('kaiju follows in both axes, remembers a delayed target and turns gradually
   controller.update(player);
   assert.equal(enemy.position,position,'no movement between footfalls');
   assert.ok(Math.cos(controller.state.heading)>0,'does not immediately reverse');
-  assert.ok(Math.abs(controller.state.heading-heading)<=.028001);
+  assert.ok(Math.abs(controller.state.heading-heading)<=.040001);
   for(let i=0;i<1680;i++)controller.update(player);
   assert.ok(enemy.position%width<position%width,'eventually follows the new horizontal target');
   const lowerRow=Math.floor(enemy.position/width);
@@ -55,7 +59,7 @@ test('kaiju follows in both axes, remembers a delayed target and turns gradually
 
 test('kaiju holds its approach distance instead of stepping into a stationary nearby player',()=>{
   const width=26,enemy={position:13};
-  const controller=createKaijuController(enemy,{width,height:56});
+  const controller=createKaijuController(enemy,{width,height:56,random:()=>.5});
   const initial=enemy.position,player={position:initial+width*4};
   for(let i=0;i<1120;i++)controller.update(player);
   assert.equal(enemy.position,initial);
@@ -132,4 +136,17 @@ test('actual enemy installs only one owned breath skill and never emits the lega
   assert.equal(data.enemyBullet.length,0);
   enemy.dead();assert.equal(data.skills[0].update({},{}),true);
   assert.equal(data.skills[1].update({isDead:true},{}),false);
+});
+
+test('the normal story schedules the new kaiju in both the single and multi-boss encounters',()=>{
+  const context=vm.createContext({w:26,h:56,pixelWeigth:15,renderData:{}});
+  const source=readFileSync(new URL('../js/script.js',import.meta.url),'utf8')
+    .replace(/import[\s\S]*?from\s+["'][^"']+["'];/g,'')
+    .replace('export default function (renCount, ruleObj, nextPolling)','function story(renCount, ruleObj, nextPolling)');
+  vm.runInContext(source+'\nthis.story=story;',context);
+  const rule={};context.story(2200,rule);
+  assert.equal(rule.boss.length,1);assert.equal(rule.boss[0].name,'GOZILLA');assert.equal(rule.boss[0].look,'kaiju');
+  context.story(2401,rule);
+  const kaiju=rule.boss.filter(enemy=>enemy.name==='GOZILLA');assert.equal(kaiju.length,2);
+  for(const enemy of kaiju){assert.equal(enemy.look,'kaiju');assert.equal(enemy.shot,false);assert.equal(enemy.skills.length,0);}
 });

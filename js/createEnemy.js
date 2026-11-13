@@ -141,7 +141,7 @@ export default function (obj) {
       if (this.kaiju) {
         this.previousPosition = this.position;
         this.kaiju.update(ship);
-        updateKaijuVisual(this,pixelWeigth,positionToXY);
+        updateKaijuVisual(this,pixelWeigth,positionToXY,vheight/h);
         survivalTime++; if(hitFrames>0)hitFrames--;
         return;
       }

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import {bodyYawForHeading} from './kaijuSweep.mjs';
 
 // Abstract articulated creature: broad facets, sparse claws and a seven-joint tail.
 export function createKaijuModel() {
@@ -103,22 +104,24 @@ return {root,body,neck,head,jaw,muzzle,legs,feet,arms,tail,dorsal,throatMat,mout
 export function poseKaiju(model,state){
   const {body,neck,head,jaw,legs,arms,tail,dorsal,throatMat,mouthCore}=model;
   const stride=state.walkTime*2*Math.PI/2.8,walking=state.walking;
+  const pitch=.02-state.charge*.07+state.firing*.22;
+  model.root.rotation.y=bodyYawForHeading(state.bodyHeading??Math.PI/2,pitch);
   const dip=Math.exp(-(state.walkTime%1.4)*8);
-  body.position.y=3.1-walking*(.07*Math.abs(Math.sin(stride))+.15*dip)-state.charge*.18;
-  body.rotation.set(.04+walking*.035*Math.sin(stride-.4),0,walking*.035*Math.cos(stride));
+  body.position.y=3.1-walking*(.07*Math.abs(Math.sin(stride))+.15*dip)-state.charge*.18-(state.brace||0)*.25;
+  body.rotation.set(.04+walking*.035*Math.sin(stride-.4)+(state.rush||0)*.12,0,walking*.035*Math.cos(stride));
   legs.forEach(({leg,shin},i)=>{const p=stride+i*Math.PI,lift=Math.max(0,Math.sin(p));leg.rotation.x=walking*.25*Math.cos(p);leg.position.y=2.4+walking*.22*lift;shin.rotation.x=walking*.3*lift;arms[i].rotation.x=-.35+walking*.14*Math.cos(p-.5);});
   tail.forEach((joint,i)=>{joint.rotation.y=walking*.065*Math.sin(stride-i*.36);joint.rotation.x=(i===0?-.4:.025)+walking*.012*Math.cos(stride-i*.25);});
   neck.rotation.x=-.02+walking*.035*Math.sin(stride-.6)-state.charge*.07;
-  head.rotation.set(.22*state.firing+walking*.03*Math.sin(stride-.9),state.sweep*state.firing+walking*.035*Math.cos(stride-.8),0);
+  head.rotation.set(.22*state.firing+walking*.03*Math.sin(stride-.9),walking*.035*Math.cos(stride-.8),0);
   jaw.rotation.x=state.jaw;
   throatMat.emissiveIntensity=.06+state.charge*2.2+state.firing*2;
   const pulse=1+state.firing*.1;mouthCore.scale.set(.44*pulse,.26*pulse,.5*pulse);
-  for(const fin of dorsal){const threshold=4+fin.index*.11;const level=THREE.MathUtils.smoothstep(state.time,threshold,threshold+.65)*(1-THREE.MathUtils.smoothstep(state.time,10.5+(14-fin.index)*.07,12.8+(14-fin.index)*.02));fin.mesh.material.emissiveIntensity=level*(1.9+.3*Math.sin(state.time*9-fin.index*.3));}
+  for(const fin of dorsal){const threshold=4+fin.index*.11;const level=THREE.MathUtils.smoothstep(state.time,threshold,threshold+.65)*(1-THREE.MathUtils.smoothstep(state.time,12.9+(14-fin.index)*.07,14.6+(14-fin.index)*.02));fin.mesh.material.emissiveIntensity=level*(1.9+.3*Math.sin(state.time*9-fin.index*.3));}
   model.root.updateMatrixWorld(true);
 }
 
 export function createKaijuCamera(){
   // Oblique front view: face, chest and both planted feet remain visible.
-  const camera=new THREE.OrthographicCamera(-4.8,4.8,6.4,-6.4,.1,60);
+  const camera=new THREE.OrthographicCamera(-9.6,9.6,9.6,-9.6,.1,60);
   camera.position.set(0,19,13);camera.lookAt(0,3,0);camera.updateMatrixWorld(true);return camera;
 }

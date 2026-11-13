@@ -75,7 +75,7 @@ export function createColliderCache(shapeFor, toXY, radius) {
       if (!entry) { entry = { entity, enemy: entity, points: [], cells: new Set(), bounds: {}, tick: -1 }; entries.set(entity, entry); }
       if (entry.tick === tick) return entry;
       const rotation = entity.look === 'CIRCLE' ? Math.round((entity.getST?.() || 0) / 20) : 0;
-      if (entry.position !== entity.position || entry.look !== entity.look || entry.type !== entity.lookType || entry.rotation !== rotation) {
+      if (entry.position !== entity.position || entry.look !== entity.look || entry.type !== entity.lookType || entry.rotation !== rotation || entry.revision !== entity.colliderRevision) {
         entry.pathObj = shapeFor(entity, entry.pathObj || []); entry.cells.clear();
         let count = 0;
         for (const value of entry.pathObj) {
@@ -83,7 +83,7 @@ export function createColliderCache(shapeFor, toXY, radius) {
           const point = entry.points[count] || (entry.points[count] = {});
           toXY(value.ps, point); point.position = value.ps; point.radius = radius; entry.cells.add(value.ps); count++;
         }
-        entry.points.length = count; entry.position = entity.position; entry.look = entity.look; entry.type = entity.lookType; entry.rotation = rotation; builds++;
+        entry.points.length = count; entry.position = entity.position; entry.look = entity.look; entry.type = entity.lookType; entry.rotation = rotation; entry.revision=entity.colliderRevision; builds++;
       }
       toXY(entity.position, center); toXY(entity.previousPosition ?? entity.position, previous);
       const b = entry.bounds; b.minX = b.minY = Infinity; b.maxX = b.maxY = -Infinity;
