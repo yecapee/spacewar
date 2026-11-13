@@ -1,4 +1,5 @@
-<html>
+<html lang="zh-Hant">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
 <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
 <script>
@@ -30,8 +31,14 @@
     <div class="title">
       <h1>OUTERSPACE IS NO END.</h1>
       <p>Developed by yecapee</p>
-      <p>press space or click me </p>
-      <p>press a, s to use special attack</p>
+      <div class="start-controls">
+        <p><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> 移動戰機</p>
+        <p><kbd>Space</kbd> 按住連續射擊</p>
+        <p><kbd>A</kbd> 攻擊波：擴散攻擊敵人</p>
+        <p><kbd>S</kbd> 防禦波：清除敵方子彈</p>
+        <p class="touch-tip">觸控：在遊戲區拖曳移動，自動射擊</p>
+      </div>
+      <p class="start-prompt">按空白鍵或點擊畫面開始</p>
 
     </div>
   </div>
@@ -39,6 +46,14 @@
   <div id="score" unselectable="on"></div>
   <div id="life"></div>
   <canvas id="view"></canvas>
+  <aside class="controls-help" aria-label="操作與技能說明">
+    <h2>操作指南</h2>
+    <div class="keyboard-tip"><kbd>↑ ↓ ← →</kbd><span>移動</span></div>
+    <div class="keyboard-tip"><kbd>Space</kbd><span>按住連射</span></div>
+    <div><kbd>A</kbd><span>攻擊波 · 攻擊敵人</span></div>
+    <div><kbd>S</kbd><span>防禦波 · 清除敵彈</span></div>
+    <p class="touch-tip">拖曳移動 · 自動射擊<br>技能可使用鍵盤 A／S</p>
+  </aside>
 
   <img id="shipImg" src="./img/ship.png" style="display:none">
   <img id="shipBulletNormal" src="./img/bullet_normal.png" style="display:none">

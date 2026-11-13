@@ -11,7 +11,7 @@ import { w, h, pixelWeigth, renderData, killCount } from "./config";
 
 function bulletPosition() {
   var bulletArr = this.bullet;
-  for (var key in bulletArr) {
+  for (var key = bulletArr.length - 1; key >= 0; key--) {
     bulletArr[key].data = bulletArr[key].fn();
     if (bulletArr[key].data.clear) {
       bulletArr.splice(key, 1);
@@ -24,32 +24,26 @@ function grapicBullet(viewDom) {
 
   var thisBullet = this.bullet;
 
-  thisBullet.map(function (el) {
+  thisBullet.slice().forEach(function (el) {
     var ps = el.data.position;
     var bulletImg = document.getElementById(el.data.look);
-
     viewDom.drawImage(bulletImg, el.data.x - 13 / 2, el.data.y - 5, 13, 64);
 
-    // defense
-    enemyBulleArr.forEach(function (enemyBullet, index) {
-      if (enemyBullet.data.position === ps) {
-        enemyBulleArr.splice(index, 1);
-        thisBullet.splice(thisBullet.indexOf(el), 1);
-      }
-      if (enemyBullet.data.position === ps + w) {
-        enemyBulleArr.splice(index, 1);
-        thisBullet.splice(thisBullet.indexOf(el), 1);
-      }
+    // A projectile is consumed by its first collision.
+    var enemyBulletIndex = enemyBulleArr.findIndex(function (bullet) {
+      return bullet.data.position === ps || bullet.data.position === ps + w;
     });
-
-    // kill enemy
-    renderData.enemy.map(function (obj) {
-      obj.wasHit(ps, viewDom, function () {
+    if (enemyBulletIndex !== -1) {
+      enemyBulleArr.splice(enemyBulletIndex, 1);
+      thisBullet.splice(thisBullet.indexOf(el), 1);
+      return;
+    }
+    renderData.enemy.slice().some(function (obj) {
+      if (obj.wasHit(ps, viewDom) || obj.wasHit(ps + w, viewDom)) {
         thisBullet.splice(thisBullet.indexOf(el), 1);
-      });
-      obj.wasHit(ps + w, viewDom, function () {
-        thisBullet.splice(thisBullet.indexOf(el), 1);
-      });
+        return true;
+      }
+      return false;
     });
   });
 }
@@ -204,18 +198,21 @@ export default function (obj) {
         pathObj,
       });
 
+      if (this.isDead) return;
+
       // was hit
-      renderData.enemyBullet.forEach(function (bullet, index) {
+      for (var index = renderData.enemyBullet.length - 1; index >= 0; index--) {
         _wasHit({
-          bulletPs: bullet.data.position,
+          bulletPs: renderData.enemyBullet[index].data.position,
           bulletIndex: index,
           viewDom: viewDom,
           shipPath: path,
         });
-      });
+        if (this.isDead) return;
+      }
 
       // touch item
-      renderData.item.forEach(function (item, index) {
+      renderData.item.slice().forEach(function (item, index) {
         var itemMap = lookPath[item.look](item.position).map(function (el) {
           return el.ps;
         });
@@ -231,14 +228,12 @@ export default function (obj) {
   };
 
   this.skill = function (keycode) {
-    var _this = this;
+    if (this.isDead) return;
     var skill = this.skills.find((skill) => skill.skillKey === keycode);
-    skill.skillPoint(this.position).forEach(function (position) {
-      launchSkillsByShip(position, skill.type, _this);
-      isLaunchSkill = true;
-      lookType = skill.skillLook;
+    if (!skill) return;
+    skill.skillPoint(this.position).forEach((position) => {
+      if (position !== undefined) launchSkillsByShip(position, skill.type, this);
     });
-    // this.grapic(viewDom, lookType);
   };
 
   this.dead = function () {

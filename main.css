@@ -21,7 +21,7 @@ html, body {
 #score {
   display: block;
   position: fixed;
-  top: 20;
+  top: 20px;
   left: 0;
   color: orange;
   font-size: 8px;
@@ -72,4 +72,100 @@ html, body {
   margin-top: 20px;
   font: bold;
   font-size: 5rem;
+}
+
+/* Keep controls visible throughout play, outside the central playfield when space allows. */
+kbd {
+  display: inline-block;
+  min-width: 20px;
+  padding: 5px 6px;
+  border: 1px solid rgba(255, 181, 71, .5);
+  border-bottom-width: 3px;
+  border-radius: 5px;
+  background: #282332;
+  color: #ffbd60;
+  font: 600 12px/1.2 system-ui, sans-serif;
+  text-align: center;
+}
+
+.controls-help {
+  position: fixed;
+  right: 16px;
+  bottom: 26px;
+  z-index: 3;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 181, 71, .3);
+  border-radius: 10px;
+  background: rgba(20, 16, 27, .88);
+  color: #f5eee3;
+  font: 14px/1.5 system-ui, sans-serif;
+  pointer-events: none;
+  user-select: none;
+}
+
+.controls-help h2 {
+  margin: 0 0 10px;
+  color: #ffbd60;
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+.controls-help div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.controls-help kbd {
+  box-sizing: border-box;
+  min-width: 78px;
+}
+
+.ready .title {
+  box-sizing: border-box;
+  max-width: 800px;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.ready h1 {
+  font-size: clamp(18px, 4vw, 32px);
+  line-height: 1.6;
+}
+
+.start-controls {
+  width: fit-content;
+  margin: 28px auto;
+  text-align: left;
+  font: 16px/1.6 system-ui, sans-serif;
+}
+
+.ready .start-prompt {
+  color: #ffbd60;
+  font: 600 16px/1.6 system-ui, sans-serif;
+}
+
+.touch-tip {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .controls-help {
+    right: 8px;
+    bottom: 20px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .controls-help h2 { margin-bottom: 6px; }
+  .controls-help div { margin-top: 5px; gap: 8px; }
+  .controls-help kbd { min-width: 68px; padding: 3px 5px; }
+  .start-controls { font-size: 14px; }
+}
+
+@media (pointer: coarse) {
+  .touch-tip { display: block; }
+  .controls-help .keyboard-tip { display: none; }
+  .controls-help .touch-tip { margin: 8px 0 0; color: #c8bfce; }
 }

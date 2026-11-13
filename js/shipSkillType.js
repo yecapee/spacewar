@@ -31,7 +31,7 @@ function circle(x, y, r, all, now, margin) {
 
 export default {
   atomicExplosion: function (position, ship) {
-    var time = 300 - (40 - w) * 20;
+    var time = Math.max(30, 300 - (40 - w) * 20);
     var prePs = position;
     var count = time;
     return function (ship, viewDom) {
@@ -69,14 +69,14 @@ export default {
           ((count / time) * 0.5 + 0.5).toFixed(1) +
           ")";
         //bricks(ps, viewDom, 'blue');
-        if (ps.ps) {
+        if (ps.ps !== undefined) {
           viewDom.fillStyle = color;
           viewDom.fillRect(ps.x, ps.y, 15, 15);
-          renderData.enemyBullet.forEach(function (bullet, index) {
-            if (ps.ps === bullet.data.position) {
+          for (var index = renderData.enemyBullet.length - 1; index >= 0; index--) {
+            if (ps.ps === renderData.enemyBullet[index].data.position) {
               renderData.enemyBullet.splice(index, 1);
             }
-          });
+          }
         }
       });
 
@@ -84,7 +84,7 @@ export default {
     };
   },
   atomicExplosionCanKill: function (position, ship) {
-    var time = 300 - (40 - w) * 20;
+    var time = Math.max(30, 300 - (40 - w) * 20);
     var prePs = ship.position;
     var count = time;
     return function (ship, viewDom) {
@@ -112,11 +112,11 @@ export default {
       }
 
       skillPath.forEach(function (ps) {
-        if (ps.ps) {
+        if (ps.ps !== undefined) {
           var enemyImg = document.getElementById("bulletBall");
           viewDom.drawImage(enemyImg, ps.x, ps.y, 15, 15);
 
-          renderData.enemy.forEach(function (obj) {
+          renderData.enemy.slice().forEach(function (obj) {
             obj.wasHit(ps.ps, viewDom, function () {
              //  thisBullet.splice(thisBullet.indexOf(el), 1);
             })

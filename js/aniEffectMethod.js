@@ -3,7 +3,8 @@ exports.animation = function (totalRenCount, aniFn) {
   var renCount = 1;
   var fn = function (viewDom) {
     if (renCount == totalRenCount) {
-      renderData.aniEffect.splice(renderData.aniEffect.indexOf(fn), 1);
+      var index = renderData.aniEffect.indexOf(fn);
+      if (index !== -1) renderData.aniEffect.splice(index, 1);
     }
     aniFn(renCount, viewDom);
     renCount++;

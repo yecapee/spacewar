@@ -77,6 +77,7 @@ export default function (obj) {
   this.wasHit = function (bulletPs, viewDom, cb) {
     var me = this;
     var path = lookPath[this.look](this.position).map(el => el.ps);
+    if (this.life < 1) return false;
     if (path.includes(bulletPs)) {
       hit = true;
       this.life--;
@@ -90,9 +91,11 @@ export default function (obj) {
         this.dead();
       } else {
         this.grapic.call(this, viewDom, _look);
-        if (cb) cb();
       };
+      if (cb) cb();
+      return true;
     }
+    return false;
   };
 
   this.grapic = function (viewDom, lootype) {

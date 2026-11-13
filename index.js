@@ -68,7 +68,7 @@ function keyCodeMap(keycode, type) {
 
   if (map[keycode]) {
     map[keycode]();
-  } else {
+  } else if (type === "keydown") {
     ship.skill(keycode);
   }
 }
@@ -129,22 +129,21 @@ function closeShot() {
 
 function bulletPosition(shipPs) {
   var enemyBulleArr = renderData.enemyBullet;
-  for (var key in enemyBulleArr) {
+  for (var key = enemyBulleArr.length - 1; key >= 0; key--) {
     enemyBulleArr[key].data = enemyBulleArr[key].fn(shipPs);
     if (enemyBulleArr[key].data.clear) {
-      enemyBulleArr[key].fn(shipPs, true);
       enemyBulleArr.splice(key, 1);
     }
   }
 }
 
 function clearRenderData() {
-  renderData.enemy = [];
-  renderData.boss = [];
-  // renderData.enemyBullet = [];
-  // renderData.aniEffect = [];
-  renderData.item = [];
-  renderData.skills = [];
+  renderData.enemy.length = 0;
+  renderData.enemyBullet.length = 0;
+  renderData.item.length = 0;
+  renderData.skills.length = 0;
+  renderData.shipSkills.length = 0;
+  ruleObj = {};
 
   //console.log(renderData);
 }
@@ -195,9 +194,9 @@ var ship = new createShip({
 function gaphic(TYPE) {
   var bestScore = localStorage.getItem("bestScore") || 0;
   var bestMileage = localStorage.getItem("bestMileage") || 0;
+  script(scriptMileage, ruleObj, nextPolling);
   var { stopCount, stopEnemyPush } = ruleObj;
   var boss = ruleObj.boss || [];
-  script(scriptMileage, ruleObj, nextPolling);
   if (TYPE === "OBJ_MOVE") {
     var createObj = false;
     var item = ruleObj.item;
@@ -267,9 +266,7 @@ function gaphic(TYPE) {
       localStorage.setItem("bestMileage", scriptMileage);
   }
 
-  if (TYPE === "BULLET_MOVE") {
-    bulletPosition(ship.position);
-  }
+  bulletPosition(ship.position);
 
   //canvas
   var viewDom = document.getElementById("view").getContext("2d");
@@ -291,27 +288,33 @@ function gaphic(TYPE) {
   });
 
   // enmy
-  renderData.enemy.forEach(function (obj) {
+  renderData.enemy.slice().forEach(function (obj) {
     obj.action(TYPE, viewDom, ship);
   });
 
   // skill
-  renderData.skills.forEach(function (skill, index) {
-    skill(ship, viewDom) && renderData.skills.splice(index, 1);
+  renderData.skills.slice().forEach(function (skill) {
+    if (skill(ship, viewDom)) {
+      var index = renderData.skills.indexOf(skill);
+      if (index !== -1) renderData.skills.splice(index, 1);
+    }
   });
 
   // shipskill
-  renderData.shipSkills.forEach(function (skill, index) {
-    skill(ship, viewDom) && renderData.shipSkills.splice(index, 1);
+  renderData.shipSkills.slice().forEach(function (skill) {
+    if (skill(ship, viewDom)) {
+      var index = renderData.shipSkills.indexOf(skill);
+      if (index !== -1) renderData.shipSkills.splice(index, 1);
+    }
   });
 
   // item
-  renderData.item.forEach(function (obj) {
+  renderData.item.slice().forEach(function (obj) {
     obj.action(TYPE, viewDom, ship.position);
   });
 
   // effect
-  renderData.aniEffect.forEach(function (el) {
+  renderData.aniEffect.slice().forEach(function (el) {
     el(viewDom);
   });
 
@@ -339,6 +342,9 @@ function gaphic(TYPE) {
 document.addEventListener(
   "keydown",
   function (e) {
+    if (![32, 37, 38, 39, 40, 65, 83].includes(e.keyCode)) return;
+    e.preventDefault();
+    if (e.repeat) return;
     start();
     keyCodeMap(e.keyCode, "keydown");
   },
@@ -348,20 +354,22 @@ document.addEventListener(
   "keyup",
   function (e) {
     keyCodeMap(e.keyCode, "keyup");
+    if (e.keyCode === 32) closeShot();
   },
   false
 );
 
-document.addEventListener("touchstart", touchAction, false);
-document.addEventListener("touchmove", touchAction, false);
+document.getElementById("view").addEventListener("touchstart", touchAction, { passive: false });
+document.getElementById("view").addEventListener("touchmove", touchAction, { passive: false });
 document.addEventListener("touchend", closeShot, false);
 
 function touchAction(event) {
   var event = event || window.event;
-  //event.preventDefault();
+  event.preventDefault();
   if (event.touches[0]) {
-    var x = Math.floor(event.touches[0].pageX / pixelWeigth);
-    var y = Math.floor(event.touches[0].pageY / pixelWeigth);
+    var rect = document.getElementById("view").getBoundingClientRect();
+    var x = Math.max(0, Math.min(w - 1, Math.floor((event.touches[0].clientX - rect.left) / rect.width * w)));
+    var y = Math.max(0, Math.min(h - 1, Math.floor((event.touches[0].clientY - rect.top) / rect.height * h)));
     var _ps = w * y + x;
     ship.position = _ps;
     shotDriver();
@@ -370,6 +378,12 @@ function touchAction(event) {
 
 document.getElementById("view").height = vheight;
 document.getElementById("view").width = vwidth;
+
+window.addEventListener("blur", function () {
+  Object.keys(keyType).forEach((key) => keyType[key] = false);
+  closeShot();
+});
+document.addEventListener("touchcancel", closeShot);
 
 var preTimetamp = null;
 
@@ -381,10 +395,8 @@ function step(timestamp) {
   if (progress >= renderTime) {
     preTimetamp = timestamp;
     //animation
-    gaphic("OBJ_MOVE");
-    gaphic("CONTROL_MOVE");
     !atc.isMobile() && actionMove(ship);
-    gaphic("BULLET_MOVE");
+    gaphic("OBJ_MOVE");
     //
   }
   requestAnimationFrame(step);
