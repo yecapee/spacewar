@@ -129,6 +129,16 @@ test('touch gestures invoke actual player skills and cancelled or paused input d
   assert.deepEqual([...context.ship.casts], [65, 83]);
 });
 
+test('touch listeners recognize an open oval after a long movement drag',()=>{
+  const {context,elements}=session();context.startRun();const canvas=elements.get('view');
+  const event=(x,y,time)=>({pointerId:1,pointerType:'touch',clientX:x,clientY:y,timeStamp:time,preventDefault(){}});
+  canvas.listeners.pointerdown(event(40,250,0));
+  for(let i=1;i<=300;i++)canvas.listeners.pointermove(event(40+i*.8,250+i*.5,i*20));
+  for(let i=0;i<32;i++)canvas.listeners.pointermove(event(280+32*Math.cos(i/32*Math.PI*1.6),450+20*Math.sin(i/32*Math.PI*1.6),6100+i*35));
+  canvas.listeners.pointerup(event(280+32*Math.cos(Math.PI*1.6),450+20*Math.sin(Math.PI*1.6),7220));
+  assert.deepEqual([...context.ship.casts],[83]);
+});
+
  test('catch-up performs five logical updates but only one render; extra renders do not advance logic', () => {
   const run = session(); run.context.startRun(); run.tick(0);
   const rendered = run.draws(); run.tick(125);

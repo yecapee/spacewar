@@ -387,7 +387,7 @@ canvas.addEventListener("pointerdown", (event) => {
 });
 canvas.addEventListener("pointermove", (event) => {
   if (event.pointerId === activeTouchId && touchFiring && phase === "playing") {
-    touchGestures.move({ x: event.clientX, y: event.clientY });
+    touchGestures.move({ x: event.clientX, y: event.clientY }, event.timeStamp);
     pointerMove(event);
   }
 });
