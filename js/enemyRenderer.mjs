@@ -42,13 +42,6 @@ export default function drawEnemy(context, enemy, points, pixel, toXY, hit, rowH
   if (enemy.look === 'CIRCLE') {
     // Use the actual rotating collision points, rather than an unrelated ring image.
     const nodes = points.map((point) => toXY(point.ps));
-    context.strokeStyle = '#e83e9c';
-    context.lineWidth = 2;
-    context.globalAlpha = .65;
-    context.beginPath();
-    nodes.forEach((point, index) => index ? context.lineTo(point.x, point.y) : context.moveTo(point.x, point.y));
-    context.closePath(); context.stroke();
-    context.globalAlpha = 1;
     nodes.slice(0, 8).forEach((point) => sprite(context, 'node', point.x, point.y, pixel * 1.6, pixel * 1.7, hit));
   } else {
     // Stable design bounds prevent a sprite shrinking when its grid is clipped.
