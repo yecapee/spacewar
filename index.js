@@ -41,6 +41,7 @@ let activeTouchId = null;
 let pendingTouchPosition = null;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const kaijuEncounter = /(?:^|[?&])encounter=kaiju(?:&|$)/.test(window.location?.search || '');
+const multiKaijuEncounter = kaijuEncounter && /(?:^|[?&])wave=multi(?:&|$)/.test(window.location?.search || '');
 function updateRecords(score,mileage) { if(!kaijuEncounter)records.update(score,mileage); }
 const clock = createFixedClock(renderTime);
 var ruleObj = {};
@@ -286,7 +287,7 @@ function showOverlay(screen) {
   element("resultSummary").hidden = screen !== "over";
   setText("overlayEyebrow", screen === "paused" ? "FLIGHT ON HOLD" : screen === "over" ? "SIGNAL LOST" : kaijuEncounter ? "BOSS ENCOUNTER / G-01" : "ARCADE / SURVIVAL");
   setText("overlayTitle", screen === "paused" ? "任務暫停" : screen === "over" ? "本次航行結束" : "SPACEWAR");
-  setText("overlayDescription", screen === "paused" ? "深呼吸。準備好，再回到星海。" : screen === "over" ? "整理裝備，下一次飛得更遠。" : kaijuEncounter ? "哥吉拉遭遇戰：留意蓄能，避開熱射線掃射。" : "在無盡星海中，留下一道航跡。");
+  setText("overlayDescription", screen === "paused" ? "深呼吸。準備好，再回到星海。" : screen === "over" ? "整理裝備，下一次飛得更遠。" : multiKaijuEncounter ? "多 Boss 遭遇戰：哥吉拉會分頭包抄，留意爆衝與掃射。" : kaijuEncounter ? "哥吉拉遭遇戰：留意蓄能，避開熱射線掃射。" : "在無盡星海中，留下一道航跡。");
   setText("startButton", screen === "paused" ? "繼續任務" : screen === "over" ? "再次出擊" : "開始出擊");
   if (screen === "over") {
     setText("resultScore", finalResult.score);
@@ -302,7 +303,7 @@ function startRun() {
   ship = makeShip();
   movement.sync(ship.position);
   renCount = 0;
-  scriptMileage = kaijuEncounter ? 2200 : 0;
+  scriptMileage = kaijuEncounter ? (multiKaijuEncounter ? 2401 : 2200) : 0;
   killCount = 0;
   bgCount = 0;
   nextPolling = 20;

@@ -1,4 +1,5 @@
 import {sweepOffset} from './kaijuSweep.mjs';
+import {createKaijuNavigation} from './kaijuNavigation.mjs';
 const clamp = x => Math.max(0, Math.min(1,x));
 const smooth = (a,b,x) => {const v=clamp((x-a)/(b-a));return v*v*(3-2*v);};
 export const KAIJU_CYCLE = 624;
@@ -21,7 +22,7 @@ export function sampleKaijuSequence(tick, state = {}) {
   return state;
 }
 
-export function createKaijuController(enemy, {width,height,onStep=()=>{},random=Math.random}) {
+export function createKaijuController(enemy, {width,height,onStep=()=>{},random=Math.random,getPeers=()=>[]}) {
   const state=sampleKaijuSequence(0);state.walkTime=0;
   let tick=0,lastStep=-1,heading=Math.PI/2,bodyHeading=heading,attackHeading=heading;
   let targetX=null,targetY=null,phase='walk',mode='cruise',modeAge=0,rushHeading=heading,rushDuration=0;
@@ -29,10 +30,13 @@ export function createKaijuController(enemy, {width,height,onStep=()=>{},random=
   const margin=Math.min(4,Math.floor((width-1)/2)),rowMargin=Math.min(7,Math.floor((height-1)/2));
   const x=Math.max(margin,Math.min(width-1-margin,enemy.position%width));
   enemy.position=Math.round(height*.22)*width+x;enemy.previousPosition=enemy.position;
+  const navigation=createKaijuNavigation(enemy,{width,height,getPeers});
+  navigation.place();enemy.previousPosition=enemy.position;
+  const phaseOffset=(navigation.id%3)*56;
   const turn=(from,to,limit)=>from+Math.max(-limit,Math.min(limit,Math.atan2(Math.sin(to-from),Math.cos(to-from))));
-  const control={state,mouth:{x:0,y:0},direction:{x:0,y:1},
+  const control={id:navigation.id,routeSide:navigation.side,state,mouth:{x:0,y:0},direction:{x:0,y:1},
     update(ship) {
-      sampleKaijuSequence(tick++,state);
+      sampleKaijuSequence(tick+phaseOffset,state);state.tick=tick++;
       const row=Math.floor(enemy.position/width),col=enemy.position%width;
       const playerX=ship.position%width,playerY=Math.floor(ship.position/width);
       if(targetX===null||(tick-1)%TRACK_INTERVAL===0){
@@ -40,21 +44,28 @@ export function createKaijuController(enemy, {width,height,onStep=()=>{},random=
         targetY=targetY===null?playerY:targetY+(playerY-targetY)*.6;
       }
       const dx=targetX-col,dy=targetY-row,distance=Math.hypot(dx,dy);
-      const desired=Math.atan2(dy,dx),liveAim=Math.atan2(playerY-row,playerX-col);
+      const route=navigation.guide(targetX,targetY);
+      const desired=Math.atan2(route.dy,route.dx),liveAim=Math.atan2(playerY-row,playerX-col);
+      const approachDistance=route.grouped?route.distance:distance;
+      const stopDistance=route.grouped?3:FOLLOW_DISTANCE;
       const gaitAllowed=state.walking;let speed=0;
-      state.rush=0;state.brace=0;state.moved=false;state.stomp=false;
+      state.rush=0;state.brace=0;state.moved=false;state.stomp=false;state.blocked=false;
       if(state.phase==='walk'){
         if(phase!=='walk'){
           mode='cruise';modeAge=0;nextRush=tick+Math.round((.45+random()*1.1)*40);
           moveX=moveY=0;
         }
         modeAge++;
-        if(mode==='cruise'&&tick>=nextRush&&state.time<2.4&&distance>7){
-          mode='windup';modeAge=0;
+        if(mode==='cruise'&&tick>=nextRush&&state.time<2.4&&distance>7&&approachDistance>5){
           // Commit to a nearby flank rather than homing perfectly during the lunge.
-          rushHeading=Math.atan2(playerY-row+(random()-.5)*3,playerX-col+(random()-.5)*5);
-          windupDuration=8+Math.round(random()*5);rushDuration=22+Math.round(random()*12);
-          moveX=moveY=0;
+          const jitterY=(random()-.5)*3,jitterX=(random()-.5)*5;
+          const goal=navigation.target(playerX+jitterX,playerY+jitterY);
+          const planned=navigation.planRush(Math.atan2(goal.y-row,goal.x-col));
+          if(planned!==null){
+            mode='windup';modeAge=0;rushHeading=planned;
+            windupDuration=8+Math.round(random()*5);rushDuration=22+Math.round(random()*12);
+            moveX=moveY=0;
+          }else nextRush=tick+20;
         }
         if(mode==='windup'){
           bodyHeading=turn(bodyHeading,rushHeading,.06);heading=bodyHeading;
@@ -73,8 +84,8 @@ export function createKaijuController(enemy, {width,height,onStep=()=>{},random=
           if(modeAge>=10){mode='cruise';modeAge=0;}
         }else{
           heading=turn(heading,desired,TURN_PER_TICK);bodyHeading=heading;
-          if(distance<=FOLLOW_DISTANCE)state.walking=0;
-          speed=distance>FOLLOW_DISTANCE?CRUISE_SPEED*gaitAllowed:0;
+          if(approachDistance<=stopDistance)state.walking=0;
+          speed=approachDistance>stopDistance?CRUISE_SPEED*gaitAllowed:0;
         }
       }else{
         mode='cruise';modeAge=0;moveX=moveY=0;state.walking=0;
@@ -99,8 +110,10 @@ export function createKaijuController(enemy, {width,height,onStep=()=>{},random=
         const sx=Math.trunc(moveX),sy=Math.trunc(moveY);moveX-=sx;moveY-=sy;
         const nextCol=Math.max(margin,Math.min(width-1-margin,col+sx));
         const nextRow=Math.max(rowMargin,Math.min(height-1-rowMargin,row+sy));
-        enemy.position=nextRow*width+nextCol;state.moved=enemy.position!==row*width+col;
-        if(mode==='rush'&&(nextCol!==col+sx||nextRow!==row+sy)){
+        const blocked=!navigation.canMove(col,row,nextCol,nextRow);
+        if(blocked){moveX=moveY=0;state.speed=0;state.blocked=true;state.walking=0;}
+        else{enemy.position=nextRow*width+nextCol;state.moved=enemy.position!==row*width+col;}
+        if(mode==='rush'&&(blocked||nextCol!==col+sx||nextRow!==row+sy)){
           mode='recover';modeAge=0;state.rush=0;nextRush=tick+Math.round((.6+random()*.8)*40);
           state.speed=0;
           onStep(enemy,state.foot||0);

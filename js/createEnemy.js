@@ -82,7 +82,7 @@ export default function (obj) {
   this.removed = false;
   if (this.name === 'GOZILLA') {
     this.look = 'kaiju'; _look = this.look;
-    this.kaiju = createKaijuController(this, {width:w,height:h,onStep:(enemy,foot)=>{
+    this.kaiju = createKaijuController(this, {width:w,height:h,getPeers:()=>renderData.enemy,onStep:(enemy,foot)=>{
       const at=positionToXY(enemy.position);
       feedback.stomp(at.x+(foot?1:-1)*pixelWeigth,at.y+pixelWeigth*4);
     }});

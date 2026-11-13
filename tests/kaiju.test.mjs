@@ -119,7 +119,7 @@ test('continuous contact burns at most one shield segment every eight simulation
 });
 
 test('actual enemy installs only one owned breath skill and never emits the legacy atomic rings',()=>{
-  const data={skills:[],enemyBullet:[]};let visualUpdates=0;
+  const data={skills:[],enemyBullet:[],enemy:[]};let visualUpdates=0;
   const xy=(ps,out={})=>Object.assign(out,{x:ps%26*15,y:Math.floor(ps/26)*15});
   const context=vm.createContext({createKaijuController,createKaijuAttack,updateKaijuVisual(){visualUpdates++;},
     w:26,h:56,pixelWeigth:15,vwidth:390,vheight:844,positionToXY:xy,renderData:data,
@@ -129,10 +129,13 @@ test('actual enemy installs only one owned breath skill and never emits the lega
   const source=readFileSync(new URL('../js/createEnemy.js',import.meta.url),'utf8').replace(/import[\s\S]*?from\s+["'][^"']+["'];/g,'').replace('export default function (obj)','function Enemy(obj)');
   vm.runInContext(source+'\nthis.Enemy=Enemy;',context);
   const enemy=new context.Enemy({name:'GOZILLA',position:8,life:800,skills:[{type:'atomicExplosion',launchTime:[1,1,1]}]});
+  data.enemy.push(enemy);
   const other=new context.Enemy({name:'GOZILLA',position:18,life:800});
+  data.enemy.push(other);
   for(let i=0;i<600;i++){enemy.update({position:26*45+13});other.update({position:26*45+13});}
   assert.equal(data.skills.length,2);assert.equal(enemy.look,'kaiju');assert.equal(visualUpdates,1200);
   assert.notEqual(enemy.kaiju.state,other.kaiju.state);
+  assert.notEqual(enemy.kaiju.routeSide,other.kaiju.routeSide);
   assert.equal(data.enemyBullet.length,0);
   enemy.dead();assert.equal(data.skills[0].update({},{}),true);
   assert.equal(data.skills[1].update({isDead:true},{}),false);

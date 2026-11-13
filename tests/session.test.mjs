@@ -143,3 +143,10 @@ test('direct kaiju encounter starts at the boss without overwriting survival rec
   assert.equal(vm.runInContext('records.bestMileage',run.context),0);
   assert.equal(run.elements.get('overlayEyebrow').textContent,'BOSS ENCOUNTER / G-01');
 });
+
+test('multi-boss shortcut uses the normal mixed-boss story wave without changing records',()=>{
+  const run=session({search:'?encounter=kaiju&wave=multi'});run.context.startRun();
+  assert.equal(run.context.scriptMileage,2401);
+  run.tick(0);run.tick(125);
+  assert.equal(vm.runInContext('records.bestMileage',run.context),0);
+});
