@@ -33,6 +33,34 @@ test('heavy gait moves only on footfalls and stays in bounds on narrow screens',
   }
 });
 
+test('kaiju follows in both axes, remembers a delayed target and turns gradually after a player reversal',()=>{
+  const width=45,enemy={position:20},player={position:50*width+42};
+  const controller=createKaijuController(enemy,{width,height:60});
+  for(let i=0;i<120;i++)controller.update(player);
+  const heading=controller.state.heading,position=enemy.position;
+  assert.ok(Math.cos(heading)>0);
+  player.position=50*width+2;
+  controller.update(player);
+  assert.equal(enemy.position,position,'no movement between footfalls');
+  assert.ok(Math.cos(controller.state.heading)>0,'does not immediately reverse');
+  assert.ok(Math.abs(controller.state.heading-heading)<=.028001);
+  for(let i=0;i<1680;i++)controller.update(player);
+  assert.ok(enemy.position%width<position%width,'eventually follows the new horizontal target');
+  const lowerRow=Math.floor(enemy.position/width);
+  assert.ok(lowerRow>Math.round(60*.31),'can pursue beyond the former top-third cap');
+  player.position=2*width+2;
+  for(let i=0;i<1400;i++)controller.update(player);
+  assert.ok(Math.floor(enemy.position/width)<lowerRow,'can follow a target above it');
+});
+
+test('kaiju holds its approach distance instead of stepping into a stationary nearby player',()=>{
+  const width=26,enemy={position:13};
+  const controller=createKaijuController(enemy,{width,height:56});
+  const initial=enemy.position,player={position:initial+width*4};
+  for(let i=0;i<1120;i++)controller.update(player);
+  assert.equal(enemy.position,initial);
+});
+
 test('low-poly rig retains independent jaw animation and an oblique camera with a stable mouth projection',()=>{
   const model=createKaijuModel(),camera=createKaijuCamera();
   assert.ok(model.stats.triangles<=650);assert.ok(model.stats.drawCalls<=55);
