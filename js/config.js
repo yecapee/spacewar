@@ -18,7 +18,8 @@ var atc = {
 var moveFps = atc.isMobile() ? 40 : 40;
 var bulletFps = atc.isMobile() ? 30 : 30;
 var controlFps = atc.isMobile() ? 60 : 40;
-var pixelWeigth = atc.isMobile() ? 10 : 15;
+// Share the world scale so ships, projectiles, shields and hitboxes enlarge together.
+var pixelWeigth = 15;
 var vwidth = atc.isMobile()
   ? window.innerWidth
   : window.innerHeight >= window.innerWidth
