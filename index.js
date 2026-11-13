@@ -40,6 +40,8 @@ const touchGestures = createTouchGestures();
 let activeTouchId = null;
 let pendingTouchPosition = null;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const kaijuEncounter = /(?:^|[?&])encounter=kaiju(?:&|$)/.test(window.location?.search || '');
+function updateRecords(score,mileage) { if(!kaijuEncounter)records.update(score,mileage); }
 const clock = createFixedClock(renderTime);
 var ruleObj = {};
 var scriptMileage = renCount;
@@ -129,7 +131,7 @@ function makeShip() {
     },
   ],
   deadCb: function () {
-    records.update(killCount, scriptMileage); records.flush();
+    updateRecords(killCount, scriptMileage); records.flush();
     finalResult = { score: killCount, mileage: scriptMileage };
     phase = "dying";
     deathFrames = 32;
@@ -158,7 +160,7 @@ function updateSimulation() {
           enemyObj.position = Math.floor(Math.random() * w);
           enemyObj.deadCb = function () {
             killCount++;
-            records.update(killCount, scriptMileage);
+            updateRecords(killCount, scriptMileage);
           };
           renderData.enemy.push(new createEnemy(enemyObj));
         }
@@ -187,7 +189,7 @@ function updateSimulation() {
         // console.log(enemyObj.position);
         enemyObj.deadCb = function () {
           killCount++;
-          records.update(killCount, scriptMileage);
+          updateRecords(killCount, scriptMileage);
           scriptMileage++;
         };
         renderData.enemy.push(new createEnemy(enemyObj));
@@ -209,7 +211,7 @@ function updateSimulation() {
     renCount++;
     !stopCount && scriptMileage++;
 
-    records.update(killCount, scriptMileage); records.tick();
+    updateRecords(killCount, scriptMileage); records.tick();
   }
 
   if (phase === 'playing') {
@@ -239,7 +241,7 @@ function renderScene(alpha = 1) {
     drawProjectile(viewDom, old.x + (bullet.data.x - old.x) * alpha, old.y + (bullet.data.y - old.y) * alpha, bullet.data.look);
   }
   for (const enemy of renderData.enemy) enemy.draw(viewDom, alpha);
-  for (const skill of renderData.skills) skill.draw(viewDom);
+  for (const skill of renderData.skills) skill.draw(viewDom, alpha);
   for (const skill of renderData.shipSkills) skill.draw(viewDom);
   if (ship.airShield) ship.airShield.draw(viewDom);
   for (const item of renderData.item) item.draw(viewDom);
@@ -282,9 +284,9 @@ function showOverlay(screen) {
   overlay.dataset.screen = screen;
   element("startButton").focus({ preventScroll: true });
   element("resultSummary").hidden = screen !== "over";
-  setText("overlayEyebrow", screen === "paused" ? "FLIGHT ON HOLD" : screen === "over" ? "SIGNAL LOST" : "ARCADE / SURVIVAL");
+  setText("overlayEyebrow", screen === "paused" ? "FLIGHT ON HOLD" : screen === "over" ? "SIGNAL LOST" : kaijuEncounter ? "BOSS ENCOUNTER / G-01" : "ARCADE / SURVIVAL");
   setText("overlayTitle", screen === "paused" ? "任務暫停" : screen === "over" ? "本次航行結束" : "SPACEWAR");
-  setText("overlayDescription", screen === "paused" ? "深呼吸。準備好，再回到星海。" : screen === "over" ? "整理裝備，下一次飛得更遠。" : "在無盡星海中，留下一道航跡。");
+  setText("overlayDescription", screen === "paused" ? "深呼吸。準備好，再回到星海。" : screen === "over" ? "整理裝備，下一次飛得更遠。" : kaijuEncounter ? "哥吉拉遭遇戰：留意蓄能，避開熱射線掃射。" : "在無盡星海中，留下一道航跡。");
   setText("startButton", screen === "paused" ? "繼續任務" : screen === "over" ? "再次出擊" : "開始出擊");
   if (screen === "over") {
     setText("resultScore", finalResult.score);
@@ -300,7 +302,7 @@ function startRun() {
   ship = makeShip();
   movement.sync(ship.position);
   renCount = 0;
-  scriptMileage = 0;
+  scriptMileage = kaijuEncounter ? 2200 : 0;
   killCount = 0;
   bgCount = 0;
   nextPolling = 20;

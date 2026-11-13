@@ -53,6 +53,11 @@ function createMapfn(pathArr) {
 }
 
 export default {
+  'kaiju': createMapfn([
+    [0,-7],[0,-6],[0,-5],[0,-4],[-1,-3],[0,-3],[1,-3],
+    ...Array.from({length:5},(_,i)=>i-2).flatMap(y=>[-2,-1,0,1,2].map(x=>[x,y])),
+    [-2,3],[-1,3],[1,3],[2,3],[-2,4],[-1,4],[1,4],[2,4],
+  ]),
   // Keep the central fuselage hurtbox stable while the weapon outriggers deploy.
   'modular': createMapfn([[0,-1],[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1]]),
   'modular-plus': createMapfn([[0,-1],[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1]]),

@@ -22,6 +22,10 @@ const feedback = {
   novaImpact(x, y) {
     trauma = Math.max(trauma, 3);
   },
+  stomp(x,y) {
+    this.burst(x,y,'#798397',5,1);
+    trauma=Math.max(trauma,.8);
+  },
   destroy(x, y, boss = false) {
     this.burst(x, y, '#ffbc76', boss ? 40 : 20, boss ? 5 : 3);
     this.burst(x, y, '#fff5db', 8, 1.8);

@@ -9,6 +9,10 @@ import bricks from './bricks';
 import { explosionSound } from './sound';
 import feedback from './feedback.mjs';
 import drawEnemy from './enemyRenderer.mjs';
+import {createKaijuController} from './kaijuSequence.mjs';
+import {updateKaijuVisual} from './kaijuRenderer.mjs';
+import {createKaijuAttack} from './kaijuAttack.mjs';
+import {heavyWaveSound} from './sound';
 import {
   w,
   h,
@@ -16,6 +20,7 @@ import {
   renderData,
   killCount,
   vheight,
+  vwidth,
 } from './config';
 
 function enemyMove() {
@@ -75,6 +80,17 @@ export default function (obj) {
   var _look = this.look;
   var lookTicks = 0;
   this.removed = false;
+  if (this.name === 'GOZILLA') {
+    this.look = 'kaiju'; _look = this.look;
+    this.kaiju = createKaijuController(this, {width:w,height:h,onStep:(enemy,foot)=>{
+      const at=positionToXY(enemy.position);
+      feedback.stomp(at.x+(foot?1:-1)*pixelWeigth,at.y+pixelWeigth*4);
+    }});
+    this.lifeBarPosition = ps => ps+w*5;
+    renderData.skills.push(createKaijuAttack(this,{pixel:pixelWeigth,width:vwidth,height:vheight,toXY:positionToXY,
+      onStage:stage=>{if(stage==='flame'||stage==='beam')heavyWaveSound();},
+      onShieldBreak:p=>feedback.burst(p.x,p.y,'#dca4ff',8,2)}));
+  }
 
   this.getST = function () {
     return survivalTime;
@@ -122,6 +138,13 @@ export default function (obj) {
     var isLaunchSkill = false;
     var lookType = _look;
     if (!this.removed && this.life > 0) {
+      if (this.kaiju) {
+        this.previousPosition = this.position;
+        this.kaiju.update(ship);
+        updateKaijuVisual(this,pixelWeigth,positionToXY);
+        survivalTime++; if(hitFrames>0)hitFrames--;
+        return;
+      }
       if (lookTicks > 0 && --lookTicks === 0) this.look = _look;
       this.previousPosition = this.position;
       enemyMove.call(this);

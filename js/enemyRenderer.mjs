@@ -1,3 +1,4 @@
+import drawKaiju from './kaijuRenderer.mjs';
 const urls = {
   zero: new URL('../img/enemies/a22-zark-zero.png', import.meta.url),
   plus: new URL('../img/enemies/a22-zark-plus.png', import.meta.url),
@@ -35,6 +36,7 @@ function sprite(context, key, x, y, width, height, hit) {
 
 export default function drawEnemy(context, enemy, points, pixel, toXY, hit, rowHeight = pixel) {
   if (!points.length) return;
+  if (enemy.kaiju && drawKaiju(context,enemy,pixel,toXY)) return;
   context.save();
   context.imageSmoothingEnabled = false;
   if (enemy.look === 'CIRCLE') {
@@ -50,7 +52,7 @@ export default function drawEnemy(context, enemy, points, pixel, toXY, hit, rowH
     nodes.slice(0, 8).forEach((point) => sprite(context, 'node', point.x, point.y, pixel * 1.6, pixel * 1.7, hit));
   } else {
     // Stable design bounds prevent a sprite shrinking when its grid is clipped.
-    const bounds = enemy.look.startsWith('MONSTER1') ? [-7, -8, 7, 6]
+    const bounds = enemy.kaiju ? [-3,-7,3,5] : enemy.look.startsWith('MONSTER1') ? [-7, -8, 7, 6]
       : enemy.look === 'MONSTER0' ? [-2, -4, 3, 3]
       : enemy.look === 'fort' ? [-1, -2, 1, 0]
       : enemy.look === 'SPIDER' ? [-1, -2, 1, 2]
@@ -60,7 +62,7 @@ export default function drawEnemy(context, enemy, points, pixel, toXY, hit, rowH
     const minY = center.y + bounds[1] * rowHeight, maxY = center.y + bounds[3] * rowHeight;
     const width = maxX - minX + pixel;
     const height = maxY - minY + pixel;
-    const key = enemy.look.startsWith('MONSTER') ? 'gozilla'
+    const key = enemy.kaiju || enemy.look.startsWith('MONSTER') ? 'gozilla'
       : enemy.look === 'fort' || enemy.look === 'SPIDER' ? 'fort'
       : enemy.look === 'turret' ? 'turret'
       : enemy.name === 'ZARK-PLUS' ? 'plus' : 'zero';

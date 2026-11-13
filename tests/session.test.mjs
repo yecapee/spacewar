@@ -9,7 +9,7 @@ import { createProjectileSystem } from '../js/projectileSystem.mjs';
 import { createTouchGestures } from '../js/touchGestures.mjs';
 
 // Run the actual session controller with lightweight DOM/render/audio substitutes.
-function session() {
+function session({search=''}={}) {
   const elements = new Map();
   const handlers = {};
   const context2d = new Proxy({}, { get: () => () => {} });
@@ -33,7 +33,7 @@ function session() {
       getElementById: element, documentElement: element('html'),
       addEventListener: (type, handler) => { handlers[type] = handler; },
     },
-    window: { matchMedia: () => ({ matches: false }), addEventListener() {} },
+    window: { location:{search}, matchMedia: () => ({ matches: false }), addEventListener() {} },
     localStorage: { getItem: () => null, setItem() {} },
     requestAnimationFrame: (callback) => { frame = callback; },
     feedback: { reset() {}, update() {}, render: () => ({ x: 0, y: 0, flash: 0 }) },
@@ -135,3 +135,11 @@ test('touch gestures invoke actual player skills and cancelled or paused input d
   assert.equal(run.updates(), 5); assert.equal(run.draws() - rendered, 1);
   run.tick(126); assert.equal(run.updates(), 5); assert.equal(run.draws() - rendered, 2);
  });
+
+test('direct kaiju encounter starts at the boss without overwriting survival records',()=>{
+  const run=session({search:'?encounter=kaiju'});run.context.startRun();
+  assert.equal(run.context.scriptMileage,2200);
+  run.tick(0);run.tick(125);
+  assert.equal(vm.runInContext('records.bestMileage',run.context),0);
+  assert.equal(run.elements.get('overlayEyebrow').textContent,'BOSS ENCOUNTER / G-01');
+});
