@@ -62,3 +62,9 @@ typings/
 # Local Parcel development output and cache
 .parcel-dev/
 .parcel-cache/
+
+# Personal attachments, private Site checkout, and reproducible preview output
+.codex-attachments/
+sites/
+.parcel-release/
+art-prototypes/*/assets/

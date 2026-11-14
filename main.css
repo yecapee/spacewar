@@ -164,3 +164,7 @@ h1 { font: 30px/1.6 'Press Start 2P', monospace; letter-spacing: -2px; margin: 0
   .health-heading, .health-heading b { font-size: 9px; }
   .health-track { margin-top: 6px; }
 }
+
+.chapter-label{grid-column:1/-1;font:11px/1.5 system-ui,sans-serif;color:#a8d9e6;margin:8px 0 0;letter-spacing:.06em}@media(max-width:600px){.chapter-label{font-size:10px;margin-top:5px}}
+
+.model-credit{font:10px/1.6 system-ui,sans-serif;color:#8ea7ba;margin:12px 0 0}.model-credit a{color:#addae3}

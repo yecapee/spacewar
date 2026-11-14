@@ -1,0 +1,25 @@
+{
+  "model": "Godzilla 1998",
+  "model_creator": "JJJ",
+  "rigging_and_fixes": "MMDCharizard",
+  "selected_by_user": true,
+  "source": "https://www.deviantart.com/mmdcharizard/art/MMD-Godzilla-Godzilla-1998-DL-839474655",
+  "rules": "https://www.deviantart.com/mmdcharizard/journal/MMDCharizard-s-model-rules-409867850",
+  "usage": {
+    "credit_required": [
+      "JJJ",
+      "MMDCharizard"
+    ],
+    "noncommercial_only": true,
+    "local_editing_allowed": true,
+    "public_model_download_requires_author_permission": true,
+    "redistribute_original_download": false,
+    "public_demo_permission_confirmed_by_owner": "2026-11-14",
+    "approved_public_demo": "https://yecapee.github.io/spacewar/dist/"
+  },
+  "source_notes": [
+    "Author identifies leg IK as finicky; validate contact and forward direction before accepting movement.",
+    "Porting may lose facial controls; inspect jaw deformation after conversion.",
+    "Preserve source proportions for the first preview; compare before polygon reduction."
+  ]
+}

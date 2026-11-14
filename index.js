@@ -12,6 +12,8 @@ import { createRecords } from './js/records.mjs';
 import { drawProjectile } from './js/glowSprites.mjs';
 import { createTouchGestures } from "./js/touchGestures.mjs";
 import { ezPositionWithCheckScope } from "./js/positionMethod";
+import {getEncounter} from './js/encounter.mjs';
+import {prepareCreature} from './art-prototypes/zilla-combat/creature-enemy.mjs';
 import {
   w,
   h,
@@ -23,6 +25,7 @@ import {
 } from "./js/config";
 
 const records = createRecords(localStorage);
+const encounter=getEncounter();
 const elements = new Map();
 function element(id) { if (!elements.has(id)) elements.set(id, document.getElementById(id)); return elements.get(id); }
 function property(id, key, value) { const node = element(id); if (node[key] !== value) node[key] = value; }
@@ -42,10 +45,11 @@ let pendingTouchPosition = null;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const kaijuEncounter = /(?:^|[?&])encounter=kaiju(?:&|$)/.test(window.location?.search || '');
 const multiKaijuEncounter = kaijuEncounter && /(?:^|[?&])wave=multi(?:&|$)/.test(window.location?.search || '');
-function updateRecords(score,mileage) { if(!kaijuEncounter)records.update(score,mileage); }
+function updateRecords(score,mileage) { if(!kaijuEncounter&&!encounter)records.update(score,mileage); }
 const clock = createFixedClock(renderTime);
 var ruleObj = {};
 var scriptMileage = renCount;
+let appliedMileage=-1,bossWave=[],storyReady=Boolean(encounter);
 
 var keyType = {
   UP: false,
@@ -84,6 +88,7 @@ function actionMove() {
 }
 
 function clearRenderData() {
+  bossWave=[];appliedMileage=-1;
   renderData.enemy.length = 0;
   projectiles.clear(renderData.enemyBullet);
   if (ship) projectiles.clear(ship.bullet);
@@ -146,10 +151,16 @@ const movement = createMovement(w, h, ship.position);
 
 
 function updateSimulation() {
-  if (phase === "playing") script(scriptMileage, ruleObj, nextPolling);
+  if (phase === "playing" && appliedMileage!==scriptMileage){
+    appliedMileage=scriptMileage;(encounter?.script||script)(scriptMileage, ruleObj, nextPolling);
+  }
   var { stopCount, stopEnemyPush } = ruleObj;
   var boss = ruleObj.boss || [];
   if (phase === "playing") {
+    if(ruleObj.clearField){
+      for(const enemy of renderData.enemy)enemy.removed=true;
+      projectiles.clear(renderData.enemyBullet);ruleObj.clearField=false;
+    }
     var createObj = false;
     var item = ruleObj.item;
 
@@ -191,9 +202,8 @@ function updateSimulation() {
         enemyObj.deadCb = function () {
           killCount++;
           updateRecords(killCount, scriptMileage);
-          scriptMileage++;
         };
-        renderData.enemy.push(new createEnemy(enemyObj));
+        const actor=new createEnemy(enemyObj);renderData.enemy.push(actor);bossWave.push(actor);
       });
       ruleObj.boss = [];
     }
@@ -227,6 +237,14 @@ function updateSimulation() {
     compact(renderData.enemy, enemy => enemy.life > 0 && !enemy.removed);
     compact(renderData.item, item => !item.removed);
     projectiles.cleanup(renderData.enemyBullet);
+    if(ruleObj.waitForBosses&&bossWave.length&&bossWave.every(enemy=>enemy.removed||enemy.life<1)&&!ship.isDead){
+      bossWave=[];ruleObj.waitForBosses=false;ruleObj.stopCount=false;scriptMileage++;
+    }
+    encounter?.onTick?.(renderData,ship);
+    if(encounter?.complete?.(renderData)&&!ship.isDead){
+      finalResult={score:killCount,mileage:scriptMileage};phase='won';resetInputs();
+      element('pauseButton').disabled=true;showOverlay('won');
+    }
   }
   compact(renderData.aniEffect, effect => effect.update());
   feedback.update();
@@ -263,6 +281,7 @@ function updateHud() {
   setText("score", String(killCount).padStart(4, "0"));
   setText("bestScore", String(records.bestScore).padStart(4, "0"));
   setText("mileage", String(scriptMileage).padStart(4, "0"));
+  setText('chapterLabel',encounter?'獨立遭遇戰':ruleObj.chapter||'01 初航巡邏');
   setText("lifeText", `${ship.life} / ${ship.maxLife}`);
   var health = ship.life / ship.maxLife;
   style('life', 'width', `${health * 100}%`);
@@ -276,7 +295,7 @@ function updateHud() {
     : "可施放 · S");
   property("shieldButton", "disabled", Boolean(shield) || phase !== "playing");
   property("attackButton", "disabled", phase !== "playing");
-  setText("runStatus", phase === "paused" ? "暫停中" : phase === "over" || phase === "dying" ? "訊號中斷" : phase === "ready" ? "等待出擊" : "任務進行中");
+  setText("runStatus", phase === "won" ? "遭遇戰完成" : phase === "paused" ? "暫停中" : phase === "over" || phase === "dying" ? "訊號中斷" : phase === "ready" ? "等待出擊" : "任務進行中");
 }
 
 const overlay = element("ready");
@@ -284,18 +303,28 @@ function showOverlay(screen) {
   overlay.hidden = false;
   overlay.dataset.screen = screen;
   element("startButton").focus({ preventScroll: true });
-  element("resultSummary").hidden = screen !== "over";
+  element("resultSummary").hidden = screen !== "over" && screen !== 'won';
   setText("overlayEyebrow", screen === "paused" ? "FLIGHT ON HOLD" : screen === "over" ? "SIGNAL LOST" : kaijuEncounter ? "BOSS ENCOUNTER / G-01" : "ARCADE / SURVIVAL");
   setText("overlayTitle", screen === "paused" ? "任務暫停" : screen === "over" ? "本次航行結束" : "SPACEWAR");
-  setText("overlayDescription", screen === "paused" ? "深呼吸。準備好，再回到星海。" : screen === "over" ? "整理裝備，下一次飛得更遠。" : multiKaijuEncounter ? "多 Boss 遭遇戰：哥吉拉會分頭包抄，留意爆衝與掃射。" : kaijuEncounter ? "哥吉拉遭遇戰：留意蓄能，避開熱射線掃射。" : "在無盡星海中，留下一道航跡。");
+  setText("overlayDescription", screen === "paused" ? "深呼吸。準備好，再回到星海。" : screen === "over" ? "整理裝備，下一次飛得更遠。" : multiKaijuEncounter ? "雙哥吉拉協同遭遇戰：留意分路包抄、爆衝與交錯熱射線。" : kaijuEncounter ? "求生怪獸遭遇戰：留意假動作、近身追擊與承傷後的熱射線。" : "突破雙環封鎖、升級火力，迎戰求生獵手與雙哥吉拉。" );
   setText("startButton", screen === "paused" ? "繼續任務" : screen === "over" ? "再次出擊" : "開始出擊");
-  if (screen === "over") {
+  if(encounter&&screen==='ready'){
+    setText('overlayEyebrow','SPACEWAR / ISOLATED ENCOUNTER');
+    setText('overlayDescription',encounter.description);
+  }
+  if(screen==='won'){
+    setText('overlayTitle','遭遇戰完成');setText('overlayEyebrow','TARGET NEUTRALIZED');
+    setText('overlayDescription','怪獸已擊敗。可重新出擊，繼續測試招式與應對。');setText('startButton','再次測試');
+  }
+  if (screen === "over" || screen === 'won') {
     setText("resultScore", finalResult.score);
     setText("resultMileage", finalResult.mileage);
   }
 }
 
 function startRun() {
+  if(encounter?.ready===false)return;
+  if(!encounter&&!storyReady)return;
   records.flush();
   clearRenderData();
   renderData.aniEffect.length = 0;
@@ -303,7 +332,8 @@ function startRun() {
   ship = makeShip();
   movement.sync(ship.position);
   renCount = 0;
-  scriptMileage = kaijuEncounter ? (multiKaijuEncounter ? 2401 : 2200) : 0;
+  scriptMileage = encounter ? 0 : kaijuEncounter ? (multiKaijuEncounter ? 5280 : 2200) : 0;
+  encounter?.reset?.();
   killCount = 0;
   bgCount = 0;
   nextPolling = 20;
@@ -425,6 +455,16 @@ function step(timestamp) {
 showOverlay("ready");
 updateHud();
 requestAnimationFrame(step);
+
+if(!encounter){
+  element('startButton').disabled=true;element('restartButton').disabled=true;
+  setText('runStatus','載入怪獸模型…');
+  prepareCreature().then(()=>{
+    storyReady=true;element('startButton').disabled=false;element('restartButton').disabled=false;updateHud();
+  }).catch(error=>{
+    element('graphicsStatus').hidden=false;setText('graphicsStatus','怪獸模型載入失敗，請重新整理：'+error.message);
+  });
+}
 
 window.r = renderData;
 

@@ -49,7 +49,7 @@ test('large enemies can be hit through their visible edge even if their center i
 
 test('sonic precursor has no damage; impact begins later, with exactly one cue per stage', () => {
   const stages = [];
-  const wave = createNovaBurst({ x: 0, y: 0 }, { onStage: (stage) => stages.push(stage) });
+  const wave = createNovaBurst({ x: 0, y: 0 }, { random:()=>.5, onStage: (stage) => stages.push(stage) });
   const closeTarget = target(8, 0);
   for (let frame = 0; frame < 10; frame++) {
     wave.update([closeTarget], {});

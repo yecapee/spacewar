@@ -1,5 +1,6 @@
 import { w, h, pixelWeigth, renderData } from "./config";
 import createEnemy from "./createEnemy";
+import {createCreatureEnemy,createSurvivalAttack} from '../art-prototypes/zilla-combat/creature-enemy.mjs';
 import { animation } from "./aniEffectMethod";
 import {
   positionToXY,
@@ -52,8 +53,13 @@ var GOZILLA = {
   name: "GOZILLA", showLife: true, life: 800,
   shot: false, shotTime: [1, 0, 1], look: "kaiju", skills: [],
   position: Math.round(w / 3),
+  createKaiju:createCreatureEnemy,createAttack:createSurvivalAttack,
 };
-var GOZILLA2 = { ...GOZILLA, position: Math.round(w * 2 / 3) };
+// The original procedural pair keeps its own navigation and swept beam attacks.
+var OLD_GOZILLA = {
+  name:'GOZILLA',showLife:true,life:400,shot:false,shotTime:[1,0,1],look:'kaiju',skills:[],position:Math.round(w/3),
+};
+var OLD_GOZILLA2 = {...OLD_GOZILLA,position:Math.round(w*2/3)};
 
 var Zark1 = {
   name: "ZARK-PLUS",
@@ -172,122 +178,38 @@ var TrebleBullet = {
   },
 };
 
-//script
+// Chapter timings count active flight only. Boss encounters hold this clock.
 var script = {
-  0: {
-    enemy: [Zark0],
-    //enemy: [turret],
-    enemyPolling: [20, 100],
-    enemyQuantity: 1,
-    stopCount: false,
-    stopEnemyPush: false,
-  },
-  // 1: {
-  //   // enemy: [Zark1, Fort0],
-  //   // enemyPolling: [15, 55],
-  //   item: [GreenPoint, GreenPoint, GreenPoint, TrebleBullet],
-  // },
-  // 100: {
-  //   boss: [GOZILLA],
-  // },
-  // 103: {
-  //   stopCount: stop,
-  // },
-  // 104: {
-  //   stopCount: true,
-  // },
-  // 1:{
-  //   //item: [GreenPoint],
-  //   //stopCount: false,
-  // },
-  800: {
-    enemy: [Zark0, Fort0],
-    enemyPolling: [15, 80],
-    enemyQuantity: 1,
-  },
-  1600: {
-    enemy: [Zark1, Fort0],
-    enemyPolling: [15, 75],
-    enemyQuantity: 1,
-  },
-  1601: {
-    item: [GreenPoint],
-  },
-  1700: {
-    enemy: [],
-  },
-  1800: {
-    item: [hp_1],
-  },
-  1805: {
-    boss: [circleKiller],
-  },
-  1806: {
-    boss: [circleKiller2],
-  },
-  1807: {
-    stopCount: true,
-    stopEnemyPush: true,
-  },
-  1809: {
-    stopCount: false,
-    stopEnemyPush: false,
-  },
-  1820: {
-    enemy: [Zark1, Fort0],
-    enemyPolling: [15, 75],
-    item: [TrebleBullet],
-  },
-  2100: {
-    enemy: [Zark1, Fort0],
-    enemyPolling: [15, 55],
-    item: [GreenPoint],
-  },
-  2120: {
-    item: [GreenPoint],
-  },
-  2200: {
-    boss: [GOZILLA],
-  },
-  2201: {
-    stopEnemyPush: true,
-    stopCount: true,
-  },
-  2202: {
-    item: [GreenPoint],
-    stopCount: false,
-    stopEnemyPush: true,
-  },
-  2400: {
-    item: [
-      hp_1,
-      GreenPoint,
-      GreenPoint,
-      GreenPoint,
-      GreenPoint,
-      GreenPoint,
-      GreenPoint,
-      GreenPoint,
-    ],
-  },
-  2401: {
-    boss: [GOZILLA, GOZILLA2, circleKiller, circleKiller2],
-  },
-  2402: {
-    stopCount: true,
-  },
-  2403: {
-    stopCount: false,
-  },
-  4500: {
-    enemyPolling: [15, 45],
-  },
-  5600: {
-    item: [hp_1],
-  },
-  5700: {
-    enemyPolling: [10, 35],
-  },
+  0: {chapter:'01 初航巡邏',enemy:[Zark0],enemyPolling:[30,100],enemyQuantity:1,stopCount:false,stopEnemyPush:false,waitForBosses:false},
+  640: {chapter:'02 交叉火網',enemy:[Zark0,Fort0],enemyPolling:[22,80],enemyQuantity:1},
+  1040: {enemy:[Zark0,Zark1,Fort0],enemyPolling:[20,75]},
+  1200: {chapter:'03 雙環封鎖',enemy:[],stopEnemyPush:true,item:[hp_1]},
+  1500: {clearField:true,boss:[circleKiller,circleKiller2],stopCount:true,stopEnemyPush:true,waitForBosses:true},
+  1501: {chapter:'04 火力突破',stopCount:false,stopEnemyPush:true,item:[hp_1]},
+  1520: {item:[TrebleBullet,GreenPoint]},
+  1640: {enemy:[Zark0,Zark1,Fort0],enemyPolling:[28,75],enemyQuantity:1,stopEnemyPush:false},
+  1920: {enemy:[Zark1,Fort0],enemyPolling:[20,65]},
+  2040: {chapter:'05 求生獵手',enemy:[],stopEnemyPush:true,item:[hp_1]},
+  2200: {chapter:'05 求生獵手 · 單體決戰',clearField:true,boss:[GOZILLA],enemy:[],stopCount:true,stopEnemyPush:true,waitForBosses:true},
+  2201: {chapter:'06 回收與喘息',stopCount:false,stopEnemyPush:true,enemy:[],item:[hp_1]},
+  2360: {item:[hp_1]},
+  2680: {chapter:'07 重返航線',enemy:[Zark0],enemyPolling:[45,100],enemyQuantity:1,stopEnemyPush:false},
+  3000: {enemy:[Zark0,Fort0],enemyPolling:[30,85]},
+  3280: {chapter:'08 突破封鎖',enemy:[Zark1,Fort0,turret],enemyPolling:[25,70],enemyQuantity:1},
+  3760: {enemy:[Zark1,Fort0,turret],enemyPolling:[20,60],item:[hp_1]},
+  4080: {chapter:'09 雙環反擊',enemy:[],stopEnemyPush:true,item:[hp_1]},
+  4240: {chapter:'09 雙環反擊',clearField:true,boss:[{...circleKiller,life:40},{...circleKiller2,life:40}],enemy:[Zark0,Fort0],enemyQuantity:1,enemyPolling:[65,100],stopCount:true,stopEnemyPush:false,waitForBosses:true},
+  4241: {chapter:'10 戰後整備',enemy:[],stopCount:false,stopEnemyPush:true,item:[hp_1]},
+  4400: {item:[hp_1]},
+  4560: {chapter:'11 巨獸前線',enemy:[Zark1,Fort0],enemyPolling:[25,70],enemyQuantity:1,stopEnemyPush:false},
+  5040: {chapter:'12 雙獸壓境',enemy:[],stopEnemyPush:true,item:[hp_1]},
+  5280: {chapter:'12 雙獸壓境 · 舊哥吉拉聯手',clearField:true,boss:[OLD_GOZILLA,OLD_GOZILLA2],stopCount:true,stopEnemyPush:true,waitForBosses:true},
+  5281: {chapter:'13 返航整備',enemy:[],stopCount:false,stopEnemyPush:true,item:[hp_1]},
+  5440: {item:[hp_1]},
+  5600: {chapter:'14 無盡航行',enemy:[Zark1,Fort0,turret],enemyPolling:[18,60],enemyQuantity:1,stopEnemyPush:false},
+  6240: {enemyPolling:[15,50]},
+  6600: {item:[hp_1]},
+  7040: {enemyPolling:[10,40]},
 };
 
 //export

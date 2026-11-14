@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-Hant" data-model-base="../zilla-jjj/">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080d17">
+  <meta name="description" content="Spacewar — 在無盡星海中生存，以粒子空氣盾抵擋敵彈的像素射擊遊戲。">
+  <meta property="og:title" content="Spacewar">
+  <meta property="og:image" content="https://yecapee.github.io/spacewar/game.png">
+  <title>SPACEWAR — 怪獸獨立遭遇戰</title>
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css"><!-- bundled-styles --><link rel="stylesheet" href="./assets/viewer.css?v=dc3b01817bf2"><!-- /bundled-styles --></head>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+  <canvas id="view" aria-label="Spacewar 遊戲區"></canvas>
+  <p id="graphicsStatus" class="graphics-status" role="alert" hidden></p>
+  <div id="damageFlash" aria-hidden="true"></div>
+
+  <header class="hud">
+    <section class="telemetry" aria-label="戰況資訊">
+      <div class="brand">SPACE<span>WAR</span><i class="signal-dot"></i></div>
+      <div class="score-heading">本次擊破 <span>HI <b id="bestScore">0000</b></span></div>
+      <div id="score">0000</div>
+      <div class="flight-line"><span>航行距離</span><b id="mileage">0000</b></div>
+      <p id="chapterLabel" class="chapter-label">01 初航巡邏</p>
+      <div id="healthPanel" class="health-panel">
+        <div class="health-heading"><span>機體完整度</span><b id="lifeText">5 / 5</b></div>
+        <div class="health-track"><div id="life"></div></div>
+      </div>
+    </section>
+    <nav class="run-actions" aria-label="遊戲控制">
+      <button id="pauseButton" disabled>Ⅱ 暫停</button>
+      <button id="restartButton" class="quiet-button">↻ 重來</button>
+    </nav>
+  </header>
+
+  <div class="mission-note" aria-hidden="true"><span class="small-label">DEEP SPACE / ENDLESS FLIGHT</span><p id="runStatus">等待出擊</p><span class="coordinate">保持航向。突破極限。</span></div>
+
+  <aside class="controls-help" aria-label="操作與技能說明">
+    <h2><span>機載系統</span><span class="small-label">SYSTEMS / 02</span></h2>
+    <button id="attackButton" class="skill-button attack-skill" disabled>
+      <kbd>A</kbd><span class="skill-copy"><strong>攻擊波</strong><small>音爆 → 隨機短雷射連發</small></span><span class="skill-symbol" aria-hidden="true">✳</span>
+    </button>
+    <button id="shieldButton" class="skill-button shield-skill" disabled>
+      <kbd>S</kbd><span class="skill-copy"><strong>空氣盾</strong><small>近距離迎擊 · 撞擊敵機扣血</small></span><span class="skill-symbol" aria-hidden="true">◠</span>
+    </button>
+    <div class="shield-track"><div id="shieldMeter"></div></div>
+    <p class="shield-status" id="shieldStatus" role="status">可施放 · S</p>
+    <div class="keyboard-tip"><span>↑ ↓ ← → 移動</span><span>Space 連射</span></div>
+    <div class="keyboard-tip secondary-tip"><span>P / Esc 暫停</span><span>R 重新出擊</span></div>
+    <p class="touch-tip">拖曳移動並射擊 · 畫圈後放開施盾<br>雙擊施放攻擊波，也可點擊技能卡</p>
+  </aside>
+
+  <section class="ready" id="ready" data-screen="ready" role="dialog" aria-modal="true" aria-labelledby="overlayTitle">
+    <div class="title">
+      <div class="small-label overlay-eyebrow" id="overlayEyebrow">ARCADE / SURVIVAL</div>
+      <div class="orbital-mark" aria-hidden="true"><span>✦</span></div>
+      <h1 id="overlayTitle">SPACEWAR</h1>
+      <p class="overlay-description" id="overlayDescription">在無盡星海中，留下一道航跡。</p>
+      <div class="result-summary" id="resultSummary" hidden>
+        <div><span>本次擊破</span><strong id="resultScore">0</strong></div>
+        <div><span>航行距離</span><strong id="resultMileage">0</strong></div>
+      </div>
+      <div class="start-controls">
+        <div><kbd>↑ ↓ ← →</kbd><span>移動戰機</span></div>
+        <div><kbd>Space</kbd><span>按住連續射擊</span></div>
+        <div><kbd>A</kbd><span>攻擊波 · 多波短雷射</span></div>
+        <div><kbd>S</kbd><span>空氣盾 · 自動迎擊，耗盡重放</span></div>
+      </div>
+      <p class="touch-tip">拖曳移動並射擊<br>畫圈後放開施盾 · 雙擊施放攻擊波</p>
+      <button id="startButton" class="primary-button">開始出擊</button>
+      <p class="start-prompt">SPACE 確認 <span>·</span> P / ESC 暫停</p>
+      <div class="credit">DEVELOPED BY YECAPEE</div>
+    </div>
+  </section>
+  <aside id="creaturePanel"><p id="creatureState" role="status">載入怪獸中…</p><details><summary>怪獸 AI 獨立調校</summary><select id="nextAction"></select><button id="queueAction">安排下一招</button><p>熱射線只由近期承傷觸發。戰機、子彈、攻擊波、粒子空氣盾、傷害與觸控操作均共用 Spacewar。</p><a href="./survival-controller.mjs" download>下載怪獸 AI 腳本</a> · <a href="./creature-actions.mjs" download>動作參數</a> · <a href="./body-motion.mjs" download>關節擺動參數</a> · <a href="./README.txt">說明</a></details></aside><div id="debug"></div>
+  <img id="shipImg" src="../../img/ship.png" hidden alt="">
+  <img id="shipBulletNormal" src="../../img/bullet_normal.png" hidden alt="">
+  <img id="bulletBall" src="../../img/bulletBall.png" hidden alt="">
+  <img id="laser" src="../../img/laser.png" hidden alt="">
+  <img id="zarkImg" src="../../img/zark.png" hidden alt="">
+  <img id="explosion" src="../../img/explosion.png" hidden alt="">
+    <!-- preview-runtime -->
+  <script src="./boot.js?v=dc3b01817bf2"></script>
+  <script defer src="./assets/viewer.dc3b01817bf2.js"></script>
+  <!-- /preview-runtime -->
+</body>
+</html>

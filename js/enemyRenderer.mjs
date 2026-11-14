@@ -36,7 +36,7 @@ function sprite(context, key, x, y, width, height, hit) {
 
 export default function drawEnemy(context, enemy, points, pixel, toXY, hit, rowHeight = pixel) {
   if (!points.length) return;
-  if (enemy.kaiju && drawKaiju(context,enemy,pixel,toXY)) return;
+  if (enemy.kaiju && (enemy.kaiju.draw?enemy.kaiju.draw(context,enemy,pixel,toXY):drawKaiju(context,enemy,pixel,toXY))) return;
   context.save();
   context.imageSmoothingEnabled = false;
   if (enemy.look === 'CIRCLE') {

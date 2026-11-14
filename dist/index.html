@@ -1,70 +1,87 @@
-<!DOCTYPE html><html lang=zh-Hant><script type=importmap>{"imports":{"1yiF3":"./hull.d1c64277.png","4R1BC":"./a22-gozilla.c70dce14.png","6Em0p":"./a22-fort.17f2e97d.png","7oyqP":"./a22-zark-zero.cc44706d.png","9d3Z3":"./a22-turret.78505b36.png","dPiQg":"./a22-orbit-node.b3aa5738.png","emGdB":"./a22-zark-plus.1fbbb29e.png","idbEp":"./repair.285814a4.png","lUyuS":"./triple.f6512090.png"}}</script><link rel=stylesheet href=spacewar.31fdbbe1.css><meta charset=UTF-8><meta name=viewport content="width=device-width, initial-scale=1.0"><meta name=theme-color content=#080d17><meta name=description content="Spacewar — 在無盡星海中生存，以粒子空氣盾抵擋敵彈的像素射擊遊戲。"><meta property=og:title content=Spacewar><meta property=og:image content=https://yecapee.github.io/spacewar/game.png><title>SPACEWAR — 無盡航行</title><link href="https://fonts.googleapis.com/css?family=Press+Start+2P&amp;display=swap" rel=stylesheet><body>
-  <div class=ambient aria-hidden=true></div>
-  <canvas id=view aria-label="Spacewar 遊戲區"></canvas>
-  <p id=graphicsStatus class=graphics-status role=alert hidden></p>
-  <div id=damageFlash aria-hidden=true></div>
+<!doctype html>
+<html lang="zh-Hant" data-model-base="./assets/creature/">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080d17">
+  <meta name="description" content="Spacewar — 在無盡星海中生存，以粒子空氣盾抵擋敵彈的像素射擊遊戲。">
+  <meta property="og:title" content="Spacewar">
+  <meta property="og:image" content="https://yecapee.github.io/spacewar/game.png">
+  <title>SPACEWAR — 無盡航行</title>
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./spacewar.7f7cf6e5bb21.css">
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+  <canvas id="view" aria-label="Spacewar 遊戲區"></canvas>
+  <p id="graphicsStatus" class="graphics-status" role="alert" hidden></p>
+  <div id="damageFlash" aria-hidden="true"></div>
 
-  <header class=hud>
-    <section class=telemetry aria-label=戰況資訊>
-      <div class=brand>SPACE<span>WAR</span><i class=signal-dot></i></div>
-      <div class=score-heading>本次擊破 <span>HI <b id=bestScore>0000</b></span></div>
-      <div id=score>0000</div>
-      <div class=flight-line><span>航行距離</span><b id=mileage>0000</b></div>
-      <div id=healthPanel class=health-panel>
-        <div class=health-heading><span>機體完整度</span><b id=lifeText>5 / 5</b></div>
-        <div class=health-track><div id=life></div></div>
+  <header class="hud">
+    <section class="telemetry" aria-label="戰況資訊">
+      <div class="brand">SPACE<span>WAR</span><i class="signal-dot"></i></div>
+      <div class="score-heading">本次擊破 <span>HI <b id="bestScore">0000</b></span></div>
+      <div id="score">0000</div>
+      <div class="flight-line"><span>航行距離</span><b id="mileage">0000</b></div>
+      <p id="chapterLabel" class="chapter-label">01 初航巡邏</p>
+      <div id="healthPanel" class="health-panel">
+        <div class="health-heading"><span>機體完整度</span><b id="lifeText">5 / 5</b></div>
+        <div class="health-track"><div id="life"></div></div>
       </div>
     </section>
-    <nav class=run-actions aria-label=遊戲控制>
-      <button id=pauseButton disabled>Ⅱ 暫停</button>
-      <button id=restartButton class=quiet-button>↻ 重來</button>
+    <nav class="run-actions" aria-label="遊戲控制">
+      <button id="pauseButton" disabled>Ⅱ 暫停</button>
+      <button id="restartButton" class="quiet-button">↻ 重來</button>
     </nav>
   </header>
 
-  <div class=mission-note aria-hidden=true><span class=small-label>DEEP SPACE / ENDLESS FLIGHT</span><p id=runStatus>等待出擊</p><span class=coordinate>保持航向。突破極限。</span></div>
+  <div class="mission-note" aria-hidden="true"><span class="small-label">DEEP SPACE / ENDLESS FLIGHT</span><p id="runStatus">等待出擊</p><span class="coordinate">保持航向。突破極限。</span></div>
 
-  <aside class=controls-help aria-label=操作與技能說明>
-    <h2><span>機載系統</span><span class=small-label>SYSTEMS / 02</span></h2>
-    <button id=attackButton class="attack-skill skill-button" disabled>
-      <kbd>A</kbd><span class=skill-copy><strong>攻擊波</strong><small>音爆 → 隨機短雷射連發</small></span><span class=skill-symbol aria-hidden=true>✳</span>
+  <aside class="controls-help" aria-label="操作與技能說明">
+    <h2><span>機載系統</span><span class="small-label">SYSTEMS / 02</span></h2>
+    <button id="attackButton" class="skill-button attack-skill" disabled>
+      <kbd>A</kbd><span class="skill-copy"><strong>攻擊波</strong><small>音爆 → 隨機短雷射連發</small></span><span class="skill-symbol" aria-hidden="true">✳</span>
     </button>
-    <button id=shieldButton class="shield-skill skill-button" disabled>
-      <kbd>S</kbd><span class=skill-copy><strong>空氣盾</strong><small>近距離迎擊 · 撞擊敵機扣血</small></span><span class=skill-symbol aria-hidden=true>◠</span>
+    <button id="shieldButton" class="skill-button shield-skill" disabled>
+      <kbd>S</kbd><span class="skill-copy"><strong>空氣盾</strong><small>近距離迎擊 · 撞擊敵機扣血</small></span><span class="skill-symbol" aria-hidden="true">◠</span>
     </button>
-    <div class=shield-track><div id=shieldMeter></div></div>
-    <p class=shield-status id=shieldStatus role=status>可施放 · S</p>
-    <div class=keyboard-tip><span>↑ ↓ ← → 移動</span><span>Space 連射</span></div>
+    <div class="shield-track"><div id="shieldMeter"></div></div>
+    <p class="shield-status" id="shieldStatus" role="status">可施放 · S</p>
+    <div class="keyboard-tip"><span>↑ ↓ ← → 移動</span><span>Space 連射</span></div>
     <div class="keyboard-tip secondary-tip"><span>P / Esc 暫停</span><span>R 重新出擊</span></div>
-    <p class=touch-tip>拖曳移動並射擊 · 畫圈後放開施盾<br>雙擊施放攻擊波，也可點擊技能卡</p>
+    <p class="touch-tip">拖曳移動並射擊 · 畫圈後放開施盾<br>雙擊施放攻擊波，也可點擊技能卡</p>
   </aside>
 
-  <section class=ready id=ready data-screen=ready role=dialog aria-modal=true aria-labelledby=overlayTitle>
-    <div class=title>
-      <div class="overlay-eyebrow small-label" id=overlayEyebrow>ARCADE / SURVIVAL</div>
-      <div class=orbital-mark aria-hidden=true><span>✦</span></div>
-      <h1 id=overlayTitle>SPACEWAR</h1>
-      <p class=overlay-description id=overlayDescription>在無盡星海中，留下一道航跡。</p>
-      <div class=result-summary id=resultSummary hidden>
-        <div><span>本次擊破</span><strong id=resultScore>0</strong></div>
-        <div><span>航行距離</span><strong id=resultMileage>0</strong></div>
+  <section class="ready" id="ready" data-screen="ready" role="dialog" aria-modal="true" aria-labelledby="overlayTitle">
+    <div class="title">
+      <div class="small-label overlay-eyebrow" id="overlayEyebrow">ARCADE / SURVIVAL</div>
+      <div class="orbital-mark" aria-hidden="true"><span>✦</span></div>
+      <h1 id="overlayTitle">SPACEWAR</h1>
+      <p class="overlay-description" id="overlayDescription">在無盡星海中，留下一道航跡。</p>
+      <div class="result-summary" id="resultSummary" hidden>
+        <div><span>本次擊破</span><strong id="resultScore">0</strong></div>
+        <div><span>航行距離</span><strong id="resultMileage">0</strong></div>
       </div>
-      <div class=start-controls>
+      <div class="start-controls">
         <div><kbd>↑ ↓ ← →</kbd><span>移動戰機</span></div>
         <div><kbd>Space</kbd><span>按住連續射擊</span></div>
         <div><kbd>A</kbd><span>攻擊波 · 多波短雷射</span></div>
         <div><kbd>S</kbd><span>空氣盾 · 自動迎擊，耗盡重放</span></div>
       </div>
-      <p class=touch-tip>拖曳移動並射擊<br>畫圈後放開施盾 · 雙擊施放攻擊波</p>
-      <button id=startButton class=primary-button>開始出擊</button>
-      <p class=start-prompt>SPACE 確認 <span>·</span> P / ESC 暫停</p>
-      <div class=credit>DEVELOPED BY YECAPEE</div>
+      <p class="touch-tip">拖曳移動並射擊<br>畫圈後放開施盾 · 雙擊施放攻擊波</p>
+      <button id="startButton" class="primary-button">開始出擊</button>
+      <p class="start-prompt">SPACE 確認 <span>·</span> P / ESC 暫停</p>
+      <div class="credit">DEVELOPED BY YECAPEE</div>
+      <p class="model-credit">怪獸模型 JJJ（Caseys42） · 骨架 MMDCharizard<br>非商業展示 · <a href="https://www.deviantart.com/mmdcharizard/art/MMD-Godzilla-Godzilla-1998-DL-839474655" target="_blank" rel="noopener">模型來源</a></p>
     </div>
   </section>
-  <div id=debug></div>
-  <img id=shipImg src=ship.f16d05d4.png hidden alt>
-  <img id=shipBulletNormal src=bullet_normal.91c45c18.png hidden alt>
-  <img id=bulletBall src=bulletBall.4db890e9.png hidden alt>
-  <img id=laser src=laser.2474abb0.png hidden alt>
-  <img id=zarkImg src=zark.fa72e16e.png hidden alt>
-  <img id=explosion src=explosion.ef47ec84.png hidden alt>
-  <script type=module src=spacewar.efb52101.js></script>
+  <div id="debug"></div>
+  <img id="shipImg" src="./assets/legacy/ship.png" hidden alt="">
+  <img id="shipBulletNormal" src="./assets/legacy/bullet_normal.png" hidden alt="">
+  <img id="bulletBall" src="./assets/legacy/bulletBall.png" hidden alt="">
+  <img id="laser" src="./assets/legacy/laser.png" hidden alt="">
+  <img id="zarkImg" src="./assets/legacy/zark.png" hidden alt="">
+  <img id="explosion" src="./assets/legacy/explosion.png" hidden alt="">
+  <script defer src="./spacewar.aa341db8972e.js"></script>
+</body>
+</html>

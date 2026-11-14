@@ -82,12 +82,12 @@ export default function (obj) {
   this.removed = false;
   if (this.name === 'GOZILLA') {
     this.look = 'kaiju'; _look = this.look;
-    this.kaiju = createKaijuController(this, {width:w,height:h,getPeers:()=>renderData.enemy,onStep:(enemy,foot)=>{
+    this.kaiju = (obj.createKaiju||createKaijuController)(this, {width:w,height:h,getPeers:()=>renderData.enemy,onStep:(enemy,foot)=>{
       const at=positionToXY(enemy.position);
       feedback.stomp(at.x+(foot?1:-1)*pixelWeigth,at.y+pixelWeigth*4);
     }});
     this.lifeBarPosition = ps => ps+w*5;
-    renderData.skills.push(createKaijuAttack(this,{pixel:pixelWeigth,width:vwidth,height:vheight,toXY:positionToXY,
+    renderData.skills.push((obj.createAttack||createKaijuAttack)(this,{pixel:pixelWeigth,width:vwidth,height:vheight,toXY:positionToXY,
       onStage:stage=>{if(stage==='flame'||stage==='beam')heavyWaveSound();},
       onShieldBreak:p=>feedback.burst(p.x,p.y,'#dca4ff',8,2)}));
   }
@@ -141,7 +141,8 @@ export default function (obj) {
       if (this.kaiju) {
         this.previousPosition = this.position;
         this.kaiju.update(ship);
-        updateKaijuVisual(this,pixelWeigth,positionToXY,vheight/h);
+        if(this.kaiju.updateVisual)this.kaiju.updateVisual(this,pixelWeigth,positionToXY,vheight/h);
+        else updateKaijuVisual(this,pixelWeigth,positionToXY,vheight/h);
         survivalTime++; if(hitFrames>0)hitFrames--;
         return;
       }

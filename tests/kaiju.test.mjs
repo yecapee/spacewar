@@ -141,15 +141,19 @@ test('actual enemy installs only one owned breath skill and never emits the lega
   assert.equal(data.skills[1].update({isDead:true},{}),false);
 });
 
-test('the normal story schedules the new kaiju in both the single and multi-boss encounters',()=>{
-  const context=vm.createContext({w:26,h:56,pixelWeigth:15,renderData:{}});
+test('the campaign gives the survival kaiju a solo climax and separates the ring rematch',()=>{
+  const context=vm.createContext({w:26,h:56,pixelWeigth:15,renderData:{},createCreatureEnemy(){},createSurvivalAttack(){}});
   const source=readFileSync(new URL('../js/script.js',import.meta.url),'utf8')
     .replace(/import[\s\S]*?from\s+["'][^"']+["'];/g,'')
     .replace('export default function (renCount, ruleObj, nextPolling)','function story(renCount, ruleObj, nextPolling)');
   vm.runInContext(source+'\nthis.story=story;',context);
   const rule={};context.story(2200,rule);
   assert.equal(rule.boss.length,1);assert.equal(rule.boss[0].name,'GOZILLA');assert.equal(rule.boss[0].look,'kaiju');
-  context.story(2401,rule);
-  const kaiju=rule.boss.filter(enemy=>enemy.name==='GOZILLA');assert.equal(kaiju.length,2);
-  for(const enemy of kaiju){assert.equal(enemy.look,'kaiju');assert.equal(enemy.shot,false);assert.equal(enemy.skills.length,0);}
+  assert.equal(rule.boss[0].createKaiju,context.createCreatureEnemy);assert.equal(rule.waitForBosses,true);
+  context.story(4240,rule);assert.equal(rule.boss.length,2);
+  assert.ok(rule.boss.every(enemy=>enemy.look==='CIRCLE'&&enemy.life===40));
+  assert.equal(rule.waitForBosses,true);
+  context.story(5280,rule);assert.equal(rule.boss.length,2);
+  for(const enemy of rule.boss){assert.equal(enemy.name,'GOZILLA');assert.equal(enemy.life,400);assert.equal(enemy.createKaiju,undefined);assert.equal(enemy.createAttack,undefined);}
+  assert.notEqual(rule.boss[0].position,rule.boss[1].position);
 });
