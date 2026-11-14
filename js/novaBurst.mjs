@@ -14,11 +14,11 @@ const IMPACT_RENDERERS = {
 };
 
 // A harmless sonic precursor is followed by the damaging laser volley.
-export default function createNovaBurst(origin, { radius = 340, frames = 32, thickness = 12, delayFrames = 10, onStage = () => {}, visualStyle = "lasers", random = Math.random } = {}) {
+export default function createNovaBurst(origin, { radius = 340, frames = 32, thickness = 12, delayFrames = 10, onStage = () => {}, onVolley = () => {}, visualStyle = "lasers", random = Math.random } = {}) {
   const center = { ...origin };
   const emitter = { ...origin };
   const hit = new WeakSet();
-  const volley = visualStyle === "lasers" ? createLaserVolley(center, { range: radius, random }) : null;
+  const volley = visualStyle === "lasers" ? createLaserVolley(center, { range: radius, random, onWave: onVolley }) : null;
   let age = 0;
   let currentRadius = 0;
   return {

@@ -1,7 +1,7 @@
 const TAU = Math.PI * 2;
 const HALF_WIDTH = 3;
 
-export function createLaserVolley(origin, { range = 340, waveCount = 4, shotsPerWave = 12, waveInterval = 6, random = Math.random } = {}) {
+export function createLaserVolley(origin, { range = 340, waveCount = 4, shotsPerWave = 12, waveInterval = 6, random = Math.random, onWave = () => {} } = {}) {
   const center = { ...origin };
   const waves = Array.from({ length: waveCount }, (_, index) => ({ start: 1 + index * waveInterval, hit: new WeakSet() }));
   const projectiles = waves.flatMap((wave, waveIndex) => {
@@ -25,7 +25,11 @@ export function createLaserVolley(origin, { range = 340, waveCount = 4, shotsPer
         const wave = waves[shot.wave];
         if (age < wave.start || shot.finished) continue;
         // Freeze each wave's origin only when it actually fires.
-        if (!wave.origin) wave.origin = { x: emitter.x, y: emitter.y };
+        if (!wave.origin) {
+          wave.origin = { x: emitter.x, y: emitter.y };
+          // One cue for the entire wave, rather than one for each beam or hit.
+          onWave(shot.wave, wave.origin);
+        }
         shot.origin = wave.origin;
         shot.active = true;
         shot.previousDistance = shot.distance;

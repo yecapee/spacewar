@@ -11,6 +11,37 @@ function seeded(seed) {
 }
 const fixed = () => .5;
 
+test('each wave emits exactly one launch cue, even without enemies, at its actual launch position', () => {
+  const launches = [];
+  let frame = 0;
+  const volley = createLaserVolley({ x: 0, y: 0 }, {
+    range: 200, random: fixed,
+    onWave(index, origin) { launches.push({ frame, index, origin }); },
+  });
+  for (frame = 1; frame <= 70; frame++) volley.update([], {}, { x: frame * 10, y: frame });
+  assert.deepEqual(launches, [
+    { frame: 1, index: 0, origin: { x: 10, y: 1 } },
+    { frame: 7, index: 1, origin: { x: 70, y: 7 } },
+    { frame: 13, index: 2, origin: { x: 130, y: 13 } },
+    { frame: 19, index: 3, origin: { x: 190, y: 19 } },
+  ]);
+});
+
+test('burst forwards all four volley cues after the sonic stage without repeating stage cues', () => {
+  const events = [];
+  let frame = 0;
+  const burst = createNovaBurst({ x: 0, y: 0 }, {
+    random: fixed,
+    onStage(stage) { events.push([frame, stage]); },
+    onVolley(index) { events.push([frame, 'volley', index]); },
+  });
+  for (frame = 1; frame <= 80; frame++) burst.update([], {});
+  assert.deepEqual(events, [
+    [1, 'sonic'], [11, 'impact'], [11, 'volley', 0],
+    [17, 'volley', 1], [23, 'volley', 2], [29, 'volley', 3],
+  ]);
+});
+
 test('four distinct random volleys launch in sequence, with short segments that move outward', () => {
   const volley = createLaserVolley({ x: 0, y: 0 }, { range: 400, random: seeded(42) });
   assert.equal(volley.projectiles.length, 48);

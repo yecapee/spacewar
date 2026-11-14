@@ -3,7 +3,7 @@ import { positionToXY } from './positionMethod';
 import lookPath from './lookPath';
 import createNovaBurst from './novaBurst.mjs';
 import feedback from './feedback.mjs';
-import { sonicBoomSound, heavyWaveSound } from './sound';
+import { sonicBoomSound, heavyWaveSound, laserWaveSound } from './sound';
 
 export default {
   atomicExplosionCanKill(position) {
@@ -17,6 +17,7 @@ export default {
           feedback.novaImpact(center.x, center.y);
         }
       },
+      onVolley(waveIndex) { laserWaveSound(waveIndex); },
       radius: Math.hypot(vwidth, vheight),
     });
     return {

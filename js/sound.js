@@ -45,9 +45,29 @@ const impactSynth = new Tone.MembraneSynth({
 }).toMaster();
 impactSynth.volume.value = -13;
 
+// A short, brighter cue stays distinct from the initial bass impact.
+// Its envelope ends before the next volley, keeping rapid waves from piling up.
+const laserSynth = new Tone.FMSynth({
+  harmonicity: 3,
+  modulationIndex: 8,
+  oscillator: { type: 'triangle' },
+  modulation: { type: 'square' },
+  envelope: { attack: .001, decay: .045, sustain: 0, release: .025 },
+  modulationEnvelope: { attack: .001, decay: .035, sustain: 0, release: .02 },
+}).toMaster();
+laserSynth.volume.value = -21;
+const laserPitches = [880, 1046.5, 1174.7, 1318.5];
+
 export function sonicBoomSound() {
   sonicSynth.triggerAttackRelease('C4', .04);
 }
 export function heavyWaveSound() {
   impactSynth.triggerAttackRelease('C1', .12);
+}
+
+export function laserWaveSound(waveIndex = 0) {
+  const time = Tone.now();
+  const pitch = laserPitches[waveIndex % laserPitches.length];
+  laserSynth.triggerAttackRelease(pitch, .035, time);
+  laserSynth.frequency.exponentialRampToValueAtTime(pitch * .35, time + .065);
 }
