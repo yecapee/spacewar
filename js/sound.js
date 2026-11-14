@@ -1,4 +1,5 @@
 import Tone from 'tone';
+import { createNovaWaveAudio } from './novaWaveAudio.mjs';
 
 var synth = new Tone.FMSynth().toMaster()
 
@@ -45,18 +46,13 @@ const impactSynth = new Tone.MembraneSynth({
 }).toMaster();
 impactSynth.volume.value = -13;
 
-// A short, brighter cue stays distinct from the initial bass impact.
-// Its envelope ends before the next volley, keeping rapid waves from piling up.
-const laserSynth = new Tone.FMSynth({
-  harmonicity: 3,
-  modulationIndex: 8,
-  oscillator: { type: 'triangle' },
-  modulation: { type: 'square' },
-  envelope: { attack: .001, decay: .045, sustain: 0, release: .025 },
-  modulationEnvelope: { attack: .001, decay: .035, sustain: 0, release: .02 },
-}).toMaster();
-laserSynth.volume.value = -21;
-const laserPitches = [880, 1046.5, 1174.7, 1318.5];
+// Separate sample voices preserve every attack even during simulation catch-up.
+const waveVoices = Array.from({ length: 4 }, (_, index) => {
+  const buffer = Tone.Buffer.fromArray(createNovaWaveAudio(Tone.context.sampleRate, index));
+  const voice = new Tone.Player(buffer).toMaster();
+  voice.volume.value = -11;
+  return voice;
+});
 
 export function sonicBoomSound() {
   sonicSynth.triggerAttackRelease('C4', .04);
@@ -66,8 +62,5 @@ export function heavyWaveSound() {
 }
 
 export function laserWaveSound(waveIndex = 0) {
-  const time = Tone.now();
-  const pitch = laserPitches[waveIndex % laserPitches.length];
-  laserSynth.triggerAttackRelease(pitch, .035, time);
-  laserSynth.frequency.exponentialRampToValueAtTime(pitch * .35, time + .065);
+  waveVoices[waveIndex % waveVoices.length].start(Tone.now());
 }
