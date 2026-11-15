@@ -12,7 +12,7 @@ test('GitHub demo packages classic scripts and resolves model assets inside dist
  for(const script of scripts)assert.doesNotThrow(()=>new Script(fs.readFileSync(path.join(root,script),'utf8')));
  for(const name of ['zilla-jjj-ps1-face.glb','model-report.json','source.json','CREDITS.txt'])assert.ok(fs.existsSync(path.join(root,'assets/creature',name)));
  assert.ok(!fs.existsSync(path.join(root,'assets/creature/zilla-jjj.glb')),'do not redistribute the original high resolution asset');
- assert.match(html,/MMDCharizard/);
+ assert.match(fs.readFileSync(path.join(root,'assets/creature/CREDITS.txt'),'utf8'),/MMDCharizard/);
 });
 test('public demo includes the reduced skinned mesh with real head and tail joint weights',()=>{
  const b=fs.readFileSync(path.join(root,'assets/creature/zilla-jjj-ps1-face.glb')),len=b.readUInt32LE(12),g=JSON.parse(b.subarray(20,20+len));
