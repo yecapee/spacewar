@@ -55,6 +55,7 @@ function launchSkillsByEnemy(position, Type, ship) {
 }
 
 export default function (obj) {
+  this.dialogueId = obj.dialogueId;
   this.name = obj.name; //名字
   this.life = obj.life; //生命值
   this.maxlife = obj.life;

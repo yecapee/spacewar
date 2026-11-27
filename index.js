@@ -1,4 +1,7 @@
 import "./main.css";
+import "./js/dialogue.css";
+import {createEncounterDialogue} from './js/encounterDialogue.mjs';
+import {createDialogueView} from './js/dialogueView.mjs';
 import script from "./js/script";
 import createEnemy from "./js/createEnemy";
 import createShip from "./js/createShip";
@@ -43,6 +46,21 @@ const touchGestures = createTouchGestures();
 let activeTouchId = null;
 let pendingTouchPosition = null;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+let dialogueTimestamp=null;
+const dialogue = createEncounterDialogue({
+  reducedMotion:reducedMotion.matches,
+  onStart(){
+    phase='dialogue';resetInputs();clock.reset();dialogueTimestamp=null;
+    element('pauseButton').disabled=true;
+    renderScene(1);dialogueView.show();
+  },
+  onChange(state){dialogueView.render(state);},
+  onFinish(){
+    dialogueView.hide();resetInputs();phase='playing';clock.reset();dialogueTimestamp=null;
+    element('pauseButton').disabled=false;element('view').focus({preventScroll:true});updateHud();
+  },
+});
+const dialogueView = createDialogueView({document,controller:dialogue,assetBase:document.documentElement.dataset.dialogueBase||'./art-prototypes/dialogue-proposals/assets/'});
 const kaijuEncounter = /(?:^|[?&])encounter=kaiju(?:&|$)/.test(window.location?.search || '');
 const multiKaijuEncounter = kaijuEncounter && /(?:^|[?&])wave=multi(?:&|$)/.test(window.location?.search || '');
 function updateRecords(score,mileage) { if(!kaijuEncounter&&!encounter)records.update(score,mileage); }
@@ -151,12 +169,14 @@ const movement = createMovement(w, h, ship.position);
 
 
 function updateSimulation() {
+  if(phase==='dialogue')return;
   if (phase === "playing" && appliedMileage!==scriptMileage){
     appliedMileage=scriptMileage;(encounter?.script||script)(scriptMileage, ruleObj, nextPolling);
   }
   var { stopCount, stopEnemyPush } = ruleObj;
   var boss = ruleObj.boss || [];
   if (phase === "playing") {
+    const spawnedDialogueIds=[];
     if(ruleObj.clearField){
       for(const enemy of renderData.enemy)enemy.removed=true;
       projectiles.clear(renderData.enemyBullet);ruleObj.clearField=false;
@@ -175,6 +195,7 @@ function updateSimulation() {
             updateRecords(killCount, scriptMileage);
           };
           renderData.enemy.push(new createEnemy(enemyObj));
+          spawnedDialogueIds.push(enemyObj.dialogueId);
         }
       }
       if (ruleObj.enemyPolling) {
@@ -204,6 +225,7 @@ function updateSimulation() {
           updateRecords(killCount, scriptMileage);
         };
         const actor=new createEnemy(enemyObj);renderData.enemy.push(actor);bossWave.push(actor);
+        spawnedDialogueIds.push(enemyObj.dialogueId);
       });
       ruleObj.boss = [];
     }
@@ -215,6 +237,13 @@ function updateSimulation() {
         renderData.item.push(new createItem(itemData));
       });
       ruleObj.item = null;
+    }
+
+    // All members of a boss group exist before any first-encounter scene starts.
+    // Stop before clocks, projectiles, collisions, skills or AI receive a tick.
+    if(dialogueView.enabled&&spawnedDialogueIds.some(Boolean)){
+      compact(renderData.enemy,enemy=>enemy.life>0&&!enemy.removed);
+      if(dialogue.spawn(spawnedDialogueIds)){updateHud();return;}
     }
 
     bgCount++;
@@ -254,7 +283,7 @@ function updateSimulation() {
 function renderScene(alpha = 1) {
   const viewDom = context2d;
   viewDom.clearRect(0, 0, vwidth, vheight);
-  if (phase === 'playing') ship.draw(viewDom, alpha);
+  if (phase === 'playing' || phase === 'dialogue') ship.draw(viewDom, alpha);
   for (const bullet of renderData.enemyBullet) {
     const old = bullet.previousData || bullet.data;
     drawProjectile(viewDom, old.x + (bullet.data.x - old.x) * alpha, old.y + (bullet.data.y - old.y) * alpha, bullet.data.look);
@@ -295,7 +324,7 @@ function updateHud() {
     : "可施放 · S");
   property("shieldButton", "disabled", Boolean(shield) || phase !== "playing");
   property("attackButton", "disabled", phase !== "playing");
-  setText("runStatus", phase === "won" ? "遭遇戰完成" : phase === "paused" ? "暫停中" : phase === "over" || phase === "dying" ? "訊號中斷" : phase === "ready" ? "等待出擊" : "任務進行中");
+  setText("runStatus", phase === 'dialogue' ? '首次交鋒通訊' : phase === "won" ? "遭遇戰完成" : phase === "paused" ? "暫停中" : phase === "over" || phase === "dying" ? "訊號中斷" : phase === "ready" ? "等待出擊" : "任務進行中");
 }
 
 const overlay = element("ready");
@@ -326,6 +355,7 @@ function startRun() {
   if(encounter?.ready===false)return;
   if(!encounter&&!storyReady)return;
   records.flush();
+  dialogue.reset();dialogueView.hide();dialogueTimestamp=null;
   clearRenderData();
   renderData.aniEffect.length = 0;
   feedback.reset();
@@ -349,6 +379,7 @@ function startRun() {
 }
 
 function togglePause(forcePause = false) {
+  if(phase==='dialogue'){dialogue.suspend(forcePause||!dialogue.state.suspended);resetInputs();return;}
   if (phase !== "playing" && phase !== "paused") return;
   if (phase === "playing") {
     records.flush();
@@ -374,6 +405,17 @@ element("shieldButton").onclick = () => { if (phase === "playing") { ship.skill(
 
 const keyMap = { ArrowUp: "UP", ArrowRight: "RIGHT", ArrowDown: "DOWN", ArrowLeft: "LEFT", Space: "SPACE" };
 document.addEventListener("keydown", function (event) {
+  if(phase==='dialogue'){
+    if(dialogueView.historyOpen)return;
+    if(['Space','Enter','Escape','KeyP','KeyR','KeyA','KeyS',...Object.keys(keyMap)].includes(event.code)){
+      if(event.repeat){event.preventDefault();return;}
+      if((event.code==='Space'||event.code==='Enter')&&event.target.closest('button'))return;
+      event.preventDefault();
+      if(event.code==='Space'||event.code==='Enter')dialogue.advance();
+      if(event.code==='Escape'||event.code==='KeyP')dialogue.suspend(!dialogue.state.suspended);
+    }
+    return;
+  }
   if (event.code === "Space" && event.target.closest("button")) return;
   if (!keyMap[event.code] && !["KeyA", "KeyS", "KeyP", "KeyR", "Escape"].includes(event.code)) return;
   event.preventDefault();
@@ -438,6 +480,10 @@ window.addEventListener("blur", () => togglePause(true));
 document.addEventListener("visibilitychange", () => { if (document.hidden) togglePause(true); });
 
 function step(timestamp) {
+  if(phase==='dialogue'){
+    const delta=dialogueTimestamp===null?0:timestamp-dialogueTimestamp;dialogueTimestamp=timestamp;
+    dialogue.update(delta);
+  }else dialogueTimestamp=null;
   if (phase === "playing" || phase === "dying") {
     clock.advance(timestamp, () => {
       if (phase === "playing") { ship.previousPosition = ship.simulationPosition; actionMove(); }

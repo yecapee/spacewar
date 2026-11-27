@@ -20,6 +20,7 @@ async function main(){
  await fs.writeFile(path.join(temporary,scriptName),scriptBytes);if(path.basename(scripts[0].filePath)!==scriptName)await fs.unlink(scripts[0].filePath);
  let html=await fs.readFile(path.join(root,'index.html'),'utf8');
  html=html.replace(/data-model-base="[^"]*"/,'data-model-base="./assets/creature/"');
+ html=html.replace(/data-dialogue-base="[^"]*"/,'data-dialogue-base="./assets/dialogue/"');
  html=html.replace(/<script type="module" src="index.js"><\/script>/,`<script defer src="./${scriptName}"></script>`);
  const styleLinks=[];
  for(const bundle of bundles.filter(b=>b.type==='css')){
@@ -34,6 +35,8 @@ async function main(){
  if(/type=["'](?:module|importmap)["']/.test(html))throw Error('The public demo must use a self-contained classic browser bundle.');
  // The dialogue study is a separate static review page, never part of the game bundle.
  const dialogueSource=path.join(root,'art-prototypes/dialogue-proposals'),dialogueTarget=path.join(temporary,'dialogue-proposals');
+ const portraitDirectory=path.join(temporary,'assets/dialogue');await fs.mkdir(portraitDirectory,{recursive:true});
+ for(const name of await fs.readdir(path.join(dialogueSource,'assets')))if(name.endsWith('.webp'))await fs.copyFile(path.join(dialogueSource,'assets',name),path.join(portraitDirectory,name));
  await fs.mkdir(dialogueTarget,{recursive:true});
  for(const name of ['index.html','style.css','app.mjs','content.mjs','dialogue.json','materials.json','dialogue-materials.zip'])await fs.copyFile(path.join(dialogueSource,name),path.join(dialogueTarget,name));
  await fs.cp(path.join(dialogueSource,'assets'),path.join(dialogueTarget,'assets'),{recursive:true});

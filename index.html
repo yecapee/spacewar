@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-Hant" data-model-base="./art-prototypes/zilla-jjj/">
+<html lang="zh-Hant" data-model-base="./art-prototypes/zilla-jjj/" data-dialogue-base="./art-prototypes/dialogue-proposals/assets/">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +12,7 @@
 </head>
 <body>
   <div class="ambient" aria-hidden="true"></div>
-  <canvas id="view" aria-label="Spacewar 遊戲區"></canvas>
+  <canvas id="view" tabindex="0" aria-label="Spacewar 遊戲區"></canvas>
   <p id="graphicsStatus" class="graphics-status" role="alert" hidden></p>
   <div id="damageFlash" aria-hidden="true"></div>
 
@@ -73,6 +73,27 @@
       <div class="credit">DEVELOPED BY YECAPEE</div>
     </div>
   </section>
+  <dialog id="encounterDialogue" class="encounter-dialogue" aria-label="首次交鋒通訊" aria-describedby="dialogueHint">
+    <div class="encounter-layout">
+      <div class="encounter-top">
+        <div class="encounter-heading"><span id="dialogueChapter">首次接觸</span><span id="dialogueProgress"></span></div>
+        <article id="dialogueEnemy" class="encounter-panel">
+          <img id="dialogueEnemyPortrait" width="768" height="768" alt="敵方頭像">
+          <div class="encounter-speech"><h2 class="encounter-name"><span id="dialogueEnemyName"></span><small>ENEMY</small></h2><p id="dialogueEnemyAction" class="encounter-action"></p><p id="dialogueEnemyText" class="encounter-text" aria-hidden="true"></p><span class="encounter-cursor" aria-hidden="true">▼</span></div>
+        </article>
+      </div>
+      <div class="encounter-bottom">
+        <article id="dialogueAlly" class="encounter-panel encounter-ally">
+          <img id="dialogueAllyPortrait" width="768" height="768" alt="我方駕駛員頭像">
+          <div class="encounter-speech"><h2 class="encounter-name">我方駕駛員<small>ALLY</small></h2><p id="dialogueAllyText" class="encounter-text" aria-hidden="true"></p><span class="encounter-cursor" aria-hidden="true">▼</span></div>
+        </article>
+        <nav class="encounter-controls" aria-label="對白操作"><button id="dialogueAuto" aria-pressed="false">自動</button><button id="dialogueLog">紀錄</button><button id="dialogueSkip">略過</button><button id="dialogueNext" autofocus>顯示整句</button></nav>
+        <p id="dialogueHint" class="encounter-hint">Space / Enter 繼續 · 戰鬥暫停中</p>
+      </div>
+    </div>
+    <p id="dialogueAnnouncement" class="encounter-announcement" role="status" aria-live="polite"></p>
+  </dialog>
+  <dialog id="dialogueHistory" class="encounter-log" aria-labelledby="dialogueHistoryTitle"><header><h2 id="dialogueHistoryTitle">對話紀錄</h2><button id="dialogueHistoryClose" autofocus>關閉</button></header><div id="dialogueHistoryLines"></div></dialog>
   <div id="debug"></div>
   <img id="shipImg" src="./img/ship.png" hidden alt="">
   <img id="shipBulletNormal" src="./img/bullet_normal.png" hidden alt="">

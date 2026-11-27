@@ -7,9 +7,10 @@ import { createRecords } from '../js/records.mjs';
 import { compact } from '../js/engine.mjs';
 import { createProjectileSystem } from '../js/projectileSystem.mjs';
 import { createTouchGestures } from '../js/touchGestures.mjs';
+import {createEncounterDialogue} from '../js/encounterDialogue.mjs';
 
 // Run the actual session controller with lightweight DOM/render/audio substitutes.
-function session({search='',encounter=null,story=null}={}) {
+function session({search='',encounter=null,story=null,dialogues=false}={}) {
   const elements = new Map();
   const handlers = {};
   const context2d = new Proxy({}, { get: () => () => {} });
@@ -26,6 +27,13 @@ function session({search='',encounter=null,story=null}={}) {
   let frame;
   let shots = 0, updates = 0, draws = 0;
   const context = vm.createContext({
+    createEncounterDialogue(options){
+      const controller=createEncounterDialogue(options);
+      // Existing combat-only tests remain independent of reading the story.
+      if(!dialogues)controller.spawn=()=>false;
+      return controller;
+    },
+    createDialogueView(){return {enabled:true,historyOpen:false,show(){element('encounterDialogue').hidden=false;},hide(){element('encounterDialogue').hidden=true;},render(state){element('encounterDialogue').state=state;}};},
     createMovement, createFixedClock, createTouchGestures, createRecords, compact, getEncounter:()=>encounter,
     prepareCreature:()=>({then(callback){callback();return {catch(){}};}}),
     projectiles: createProjectileSystem({ width: 40, height: 60, cellWidth: 15, cellHeight: 15 }),
@@ -221,4 +229,50 @@ test('full campaign reaches endless mode with four gated boss groups and only on
  assert.equal(c.scriptMileage,7041);assert.deepEqual(waves.map(w=>[w.mile,w.count]),[[1500,2],[2200,1],[4240,2],[5280,2]]);
  assert.equal(waves[1].names[0],'GOZILLA');assert.equal(chapters.at(-1),'14 無盡航行');assert.ok(chapters.includes('06 回收與喘息'));
  assert.equal(c.renderData.item.filter(item=>item.restoreLife?.some(effect=>effect.startsWith('liftMax'))).length,1);
+});
+
+test('first spawn freezes the actual session before AI, projectile, skill, effect and chapter updates',()=>{
+ const run=session({story:campaignStory(),dialogues:true}),c=run.context;c.startRun();
+ const key=code=>run.handlers.keydown({code,repeat:false,preventDefault(){},target:{closest:()=>null}});
+ key('Space');key('ArrowRight');c.renCount=c.nextPolling=20;
+ let projectileTicks=0,skillTicks=0,effectTicks=0;
+ const original=c.projectiles.update;c.projectiles.update=(...args)=>{projectileTicks++;return original(...args);};
+ c.renderData.shipSkills.push({update(){skillTicks++;return false;},draw(){}});
+ c.renderData.aniEffect.push({update(){effectTicks++;return true;},draw(){}});
+ c.updateSimulation();assert.equal(vm.runInContext('phase',c),'dialogue');
+ assert.equal(vm.runInContext('dialogue.state.eventId',c),'patrol');assert.equal(c.renderData.enemy.length,1);
+ assert.equal(c.renCount,20);assert.equal(c.scriptMileage,0);assert.equal(c.bgCount,0);
+ const shipPosition=c.ship.position,life=c.ship.life;run.tick(0);run.tick(60000);
+ for(let i=0;i<10;i++)c.updateSimulation();
+ assert.equal(run.updates(),0);assert.equal(projectileTicks,0);assert.equal(skillTicks,0);assert.equal(effectTicks,0);
+ assert.equal(c.ship.position,shipPosition);assert.equal(c.ship.life,life);assert.equal(c.keyType.SPACE,false);assert.equal(c.keyType.RIGHT,false);
+ key('KeyA');key('KeyS');key('KeyR');assert.deepEqual([...c.ship.casts],[]);assert.equal(c.renderData.enemy.length,1);
+ vm.runInContext('dialogue.skip()',c);assert.equal(vm.runInContext('phase',c),'playing');
+ run.tick(100000);assert.equal(run.updates(),0,'resume starts a fresh fixed clock');run.tick(100025);
+ assert.equal(run.updates(),1);assert.equal(c.renderData.enemy.length,1,'the paused spawn is not duplicated');assert.equal(run.shots(),0,'closing dialogue never leaves firing held');
+ assert.equal(projectileTicks,1);assert.equal(skillTicks,1);assert.equal(effectTicks,1);
+});
+
+test('both old bosses spawn atomically, dialogue keeps their identities separate, and restart resets sightings',()=>{
+ const run=session({story:campaignStory(),dialogues:true}),c=run.context;c.startRun();c.scriptMileage=5280;c.updateSimulation();
+ assert.deepEqual([...c.renderData.enemy].map(e=>e.dialogueId),['legacy-a','legacy-b']);assert.equal(c.renderData.enemy[0].name,c.renderData.enemy[1].name);
+ assert.equal(vm.runInContext('dialogue.state.eventId',c),'legacy');assert.equal(c.scriptMileage,5280);
+ vm.runInContext('dialogue.advance();dialogue.advance();dialogue.advance();dialogue.advance()',c);
+ assert.equal(vm.runInContext('dialogue.state.line.actor',c),'legacy-b');
+ c.togglePause(true);assert.equal(vm.runInContext('dialogue.state.suspended',c),true);run.tick(0);run.tick(100000);
+ assert.equal(c.scriptMileage,5280);assert.equal(c.renderData.enemy.length,2);
+ c.startRun();assert.equal(vm.runInContext('dialogue.state.active',c),false);assert.equal(vm.runInContext('dialogue.state.seen.length',c),0);
+ c.scriptMileage=5280;c.updateSimulation();assert.equal(vm.runInContext('dialogue.state.eventId',c),'legacy');assert.equal(c.renderData.enemy.length,2);
+});
+
+test('complete real campaign plays each first encounter once, skips the ring rematch and reaches endless mode',()=>{
+ const run=session({story:campaignStory(),dialogues:true}),c=run.context;c.startRun();const played=[];let held=0,lastGate=-1;
+ for(let i=0;i<8500&&c.scriptMileage<=7040;i++){
+  c.updateSimulation();
+  if(vm.runInContext('dialogue.state.active',c)){played.push(vm.runInContext('dialogue.state.eventId',c));vm.runInContext('dialogue.skip()',c);}
+  const bosses=c.renderData.enemy.filter(e=>e.showLife);
+  if(bosses.length){if(lastGate!==c.scriptMileage){lastGate=c.scriptMileage;held=0;}if(++held===3)bosses.forEach(e=>e.dead());}
+ }
+ assert.equal(c.scriptMileage,7041);assert.equal(played.length,7);assert.deepEqual([...played].sort(),['patrol','fort','plus','rings','hunter','turret','legacy'].sort());
+ assert.equal(vm.runInContext('dialogue.state.seen.length',c),9);assert.equal(run.elements.get('chapterLabel').textContent,'14 無盡航行');
 });

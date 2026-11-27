@@ -24,6 +24,7 @@ function circle(x, y, r, all, now, margin) {
 
 // test enemy
 var turret = {
+  dialogueId: 'turret',
   name: "turret",
   life: 1,
   // position: Math.floor(Math.random() * w),
@@ -37,6 +38,7 @@ var turret = {
 
 // enemy
 var Zark0 = {
+  dialogueId: 'zark-zero',
   name: "ZARK-ZERO",
   life: 1,
   // position: Math.floor(Math.random() * w),
@@ -50,6 +52,7 @@ var Zark0 = {
 
 // The articulated boss owns its gait and breath sequence; legacy pixel skills are disabled.
 var GOZILLA = {
+  dialogueId: 'survival',
   name: "GOZILLA", showLife: true, life: 800,
   shot: false, shotTime: [1, 0, 1], look: "kaiju", skills: [],
   position: Math.round(w / 3),
@@ -57,11 +60,13 @@ var GOZILLA = {
 };
 // The original procedural pair keeps its own navigation and swept beam attacks.
 var OLD_GOZILLA = {
+  dialogueId: 'legacy-a',
   name:'GOZILLA',showLife:true,life:400,shot:false,shotTime:[1,0,1],look:'kaiju',skills:[],position:Math.round(w/3),
 };
-var OLD_GOZILLA2 = {...OLD_GOZILLA,position:Math.round(w*2/3)};
+var OLD_GOZILLA2 = {...OLD_GOZILLA,dialogueId:'legacy-b',position:Math.round(w*2/3)};
 
 var Zark1 = {
+  dialogueId: 'zark-plus',
   name: "ZARK-PLUS",
   life: 1,
   // position: Math.floor(Math.random() * w),
@@ -74,6 +79,7 @@ var Zark1 = {
 };
 
 var Fort0 = {
+  dialogueId: 'fort',
   name: "FORT",
   life: 1,
   // position: Math.floor(Math.random() * w),
@@ -86,6 +92,7 @@ var Fort0 = {
 };
 
 var circleKiller = {
+  dialogueId: 'ring-alpha',
   name: "circleKiller",
   showLife: true,
   lifeBarPosition: function (ps) {
@@ -104,6 +111,7 @@ var circleKiller = {
 };
 
 var circleKiller2 = Object.assign({}, circleKiller, {
+  dialogueId: 'ring-beta',
   position: Math.round(w / 3) * 2 + 5,
 });
 
