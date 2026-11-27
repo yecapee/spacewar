@@ -32,6 +32,11 @@ async function main(){
  }
  await fs.writeFile(path.join(temporary,'index.html'),html.trimEnd()+'\n');
  if(/type=["'](?:module|importmap)["']/.test(html))throw Error('The public demo must use a self-contained classic browser bundle.');
+ // The dialogue study is a separate static review page, never part of the game bundle.
+ const dialogueSource=path.join(root,'art-prototypes/dialogue-proposals'),dialogueTarget=path.join(temporary,'dialogue-proposals');
+ await fs.mkdir(dialogueTarget,{recursive:true});
+ for(const name of ['index.html','style.css','app.mjs','content.mjs','dialogue.json','materials.json','dialogue-materials.zip'])await fs.copyFile(path.join(dialogueSource,name),path.join(dialogueTarget,name));
+ await fs.cp(path.join(dialogueSource,'assets'),path.join(dialogueTarget,'assets'),{recursive:true});
  await fs.rm(destination,{recursive:true,force:true});await fs.rename(temporary,destination);
  console.log(JSON.stringify({directory:'dist',modelBase:'./assets/creature/',buildTimeMs:result.buildTime}));
 }

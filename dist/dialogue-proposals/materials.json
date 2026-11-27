@@ -1,0 +1,109 @@
+{
+  "description": "首次接觸對白提案素材包；全部圖像隨頁面提供，無外部圖床依賴。",
+  "portraits": [
+    {
+      "id": "pilot",
+      "file": "assets/pilot.webp",
+      "method": "內建 ImageGen 原創繪製",
+      "reference": "本次統一美術設定",
+      "role": "人類・冷靜觀察"
+    },
+    {
+      "id": "zark-zero",
+      "file": "assets/zark-zero.webp",
+      "method": "內建 ImageGen 原創繪製",
+      "reference": "本次統一美術設定",
+      "role": "人類・巡邏隊員"
+    },
+    {
+      "id": "fort",
+      "file": "assets/fort.webp",
+      "method": "內建 ImageGen 原創繪製",
+      "reference": "本次統一美術設定",
+      "role": "AI・重裝追蹤"
+    },
+    {
+      "id": "zark-plus",
+      "file": "assets/zark-plus.webp",
+      "method": "內建 ImageGen 原創繪製",
+      "reference": "本次統一美術設定",
+      "role": "人類・高速截擊"
+    },
+    {
+      "id": "ring-alpha",
+      "file": "assets/ring-alpha.webp",
+      "method": "內建 ImageGen 原創繪製",
+      "reference": "本次統一美術設定",
+      "role": "AI・主鎖定"
+    },
+    {
+      "id": "ring-beta",
+      "file": "assets/ring-beta.webp",
+      "method": "內建 ImageGen 原創繪製",
+      "reference": "本次統一美術設定",
+      "role": "AI・側翼封鎖"
+    },
+    {
+      "id": "survival",
+      "file": "assets/survival.webp",
+      "method": "內建 ImageGen 原創繪製",
+      "reference": "既有模型臉部 poster-face.jpg",
+      "role": "生物・聲音與動作"
+    },
+    {
+      "id": "turret",
+      "file": "assets/turret.webp",
+      "method": "內建 ImageGen 原創繪製",
+      "reference": "本次統一美術設定",
+      "role": "AI・擴散追蹤"
+    },
+    {
+      "id": "legacy-a",
+      "file": "assets/legacy-a.webp",
+      "method": "內建 ImageGen 原創繪製",
+      "reference": "既有程序式舊巨獸的體型設定",
+      "role": "生物・正面壓迫"
+    },
+    {
+      "id": "legacy-b",
+      "file": "assets/legacy-b.webp",
+      "method": "內建 ImageGen 原創繪製",
+      "reference": "既有程序式舊巨獸的體型設定",
+      "role": "生物・側翼夾擊"
+    }
+  ],
+  "sprites": [
+    {
+      "file": "assets/a22-zark-zero.png",
+      "source": "img/enemies/a22-zark-zero.png",
+      "method": "專案既有素材，原樣收錄"
+    },
+    {
+      "file": "assets/a22-zark-plus.png",
+      "source": "img/enemies/a22-zark-plus.png",
+      "method": "專案既有素材，原樣收錄"
+    },
+    {
+      "file": "assets/a22-fort.png",
+      "source": "img/enemies/a22-fort.png",
+      "method": "專案既有素材，原樣收錄"
+    },
+    {
+      "file": "assets/a22-turret.png",
+      "source": "img/enemies/a22-turret.png",
+      "method": "專案既有素材，原樣收錄"
+    },
+    {
+      "file": "assets/a22-orbit-node.png",
+      "source": "img/enemies/a22-orbit-node.png",
+      "method": "專案既有素材，原樣收錄"
+    }
+  ],
+  "background": {
+    "file": "assets/spacebg.png",
+    "source": "img/spacebg.png",
+    "usage": "戰場示意背景"
+  },
+  "sourceCode": "js/script.js",
+  "notes": "未使用第三方動畫角色圖；新增人物、代號與分工均為提案。怪獸不說人類語言。"
+}

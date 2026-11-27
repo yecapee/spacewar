@@ -1,0 +1,94 @@
+{
+  "mode": "built-in image_gen",
+  "assets": [
+    {
+      "id": "pilot",
+      "generatedOriginal": "imagegen-originals/exec-2dedc0f2-2649-4850-befa-6079dd5f9a06.png"
+    },
+    {
+      "id": "zark-zero",
+      "generatedOriginal": "imagegen-originals/exec-07a90d53-461b-4d9d-8625-8fe58a82d39a.png"
+    },
+    {
+      "id": "fort",
+      "generatedOriginal": "imagegen-originals/exec-3aac0d3f-a4c5-4d24-bcb0-f49584f4bfc9.png"
+    },
+    {
+      "id": "zark-plus",
+      "generatedOriginal": "imagegen-originals/exec-eb3a8df0-a0e5-4bbb-bc3c-fb1257dc9e84.png"
+    },
+    {
+      "id": "ring-alpha",
+      "generatedOriginal": "imagegen-originals/exec-51b75999-2c49-481c-8dfd-2b9b2ee7b822.png"
+    },
+    {
+      "id": "ring-beta",
+      "generatedOriginal": "imagegen-originals/exec-cfbcfc21-5e51-48a6-b0a5-951f8ec06f31.png"
+    },
+    {
+      "id": "survival",
+      "generatedOriginal": "imagegen-originals/exec-f66d61d6-8309-4a4f-96d4-376e1b0049d3.png"
+    },
+    {
+      "id": "turret",
+      "generatedOriginal": "imagegen-originals/exec-6667a19c-05c4-46c2-99c0-dec60c73b1f0.png"
+    },
+    {
+      "id": "legacy-a",
+      "generatedOriginal": "imagegen-originals/exec-9256743d-7009-4dcc-99b3-0ef2e78d7d49.png"
+    },
+    {
+      "id": "legacy-b",
+      "generatedOriginal": "imagegen-originals/exec-7a6fc50b-fb1c-414b-8184-e29f6219aaeb.png"
+    }
+  ],
+  "prompts": {
+    "initial": [
+      {
+        "key": "pilot",
+        "prompt": "One square 1:1 character communication PORTRAIT for an original Japanese tactical mecha shooting game. Head and upper shoulders only, face large and legible at 128 px. Original late-1990s hand-drawn mecha-anime / strategy-RPG dialogue portrait art: deliberate clean dark ink outlines, angular cel shading with three to five tones, restrained pixel-cluster texture, carefully drawn expressive eyes, no photorealism, no glossy 3D render. Muted charcoal navy backdrop, soft subtle dark cockpit or abstract background. Entire head and chin in frame. Cohesive slate-gray, muted violet and teal military palette. No frame, no text, no letters, no logos, no UI, no watermark. Original design, not a recognizable existing anime character.\nPLAYER PILOT: a young adult East Asian male pilot, about 27, short slightly tousled black hair with one subtle blue-gray streak, sharp warm brown eyes, calm alert expression, a small headset on one ear, white and light-gray flight suit with subdued cyan accents matching a white modular interceptor. No full-face helmet. Three-quarter bust facing LEFT, gaze slightly upward toward the opposing dialogue panel. Express resilient intelligence rather than an exaggerated heroic grin. Head and visible flight-suit collar fill the square."
+      },
+      {
+        "key": "survival",
+        "refs": [
+          "art-prototypes/zilla-jjj/poster-face.jpg"
+        ],
+        "prompt": "One square 1:1 character communication PORTRAIT for an original Japanese tactical mecha shooting game. Head and upper shoulders only, face large and legible at 128 px. Original late-1990s hand-drawn mecha-anime / strategy-RPG dialogue portrait art: deliberate clean dark ink outlines, angular cel shading with three to five tones, restrained pixel-cluster texture, carefully drawn expressive eyes, no photorealism, no glossy 3D render. Muted charcoal navy backdrop, soft subtle dark cockpit or abstract background. Entire head and chin in frame. Cohesive slate-gray, muted violet and teal military palette. No frame, no text, no letters, no logos, no UI, no watermark. Original design, not a recognizable existing anime character.\nSURVIVAL MONSTER: use reference image 1 ONLY for anatomy, creature identity and colors, not its 3D-render style. Draw a refined 2D ink-and-cel close-up portrait of this exact lean long-snouted reptilian monster, facing RIGHT. Preserve long narrow angular muzzle, heavy slanted brow, amber iris with black vertical pupil, muted gray-green upper face, saturated dark-blue underside of lower jaw and throat, small ivory teeth, streamlined neck and dorsal fins. Mouth nearly closed with a slight alert hiss, intelligent cautious expression, survival-minded animal. Never turn it into a bulky round-headed classic Godzilla, metal robot, humanoid, dragon with horns, or talking cartoon. No visible speech marks."
+      },
+      {
+        "key": "legacy-a",
+        "prompt": "One square 1:1 character communication PORTRAIT for an original Japanese tactical mecha shooting game. Head and upper shoulders only, face large and legible at 128 px. Original late-1990s hand-drawn mecha-anime / strategy-RPG dialogue portrait art: deliberate clean dark ink outlines, angular cel shading with three to five tones, restrained pixel-cluster texture, carefully drawn expressive eyes, no photorealism, no glossy 3D render. Muted charcoal navy backdrop, soft subtle dark cockpit or abstract background. Entire head and chin in frame. Cohesive slate-gray, muted violet and teal military palette. No frame, no text, no letters, no logos, no UI, no watermark. Original design, not a recognizable existing anime character.\nLEGACY GIANT MONSTER ALPHA: a heavily built charcoal/slate-gray reptilian kaiju with a relatively SHORT broad boxy snout, massive angular brow plates, small luminous pale-lilac eyes, sparse ivory fangs, thick lower jaw, muted purple throat glow and a few broad violet dorsal plates visible behind neck. Organic stylized angular armored skin, not a mechanical robot: no gears, orange reactor, cockpit, or wires. Three-quarter portrait facing RIGHT, mouth slightly open in a deep threatening growl, stubborn direct aggressive character. Distinct from a lean blue-throated long-snouted monster. The original source design has large simple faceted body forms; interpret them as cel-shaded organic anatomy, no added elaborate crown. Keep face readable within the square."
+      },
+      {
+        "key": "legacy-b",
+        "prompt": "One square 1:1 character communication PORTRAIT for an original Japanese tactical mecha shooting game. Head and upper shoulders only, face large and legible at 128 px. Original late-1990s hand-drawn mecha-anime / strategy-RPG dialogue portrait art: deliberate clean dark ink outlines, angular cel shading with three to five tones, restrained pixel-cluster texture, carefully drawn expressive eyes, no photorealism, no glossy 3D render. Muted charcoal navy backdrop, soft subtle dark cockpit or abstract background. Entire head and chin in frame. Cohesive slate-gray, muted violet and teal military palette. No frame, no text, no letters, no logos, no UI, no watermark. Original design, not a recognizable existing anime character.\nLEGACY GIANT MONSTER BETA: companion of the same species as a heavily built charcoal/slate-gray short broad box-snouted reptilian kaiju, luminous pale-lilac eyes, sparse ivory fangs, thick lower jaw, subdued purple throat glow and broad violet dorsal plates. Organic angular armored skin, NOT mechanical: no gears, orange reactor, cockpit, or wires. Three-quarter portrait facing RIGHT with a lower quieter head angle, jaw closed, watchful sideways eye and slightly deeper brow creases; strategic flanker instead of the directly roaring alpha. A small old nick on the outer brow edge can distinguish it but no glowing scar or elaborate new horns. Do not make it a different color species. Contrast a subtle calculating expression with alpha's aggression."
+      }
+    ],
+    "remaining": [
+      [
+        "zark-zero",
+        "Original male enemy patrol pilot, late 30s, stern tired eyes, dark violet flight helmet with open face and communications earpiece, charcoal purple flight suit with muted pink seam accents. Brown skin, compact dark facial stubble, disciplined expression, utilitarian angular equipment. Match player's world but distinct enemy uniform."
+      ],
+      [
+        "zark-plus",
+        "Original female ace pilot, early 30s, short silver bob hair, sharp amber eyes, confident restrained smirk, dark violet pressure suit and magenta collar insignia without lettering, small tactical ear comm. Three-quarter right-facing portrait. Professional aerial interceptor squad leader."
+      ],
+      [
+        "fort",
+        "Original autonomous FORT targeting AI portrait: machine only, chunky rounded slate-violet armored sensor head, broad bright magenta horizontal visor in a low brow, short central orange cylindrical targeting lens below visor, layered thick turret shoulder armor. Expression comes from visor aperture. Heavy fortress design, no human."
+      ],
+      [
+        "turret",
+        "Original autonomous four-arm turret gun-control head: center compact square violet armor block, single square orange optic with black cross aperture, four diagonally arranged cropped angular shoulder gun housings with magenta slit sensors. Symmetric military machine, angular than rounded FORT, no human."
+      ],
+      [
+        "ring-alpha",
+        "Original orbital drone AI sensor head, compact vertical violet armored diamond face, orange glowing round eye, magenta central status slit below, two narrow pointed violet side fins. COMMAND node has a solid round orange iris. Machine only; no humanoid face, no monster, a tight head portrait."
+      ],
+      [
+        "ring-beta",
+        "Original orbital drone AI sensor head, same compact violet diamond chassis as alpha, orange glowing targeting eye with split iris, magenta central slit, one small offset side antenna and narrow violet side fins. FLANK node: three-quarter side angle, calculating. Machine only, no human."
+      ]
+    ]
+  }
+}
