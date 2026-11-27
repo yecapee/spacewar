@@ -105,5 +105,21 @@
     "usage": "戰場示意背景"
   },
   "sourceCode": "js/script.js",
-  "notes": "未使用第三方動畫角色圖；新增人物、代號與分工均為提案。怪獸不說人類語言。"
+  "notes": "未使用第三方動畫角色圖；新增人物、代號與分工均為提案。怪獸不說人類語言。",
+  "pixelProposals": {
+    "entry": "pixel/index.html",
+    "versions": [
+      "pixel/classic.html",
+      "pixel/tactical.html",
+      "pixel/dramatic.html"
+    ],
+    "font": {
+      "file": "pixel/fonts/fusion-pixel.woff2",
+      "source": "https://github.com/TakWolf/fusion-pixel-font/releases/tag/2026.11.10",
+      "license": "SIL Open Font License 1.1",
+      "notices": "pixel/fonts/OFL.txt; pixel/fonts/LICENSES/"
+    },
+    "portraits": "既有原創賽璐璐頭像直接清晰顯示，不像素化。",
+    "ui": "HTML/CSS 原創繪製；未使用官方遊戲 UI 截圖作為介面資產。"
+  }
 }

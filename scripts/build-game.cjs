@@ -37,6 +37,7 @@ async function main(){
  await fs.mkdir(dialogueTarget,{recursive:true});
  for(const name of ['index.html','style.css','app.mjs','content.mjs','dialogue.json','materials.json','dialogue-materials.zip'])await fs.copyFile(path.join(dialogueSource,name),path.join(dialogueTarget,name));
  await fs.cp(path.join(dialogueSource,'assets'),path.join(dialogueTarget,'assets'),{recursive:true});
+ await fs.cp(path.join(dialogueSource,'pixel'),path.join(dialogueTarget,'pixel'),{recursive:true,filter:source=>!source.endsWith('.jpg')});
  await fs.rm(destination,{recursive:true,force:true});await fs.rename(temporary,destination);
  console.log(JSON.stringify({directory:'dist',modelBase:'./assets/creature/',buildTimeMs:result.buildTime}));
 }
