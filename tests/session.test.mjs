@@ -276,3 +276,16 @@ test('complete real campaign plays each first encounter once, skips the ring rem
  assert.equal(c.scriptMileage,7041);assert.equal(played.length,7);assert.deepEqual([...played].sort(),['patrol','fort','plus','rings','hunter','turret','legacy'].sort());
  assert.equal(vm.runInContext('dialogue.state.seen.length',c),9);assert.equal(run.elements.get('chapterLabel').textContent,'14 無盡航行');
 });
+
+test('any dialogue key advances once, repeated keys are ignored and the final key never triggers combat',()=>{
+ for(const code of ['KeyZ','ArrowLeft','KeyA','KeyS','KeyP','KeyR','Escape','Enter','Space','Tab']){
+  const run=session({story:campaignStory(),dialogues:true}),c=run.context;c.startRun();c.renCount=c.nextPolling=20;c.updateSimulation();
+  const ship=c.ship,key=(repeat=false)=>run.handlers.keydown({code,repeat,preventDefault(){},target:{closest:()=>null}});
+  vm.runInContext('dialogue.advance()',c);key();assert.equal(vm.runInContext('dialogue.state.index',c),1,code);
+  key(true);assert.equal(vm.runInContext('dialogue.state.index',c),1);assert.equal(vm.runInContext('dialogue.state.complete',c),false,'held keys cannot reveal or advance repeatedly');
+  vm.runInContext('while(dialogue.state.index<dialogue.state.total-1||!dialogue.state.complete)dialogue.advance()',c);
+  key();assert.equal(vm.runInContext('phase',c),'playing',code);assert.equal(c.ship,ship,'R does not restart while closing a scene');
+  assert.deepEqual([...ship.casts],[],'A/S do not cast while closing a scene');assert.equal(c.keyType.SPACE,false);assert.equal(c.keyType.LEFT,false);
+  run.tick(0);run.tick(25);assert.equal(run.shots(),0,'closing with Space does not shoot');
+ }
+});

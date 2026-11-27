@@ -406,14 +406,10 @@ element("shieldButton").onclick = () => { if (phase === "playing") { ship.skill(
 const keyMap = { ArrowUp: "UP", ArrowRight: "RIGHT", ArrowDown: "DOWN", ArrowLeft: "LEFT", Space: "SPACE" };
 document.addEventListener("keydown", function (event) {
   if(phase==='dialogue'){
-    if(dialogueView.historyOpen)return;
-    if(['Space','Enter','Escape','KeyP','KeyR','KeyA','KeyS',...Object.keys(keyMap)].includes(event.code)){
-      if(event.repeat){event.preventDefault();return;}
-      if((event.code==='Space'||event.code==='Enter')&&event.target.closest('button'))return;
-      event.preventDefault();
-      if(event.code==='Space'||event.code==='Enter')dialogue.advance();
-      if(event.code==='Escape'||event.code==='KeyP')dialogue.suspend(!dialogue.state.suspended);
-    }
+    // Preserve browser shortcuts; a held key must not fast-forward the scene.
+    if(event.metaKey||event.ctrlKey||event.altKey||['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight'].includes(event.code))return;
+    event.preventDefault();
+    if(!event.repeat)dialogue.advance();
     return;
   }
   if (event.code === "Space" && event.target.closest("button")) return;

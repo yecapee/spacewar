@@ -1,33 +1,19 @@
 import {dialogueCast} from './dialogueContent.mjs';
 
 export function createDialogueView({document,controller,assetBase}) {
- const el=id=>document.getElementById(id),root=el('encounterDialogue'),history=el('dialogueHistory');
+ const el=id=>document.getElementById(id),root=el('encounterDialogue');
  // Older isolated harness pages also import the game, without the story UI.
- if(!root||!history)return {enabled:false,historyOpen:false,show(){},hide(){},render(){}};
+ if(!root)return {enabled:false,show(){},hide(){},render(){}};
  let lastLine='',activeEnemy='',lastEvent='';
  const set=(id,text)=>{if(el(id).textContent!==text)el(id).textContent=text;};
  const portrait=(id,actor)=>{el(id).src=assetBase+dialogueCast[actor].image+'.webp';el(id).alt=dialogueCast[actor].name+'頭像';};
- function closeHistory(){if(history.open)history.close();}
- el('dialogueNext').onclick=()=>controller.advance();
- el('dialogueSkip').onclick=()=>controller.skip();
- el('dialogueAuto').onclick=()=>controller.setAuto(!controller.state.automatic);
- el('dialogueLog').onclick=()=>{
-  controller.history(true);el('dialogueHistoryLines').replaceChildren(...controller.state.history.map(line=>{
-   const block=document.createElement('article'),name=document.createElement('h3'),text=document.createElement('p');
-   name.textContent=dialogueCast[line.actor].name;text.textContent=line.text;block.append(name,text);
-   if(line.action){const note=document.createElement('p');note.className='encounter-action';note.textContent=line.action;block.append(note);}
-   return block;
-  }));history.showModal();
- };
- el('dialogueHistoryClose').onclick=closeHistory;
- history.addEventListener('close',()=>controller.history(false));
- root.addEventListener('cancel',event=>{event.preventDefault();controller.suspend();});
+ root.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();controller.advance();});
+ root.addEventListener('cancel',event=>event.preventDefault());
  portrait('dialogueAllyPortrait','pilot');
  return {
   enabled:true,
-  get historyOpen(){return history.open;},
-  show(){if(!root.open)root.showModal();el('dialogueNext').focus({preventScroll:true});},
-  hide(){closeHistory();if(root.open)root.close();lastLine=lastEvent=activeEnemy='';},
+  show(){if(!root.open)root.showModal();root.focus({preventScroll:true});},
+  hide(){if(root.open)root.close();lastLine=lastEvent=activeEnemy='';},
   render(state){
    if(!state.active)return;
    root.dataset.encounter=state.eventId;root.dataset.line=String(state.index+1);root.dataset.total=String(state.total);
@@ -45,9 +31,7 @@ export function createDialogueView({document,controller,assetBase}) {
     if(!isAlly)set('dialogueEnemyAction',line.action||'');
    }
    set(isAlly?'dialogueAllyText':'dialogueEnemyText',state.text);
-   set('dialogueNext',state.suspended?'繼續閱讀':state.complete?(state.index===state.total-1?'開始交戰':'繼續'):'顯示整句');
-   set('dialogueAuto',state.automatic?'自動：開':'自動');el('dialogueAuto').setAttribute('aria-pressed',String(state.automatic));
-   set('dialogueHint',state.suspended?'閱讀已暫停，按「繼續閱讀」接續。':'Space / Enter 繼續 · 戰鬥暫停中');
+   set('dialogueHint',state.suspended?'任意鍵或點擊畫面，接續閱讀。':'任意鍵或點擊畫面繼續 · 戰鬥暫停中');
   },
  };
 }
